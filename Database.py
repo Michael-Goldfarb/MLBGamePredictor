@@ -68,7 +68,7 @@ cursor.execute("""
 conn.commit()
 
 # Insert data into the table
-cursor.execute("TRUNCATE TABLE games, LineupAndProbables, hittingStats;")
+cursor.execute("TRUNCATE TABLE games, LineupAndProbables, pitchingStats, hittingStats;")
 
 cursor.executemany("""
     INSERT INTO games (gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
@@ -127,13 +127,10 @@ cursor.execute("""
         pitcherNameHome TEXT,
         pitcherNameAway TEXT
     );
-""")
-               
+""")  
 
 unique_games = []
 game_ids = set()
-print(f"Number of unique games: {len(unique_games)}")
-
 
 # Loop through each gameId and create rows in the "LineupAndProbables" table
 for game in games:
@@ -213,16 +210,6 @@ for game in unique_games:
         batterEightHome = None
         batterNineHome = None
 
-        # # Append the data to the lineup_probables_data list
-        # lineup_probables_data.append((
-        #     awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway,
-        #     batterFourAway, batterFiveAway, batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome,
-        #     batterTwoHome, batterThreeHome, batterFourHome, batterFiveHome, batterSixHome, batterSevenHome, batterEightHome,
-        #     batterNineHome, probablePitcherHome['id'], probablePitcherAway['id'], probablePitcherHome['fullName'],
-        #     probablePitcherAway['fullName']
-        # ))
-
-
     # Insert the data into the "LineupAndProbables" table
     cursor.execute("""
         INSERT INTO LineupAndProbables (
@@ -254,7 +241,7 @@ for game in unique_games:
 
 # Create the hittingStats table
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS hittingStats (
+    CREATE TABLE IF NOT EXISTS HittingStats (
         teamId INTEGER,
         runs INTEGER,
         obp VARCHAR(255),
@@ -305,7 +292,83 @@ for game in games:
         homeTeamStats['stolenBases']
     ))
 
-# Commit the changes and close the connection
+
+
+
+
+
+
+
+
+
+
+
+# Create the PitchingStats table
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS PitchingStats (
+        teamId INTEGER,
+        era VARCHAR(255),
+        whip VARCHAR(255),
+        hitsPer9Inn VARCHAR(255),
+        runsScoredPer9 VARCHAR(255),
+        homeRunsPer9 VARCHAR(255),
+        obp VARCHAR(255),
+        slg VARCHAR(255),
+        ops VARCHAR(255),
+        gamesPitched INTEGER,
+        strikeOuts INTEGER,
+        saves INTEGER,
+        blownSaves INTEGER,
+        strikeoutWalkRatio VARCHAR(255)
+    )
+""")
+
+# Loop through each game and get the pitching statistics
+for game in games:
+    awayTeamId = game['teams']['away']['team']['id']
+    homeTeamId = game['teams']['home']['team']['id']
+    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=pitching&stats=season"
+    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=pitching&stats=season"
+
+    # Get the pitching statistics for the away team
+    awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
+    awayTeamStatsData = awayTeamStatsResponse.json()
+    awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
+
+    # Insert data into the PitchingStats table for the away team
+    cursor.execute("""
+        INSERT INTO PitchingStats (
+            teamId, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+            strikeOuts, saves, blownSaves, strikeoutWalkRatio
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        awayTeamId, awayTeamStats['era'], awayTeamStats['whip'], awayTeamStats['hitsPer9Inn'],
+        awayTeamStats['runsScoredPer9'], awayTeamStats['homeRunsPer9'], awayTeamStats['obp'],
+        awayTeamStats['slg'], awayTeamStats['ops'], awayTeamStats['gamesPitched'], awayTeamStats['strikeOuts'],
+        awayTeamStats['saves'], awayTeamStats['blownSaves'], awayTeamStats['strikeoutWalkRatio']
+    ))
+
+    # Get the pitching statistics for the home team
+    homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
+    homeTeamStatsData = homeTeamStatsResponse.json()
+    homeTeamStats = homeTeamStatsData['stats'][0]['splits'][0]['stat']
+
+    # Insert data into the PitchingStats table for the home team
+    cursor.execute("""
+        INSERT INTO PitchingStats (
+            teamId, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+            strikeOuts, saves, blownSaves, strikeoutWalkRatio
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        homeTeamId, homeTeamStats['era'], homeTeamStats['whip'], homeTeamStats['hitsPer9Inn'],
+        homeTeamStats['runsScoredPer9'], homeTeamStats['homeRunsPer9'], homeTeamStats['obp'],
+        homeTeamStats['slg'], homeTeamStats['ops'], homeTeamStats['gamesPitched'], homeTeamStats['strikeOuts'],
+        homeTeamStats['saves'], homeTeamStats['blownSaves'], homeTeamStats['strikeoutWalkRatio']
+    ))
+
+# Commit the changes and close the cursor and connection
 conn.commit()
 cursor.close()
 conn.close()
