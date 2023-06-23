@@ -7,14 +7,10 @@ import psycopg2
 
 # first table with game information
 
-# Step 1: Retrieve the data
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
-
-# Step 2: Parse the JSON
 games = data['dates'][0]['games']
 
-# Step 3: Extract the required fields
 records = []
 for game in games:
     gameId = game['gamePk']
@@ -36,7 +32,7 @@ for game in games:
     isWinnerHome = game['teams']['home'].get('isWinner')
     records.append((gameId, link, awayTeamId, awayTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
 
-# Step 4: Set up a connection to ElephantSQL
+# Set up connection to ElephantSQL
 conn = psycopg2.connect(
     host = 'rajje.db.elephantsql.com',
     database = 'syabkhtb',
@@ -45,7 +41,6 @@ conn = psycopg2.connect(
     password = 'J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
 )
 
-# Step 5: Create a table
 cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS games (
@@ -72,8 +67,8 @@ cursor.execute("""
 
 conn.commit()
 
-# Step 6: Insert data into the table
-cursor.execute("TRUNCATE TABLE games, hittingStats;")
+# Insert data into the table
+cursor.execute("TRUNCATE TABLE games, LineupAndProbables, hittingStats;")
 
 cursor.executemany("""
     INSERT INTO games (gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
@@ -137,6 +132,8 @@ cursor.execute("""
 
 unique_games = []
 game_ids = set()
+print(f"Number of unique games: {len(unique_games)}")
+
 
 # Loop through each gameId and create rows in the "LineupAndProbables" table
 for game in games:
@@ -145,7 +142,7 @@ for game in games:
         unique_games.append(game)
         game_ids.add(gameId)
 for game in unique_games:
-    url = f"https://statsapi.mlb.com/api/v1.1/game/{gameId}/feed/live"
+    url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
     response = requests.get(url)
     data = response.json()
 
@@ -216,14 +213,23 @@ for game in unique_games:
         batterEightHome = None
         batterNineHome = None
 
+        # # Append the data to the lineup_probables_data list
+        # lineup_probables_data.append((
+        #     awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway,
+        #     batterFourAway, batterFiveAway, batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome,
+        #     batterTwoHome, batterThreeHome, batterFourHome, batterFiveHome, batterSixHome, batterSevenHome, batterEightHome,
+        #     batterNineHome, probablePitcherHome['id'], probablePitcherAway['id'], probablePitcherHome['fullName'],
+        #     probablePitcherAway['fullName']
+        # ))
+
 
     # Insert the data into the "LineupAndProbables" table
     cursor.execute("""
         INSERT INTO LineupAndProbables (
-            awayId, awayName, homeId, homeName, batterOneAway, batterTwoAway, batterThreeAway, batterFourAway, batterFiveAway,
-            batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome, batterFourHome, 
-            batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome, pitcherIdHome, pitcherIdAway, pitcherNameHome, 
-            pitcherNameAway
+        awayId, awayName, homeId, homeName, batterOneAway, batterTwoAway, batterThreeAway, batterFourAway, batterFiveAway,
+        batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome, batterFourHome, 
+        batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome, pitcherIdHome, pitcherIdAway, pitcherNameHome, 
+        pitcherNameAway
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """,
