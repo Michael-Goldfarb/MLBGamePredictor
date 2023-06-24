@@ -27,6 +27,7 @@ cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS PitchingStats (
         teamId INTEGER,
+        teamName VARCHAR(255),
         era VARCHAR(255),
         whip VARCHAR(255),
         hitsPer9Inn VARCHAR(255),
@@ -50,6 +51,8 @@ cursor.execute("TRUNCATE TABLE pitchingStats;")
 for game in games:
     awayTeamId = game['teams']['away']['team']['id']
     homeTeamId = game['teams']['home']['team']['id']
+    awayTeamName = game['teams']['away']['team']['name']
+    homeTeamName = game['teams']['home']['team']['name']
     awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=pitching&stats=season"
     homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=pitching&stats=season"
 
@@ -61,12 +64,12 @@ for game in games:
     # Insert data into the PitchingStats table for the away team
     cursor.execute("""
         INSERT INTO PitchingStats (
-            teamId, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+            teamId, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
             strikeOuts, saves, blownSaves, strikeoutWalkRatio
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        awayTeamId, awayTeamStats['era'], awayTeamStats['whip'], awayTeamStats['hitsPer9Inn'],
+        awayTeamId, awayTeamName, awayTeamStats['era'], awayTeamStats['whip'], awayTeamStats['hitsPer9Inn'],
         awayTeamStats['runsScoredPer9'], awayTeamStats['homeRunsPer9'], awayTeamStats['obp'],
         awayTeamStats['slg'], awayTeamStats['ops'], awayTeamStats['gamesPitched'], awayTeamStats['strikeOuts'],
         awayTeamStats['saves'], awayTeamStats['blownSaves'], awayTeamStats['strikeoutWalkRatio']
@@ -80,12 +83,12 @@ for game in games:
     # Insert data into the PitchingStats table for the home team
     cursor.execute("""
         INSERT INTO PitchingStats (
-            teamId, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+            teamId, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
             strikeOuts, saves, blownSaves, strikeoutWalkRatio
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        homeTeamId, homeTeamStats['era'], homeTeamStats['whip'], homeTeamStats['hitsPer9Inn'],
+        homeTeamId, homeTeamName, homeTeamStats['era'], homeTeamStats['whip'], homeTeamStats['hitsPer9Inn'],
         homeTeamStats['runsScoredPer9'], homeTeamStats['homeRunsPer9'], homeTeamStats['obp'],
         homeTeamStats['slg'], homeTeamStats['ops'], homeTeamStats['gamesPitched'], homeTeamStats['strikeOuts'],
         homeTeamStats['saves'], homeTeamStats['blownSaves'], homeTeamStats['strikeoutWalkRatio']
