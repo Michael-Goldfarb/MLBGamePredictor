@@ -90,7 +90,7 @@ for game in games:
     awayTeamIds.append(awayTeamId)
     records.append((gameId, status, gameTime, gameDate, venueName, venueId, homeTeamName, homeTeamMarket, homeTeamId, awayTeamName, awayTeamMarket, awayTeamId))
 
-# Insert data into the games2 table
+    # Insert data into the games2 table
     insert_query = """
     INSERT INTO games2 (
         gameId,
@@ -109,7 +109,7 @@ for game in games:
     """
     cursor.execute(insert_query, (gameId, status, gameTime, gameDate, venueName, venueId, homeTeamName, homeTeamMarket, homeTeamId, awayTeamName, awayTeamMarket, awayTeamId))
 
-    # Fetch away team stats
+# Fetch away team stats
 for team in awayTeamIds:
     secondUrl = f"https://api.sportradar.com/mlb/trial/v7/en/seasons/2023/reg/teams/{team}/statistics.json?api_key={apiKey}"
     away_team_stats_url = secondUrl
