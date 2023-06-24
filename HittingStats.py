@@ -27,6 +27,7 @@ cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS HittingStats (
         teamId INTEGER,
+        teamName VARCHAR(255),
         runs INTEGER,
         obp VARCHAR(255),
         slg VARCHAR(255),
@@ -43,7 +44,9 @@ cursor.execute("TRUNCATE TABLE hittingStats;")
 # Get the hitting stats for the away team
 for game in games:
     awayTeamId = game['teams']['away']['team']['id']
+    awayTeamName = game['teams']['away']['team']['name']
     homeTeamId = game['teams']['home']['team']['id']
+    homeTeamName = game['teams']['home']['team']['name']
     awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=hitting&stats=season"
     awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
     awayTeamStatsData = awayTeamStatsResponse.json()
@@ -52,11 +55,11 @@ for game in games:
     # Insert data into the hittingStats table
     cursor.execute("""
         INSERT INTO hittingStats (
-            teamId, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
+            teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        awayTeamId, awayTeamStats['runs'], awayTeamStats['obp'], awayTeamStats['slg'],
+        awayTeamId, awayTeamName, awayTeamStats['runs'], awayTeamStats['obp'], awayTeamStats['slg'],
         awayTeamStats['ops'], awayTeamStats['gamesPlayed'], awayTeamStats['leftOnBase'],
         awayTeamStats['stolenBases']
     ))
@@ -70,11 +73,11 @@ for game in games:
     # Insert data into the hittingStats table
     cursor.execute("""
         INSERT INTO hittingStats (
-            teamId, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
+            teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        homeTeamId, homeTeamStats['runs'], homeTeamStats['obp'], homeTeamStats['slg'],
+        homeTeamId, homeTeamName, homeTeamStats['runs'], homeTeamStats['obp'], homeTeamStats['slg'],
         homeTeamStats['ops'], homeTeamStats['gamesPlayed'], homeTeamStats['leftOnBase'],
         homeTeamStats['stolenBases']
     ))
