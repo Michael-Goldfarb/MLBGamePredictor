@@ -57,6 +57,9 @@ cursor.execute("""
     );
 """)  
 
+# Truncate the table before inserting new data
+cursor.execute("TRUNCATE TABLE LineupAndProbables;")
+
 unique_games = []
 game_ids = set()
 
