@@ -19,6 +19,7 @@ starters = []
 lineup = []
 teamsLineup = []
 teamsStarters = []
+startersName = []
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
@@ -53,10 +54,12 @@ for game in unique_games:
     probablePitcherHome = data['gameData']['probablePitchers']['home']
     probablePitcherHomeId = data['gameData']['probablePitchers']['home']['id']
     starters.append(probablePitcherHomeId)
+    startersName.append(probablePitcherHome['fullName'])
     teamsStarters.append(homeTeamName)
     probablePitcherAway = data['gameData']['probablePitchers']['away']
     probablePitcherAwayId = data['gameData']['probablePitchers']['away']['id']
     starters.append(probablePitcherAwayId)
+    startersName.append(probablePitcherAway['fullName'])
     teamsStarters.append(awayTeamName)
 
     # Check if battingOrderAway has at least 9 elements
@@ -153,6 +156,7 @@ currentDate = datetime.now().strftime("%m/%d/%Y")
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS probablesStats (
         player_id TEXT,
+        player_name TEXT,
         strikeoutWalkRatio TEXT,
         games_started INTEGER,
         hitsPer9Inn TEXT,
@@ -170,6 +174,7 @@ cursor.execute("TRUNCATE TABLE probablesStats;")
 
 for index, player_id in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
+    player_name = startersName[index]
 
     # Make the API request to fetch player stats
     api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=pitching&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
@@ -191,36 +196,15 @@ for index, player_id in enumerate(starters):
                 hitsPer9Inn = split['stat']['hitsPer9Inn']
                 strikeoutsPer9Inn = split['stat']['strikeoutsPer9Inn']
                 walksPer9Inn = split['stat']['walksPer9Inn']
-            # else:
-            #     # Handle the case where 'splits' field is empty
-            #     strikeoutWalkRatio = None
-            #     games_started = None
-            #     hitsPer9Inn = None
-            #     strikeoutsPer9Inn = None
-            #     era = None
-            #     whip = None
-            #     walksPer9Inn = None
-    
-    # if mlb_stat is not None:
-    #     era = mlb_stat['era']
-    #     whip = mlb_stat['whip']
-    #     strikeoutWalkRatio = mlb_stat['strikeoutWalkRatio']
-    #     games_started = mlb_stat['games_started']
-    #     hitsPer9Inn = mlb_stat['hitsPer9Inn']
-    #     strikeoutsPer9Inn = mlb_stat['strikeoutsPer9Inn']
-    #     walksPer9Inn = mlb_stat['walksPer9Inn']
-    # else:
-    #     print("No MLB stats found.")
-    
     
 
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO probablesStats (
-            player_id, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+            player_id, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (player_id, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn))
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (player_id, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn))
 
 
 # Commit the changes and close the cursor and connection
