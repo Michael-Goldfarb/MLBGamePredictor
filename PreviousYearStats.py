@@ -21,6 +21,7 @@ starters = []
 lineup = []
 teamsLineup = []
 teamsStarters = []
+starter = []
 game_ids = set()
 unique_games = []
 
@@ -57,12 +58,12 @@ for game in unique_games:
         battingOrderAway = battingOrderAway_str
 
     probablePitcherHome = data['gameData']['probablePitchers']['home']
-    probablePitcherHomeId = data['gameData']['probablePitchers']['home']['id']
-    starters.append(probablePitcherHomeId)
+    starter.append(probablePitcherHome['fullName'])
+    starters.append(probablePitcherHome['id'])
     teamsStarters.append(homeTeamName)
     probablePitcherAway = data['gameData']['probablePitchers']['away']
-    probablePitcherAwayId = data['gameData']['probablePitchers']['away']['id']
-    starters.append(probablePitcherAwayId)
+    starter.append(probablePitcherAway['fullName'])
+    starters.append(probablePitcherAway['id'])
     teamsStarters.append(awayTeamName)
 
 
@@ -153,6 +154,7 @@ for game in unique_games:
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearPitchingStats (
         player_id TEXT,
+        player_name TEXT,
         strikeoutWalkRatio TEXT,
         games_started INTEGER,
         hitsPer9Inn TEXT,
@@ -169,26 +171,61 @@ cursor.execute("TRUNCATE TABLE previousYearPitchingStats;")
 
      # SEE IF THERE IS A DIFFERENCE IF IT IS A TEXT OR FLOAT
 
+
+strikeoutWalkRatio = None
+games_started = None
+hitsPer9Inn = None
+strikeoutsPer9Inn = None
+era = None
+whip = None
+walksPer9Inn = None
 # Iterate over the starters
 for index, playerId in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
-    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2022&group=pitching&startDate=05/07/2022&endDate=10/05/2022&leagueListId=mlb_milb"
+    player_name = starter[index]
+    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=05/01/2021&endDate=10/05/2022&leagueListId=mlb_milb"
     response = requests.get(url)
     data = json.loads(response.text)
     player_id = playerId
 
+
     if 'stats' in data and data['stats']:
-        # Check if the 'stats' field is present and not empty
-        stats = data['stats'][0]['splits'][0]['stat']
-        strikeoutWalkRatio = stats["strikeoutWalkRatio"]
-        games_started = stats["gamesStarted"]
-        hitsPer9Inn = stats["hitsPer9Inn"]
-        strikeoutsPer9Inn = stats["strikeoutsPer9Inn"]
-        era = stats["era"]
-        whip = stats["whip"]
-        walksPer9Inn = stats["walksPer9Inn"]
+        stats_list = data['stats']
+        if stats_list:
+            last_stats = stats_list[-1]  # Get the last instance of 'stats'
+            if 'splits' in last_stats and last_stats['splits']:
+                splits = last_stats['splits']
+                last_split = splits[-1]  # Get the last instance of 'splits'
+                if 'stat' in last_split:
+                    stat = last_split['stat']
+                    # Retrieve the required fields
+                    strikeoutWalkRatio = stat.get("strikeoutWalkRatio")
+                    games_started = stat.get("gamesStarted")
+                    hitsPer9Inn = stat.get("hitsPer9Inn")
+                    strikeoutsPer9Inn = stat.get("strikeoutsPer9Inn")
+                    era = stat.get("era")
+                    whip = stat.get("whip")
+                    walksPer9Inn = stat.get("walksPer9Inn")
+            else:
+                # Handle the case where 'splits' field is empty
+                strikeoutWalkRatio = None
+                games_started = None
+                hitsPer9Inn = None
+                strikeoutsPer9Inn = None
+                era = None
+                whip = None
+                walksPer9Inn = None
+        else:
+            # Handle the case where 'stats' field is empty
+            strikeoutWalkRatio = None
+            games_started = None
+            hitsPer9Inn = None
+            strikeoutsPer9Inn = None
+            era = None
+            whip = None
+            walksPer9Inn = None
     else:
-        # Set default values or handle the case where the required fields are missing
+        # Handle the case where 'stats' field is missing
         strikeoutWalkRatio = None
         games_started = None
         hitsPer9Inn = None
@@ -198,14 +235,15 @@ for index, playerId in enumerate(starters):
         walksPer9Inn = None
 
 
+
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearPitchingStats (
-            player_id, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+            player_id, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+        player_id, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
     ))
 
 # Commit the changes and close the cursor and connection
