@@ -41,6 +41,7 @@ for offset in range(0, 732400, 200):
     
     # use batter game stat finder url to get data
     request_url = 'https://stathead.com/baseball/batter_vs_pitcher.cgi?today=1&offset=' + str(offset)
+    print(request_url)
     wait = WebDriverWait(driver, 300)
     driver.get(request_url)
     get_url = driver.current_url
