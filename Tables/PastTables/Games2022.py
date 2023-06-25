@@ -38,14 +38,8 @@ cursor.execute("""
                
 records = []
 i = 0
-total_items = data["totalItems"]
-total_games = data["totalGames"]
-
-dates = data["dates"]
-for date_info in dates:
-    date = date_info["date"]
-    games = date_info["games"]
-    for game in games:
+for date_info in data["dates"]:
+    for game in date_info["games"]:
         gameId = game['gamePk']
         link = game['link']
         awayTeamId = game['teams']['away']['team']['id']
@@ -60,11 +54,12 @@ for date_info in dates:
         awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
         homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
         venue = game['venue']['name']
-        # if it has ended, get a "isWinner" field to see who wins
         isWinnerAway = game['teams']['away'].get('isWinner')
         isWinnerHome = game['teams']['home'].get('isWinner')
-        if i == 0:
+        if i == 0: # uses the first game twice for some reason
             i += 1
+            continue
+        if gameId == 663466: # all star game
             continue
         records.append((gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
 
