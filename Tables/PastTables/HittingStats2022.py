@@ -18,6 +18,7 @@ cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS HittingStats2022 (
         teamId INTEGER,
+        gameDate DATE,
         teamName VARCHAR(255),
         runs INTEGER,
         obp VARCHAR(255),
@@ -30,13 +31,10 @@ cursor.execute("""
     )
 """)
                
-# Retrieve existing teamIds from the table
-cursor.execute("SELECT teamId FROM HittingStats2022")
-existing_teams = [row[0] for row in cursor.fetchall()]
-               
 for date_info in data["dates"]:
     for game in date_info["games"]:
         gameId = game['gamePk']
+        gameDate = game['officialDate']
         awayTeamId = game['teams']['away']['team']['id']
         homeTeamId = game['teams']['home']['team']['id']
         awayTeamName = game['teams']['away']['team']['name']
@@ -46,48 +44,39 @@ for date_info in data["dates"]:
         if gameId == 663466:
             continue
 
-        # Check if away team already exists in the table
-        if awayTeamId not in existing_teams:
-            awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2022&group=hitting&stats=season"
-            awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
-            awayTeamStatsData = awayTeamStatsResponse.json()
-            awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
+        awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
+        awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
+        awayTeamStatsData = awayTeamStatsResponse.json()
+        awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
 
-            # Insert data into the HittingStats2022 table for the away team
-            cursor.execute("""
-                INSERT INTO HittingStats2022 (
-                    teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases, isWinner
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                awayTeamId, awayTeamName, awayTeamStats['runs'], awayTeamStats['obp'], awayTeamStats['slg'],
-                awayTeamStats['ops'], awayTeamStats['gamesPlayed'], awayTeamStats['leftOnBase'],
-                awayTeamStats['stolenBases'], isWinnerAway
-            ))
+        # Insert data into the HittingStats2022 table for the away team
+        cursor.execute("""
+            INSERT INTO HittingStats2022 (
+                teamId, gameDate, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases, isWinner
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            awayTeamId, gameDate, awayTeamName, awayTeamStats['runs'], awayTeamStats['obp'], awayTeamStats['slg'],
+            awayTeamStats['ops'], awayTeamStats['gamesPlayed'], awayTeamStats['leftOnBase'],
+            awayTeamStats['stolenBases'], isWinnerAway
+        ))
 
-            existing_teams.append(awayTeamId)
+        homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
+        homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
+        homeTeamStatsData = homeTeamStatsResponse.json()
+        homeTeamStats = homeTeamStatsData['stats'][0]['splits'][0]['stat']
 
-        # Check if home team already exists in the table
-        if homeTeamId not in existing_teams:
-            homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2022&group=hitting&stats=season"
-            homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
-            homeTeamStatsData = homeTeamStatsResponse.json()
-            homeTeamStats = homeTeamStatsData['stats'][0]['splits'][0]['stat']
-
-            # Insert data into the HittingStats2022 table for the home team
-            cursor.execute("""
-                INSERT INTO HittingStats2022 (
-                    teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases, isWinner
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                homeTeamId, homeTeamName, homeTeamStats['runs'], homeTeamStats['obp'], homeTeamStats['slg'],
-                homeTeamStats['ops'], homeTeamStats['gamesPlayed'], homeTeamStats['leftOnBase'],
-                homeTeamStats['stolenBases'], isWinnerHome
-            ))
-
-            existing_teams.append(homeTeamId)
-
+        # Insert data into the HittingStats2022 table for the home team
+        cursor.execute("""
+        INSERT INTO HittingStats2022 (
+                teamId, gameDate, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases, isWinner
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            homeTeamId, gameDate, homeTeamName, homeTeamStats['runs'], homeTeamStats['obp'], homeTeamStats['slg'],
+            homeTeamStats['ops'], homeTeamStats['gamesPlayed'], homeTeamStats['leftOnBase'],
+            homeTeamStats['stolenBases'], isWinnerHome
+        ))
 
 # Commit the changes and close the cursor and connection
 conn.commit()
