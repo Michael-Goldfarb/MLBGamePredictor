@@ -7,14 +7,6 @@ response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=
 data = response.json()
 games = data['dates'][0]['games']
 
-records = []
-for game in games:
-    gameId = game['gamePk']
-    awayTeamId = game['teams']['away']['team']['id']
-    homeTeamId = game['teams']['home']['team']['id']
-    awayTeamName = game['teams']['away']['team']['name']
-    homeTeamName = game['teams']['home']['team']['name']
-
 # Set up connection to ElephantSQL
 conn = psycopg2.connect(
     host = 'rajje.db.elephantsql.com',
@@ -66,6 +58,10 @@ game_ids = set()
 # Loop through each gameId and create rows in the "LineupAndProbables" table
 for game in games:
     gameId = game['gamePk']
+    awayTeamId = game['teams']['away']['team']['id']
+    homeTeamId = game['teams']['home']['team']['id']
+    awayTeamName = game['teams']['away']['team']['name']
+    homeTeamName = game['teams']['home']['team']['name']
     if gameId not in game_ids:
         unique_games.append(game)
         game_ids.add(gameId)
