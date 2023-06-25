@@ -3,37 +3,9 @@ import json
 import psycopg2
 from datetime import datetime
 
-# ONLY RETURN PREDICTION OF WHO IS GOING TO WIN IF GAME HASN'T STARTED
-
-
-# first table with game information
-
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
 data = response.json()
-games = data['dates'][0]['games']
 
-records = []
-for game in games:
-    gameId = game['gamePk']
-    link = game['link']
-    awayTeamId = game['teams']['away']['team']['id']
-    homeTeamId = game['teams']['home']['team']['id']
-    awayTeamName = game['teams']['away']['team']['name']
-    homeTeamName = game['teams']['home']['team']['name']
-    gameStatus = game["status"]["detailedState"]
-    gameDate = game['gameDate']
-    gameTime = game['gameDate'][11:16]
-    awayTeamScore = game['teams']['away'].get('score')
-    homeTeamScore = game['teams']['home'].get('score')
-    awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
-    homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
-    venue = game['venue']['name']
-    # if it has ended, get a "isWinner" field to see who wins
-    isWinnerAway = game['teams']['away'].get('isWinner')
-    isWinnerHome = game['teams']['home'].get('isWinner')
-    records.append((gameId, link, awayTeamId, awayTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
-
-# Set up connection to ElephantSQL
 conn = psycopg2.connect(
     host = 'rajje.db.elephantsql.com',
     database = 'syabkhtb',
@@ -63,18 +35,56 @@ cursor.execute("""
         isWinnerHome BOOLEAN
     )
 """)
+               
+records = []
+i = 0
+total_items = data["totalItems"]
+total_games = data["totalGames"]
 
-    # ONLY RETURN ODDS IF GAME HASN'T STARTED
+dates = data["dates"]
+for date_info in dates:
+    date = date_info["date"]
+    games = date_info["games"]
+    for game in games:
+        gameId = game['gamePk']
+        link = game['link']
+        awayTeamId = game['teams']['away']['team']['id']
+        homeTeamId = game['teams']['home']['team']['id']
+        awayTeamName = game['teams']['away']['team']['name']
+        homeTeamName = game['teams']['home']['team']['name']
+        gameStatus = game["status"]["detailedState"]
+        gameDate = game['gameDate']
+        gameTime = game['gameDate'][11:16]
+        awayTeamScore = game['teams']['away'].get('score')
+        homeTeamScore = game['teams']['home'].get('score')
+        awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
+        homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
+        venue = game['venue']['name']
+        # if it has ended, get a "isWinner" field to see who wins
+        isWinnerAway = game['teams']['away'].get('isWinner')
+        isWinnerHome = game['teams']['home'].get('isWinner')
+        if i == 0:
+            i += 1
+            continue
+        records.append((gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
 
-conn.commit()
+    # Insert data into the table
+    cursor.execute("TRUNCATE TABLE games2022;")
 
-# Insert data into the table
-cursor.execute("TRUNCATE TABLE games2022;")
+    # Filter out duplicate records
+    unique_records = []
+    seen_game_ids = set()
+    for record in records:
+        gameId = record[0]
+        if gameId not in seen_game_ids:
+            unique_records.append(record)
+            seen_game_ids.add(gameId)
 
-cursor.executemany("""
-    INSERT INTO games2022 (gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
-    VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-""", records)
+    # Insert data into the table
+    cursor.executemany("""
+        INSERT INTO games2022 (gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, unique_records)
 
 # Commit the changes and close the cursor and connection
 conn.commit()
