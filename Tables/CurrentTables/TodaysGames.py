@@ -31,7 +31,7 @@ for game in games:
     # if it has ended, get a "isWinner" field to see who wins
     isWinnerAway = game['teams']['away'].get('isWinner')
     isWinnerHome = game['teams']['home'].get('isWinner')
-    records.append((gameId, link, awayTeamId, awayTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
+    records.append((gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
 
 # Set up connection to ElephantSQL
 conn = psycopg2.connect(
