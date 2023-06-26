@@ -49,7 +49,6 @@ for game in unique_games:
     starters.append(probablePitcherAway['id'])
     teamsStarters.append(awayTeamName)
 
-
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearPitchingStats (
         player_id TEXT,
@@ -68,9 +67,6 @@ cursor.execute("""
 # Clear the table before inserting new data
 cursor.execute("TRUNCATE TABLE previousYearPitchingStats;")
 
-     # SEE IF THERE IS A DIFFERENCE IF IT IS A TEXT OR FLOAT
-
-
 strikeoutWalkRatio = None
 games_started = None
 hitsPer9Inn = None
@@ -86,8 +82,6 @@ for index, playerId in enumerate(starters):
     response = requests.get(url)
     data = json.loads(response.text)
     player_id = playerId
-
-
     if 'stats' in data and data['stats']:
         stats_list = data['stats']
         if stats_list:
@@ -132,8 +126,6 @@ for index, playerId in enumerate(starters):
         era = None
         whip = None
         walksPer9Inn = None
-
-
 
     # Insert the player stats into the table
     cursor.execute("""

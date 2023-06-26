@@ -16,8 +16,6 @@ cursor = conn.cursor()
 unique_games = []
 game_ids = set()
 starters = []
-lineup = []
-teamsLineup = []
 teamsStarters = []
 startersName = []
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
@@ -37,20 +35,6 @@ for game in unique_games:
 
     awayTeamName = data['gameData']['teams']['away']['name']
     homeTeamName = data['gameData']['teams']['home']['name']
-
-    # Parse battingOrder if it is a string representation of an array
-    battingOrderHome_str = data['liveData']['boxscore']['teams']['home'].get('battingOrder')
-    if isinstance(battingOrderHome_str, str):
-        battingOrderHome = json.loads(battingOrderHome_str)
-    else:
-        battingOrderHome = battingOrderHome_str
-
-    battingOrderAway_str = data['liveData']['boxscore']['teams']['away'].get('battingOrder')
-    if isinstance(battingOrderAway_str, str):
-        battingOrderAway = json.loads(battingOrderAway_str)
-    else:
-        battingOrderAway = battingOrderAway_str
-
     probablePitcherHome = data['gameData']['probablePitchers']['home']
     probablePitcherHomeId = data['gameData']['probablePitchers']['home']['id']
     starters.append(probablePitcherHomeId)
@@ -61,96 +45,6 @@ for game in unique_games:
     starters.append(probablePitcherAwayId)
     startersName.append(probablePitcherAway['fullName'])
     teamsStarters.append(awayTeamName)
-
-    # Check if battingOrderAway has at least 9 elements
-    if len(battingOrderAway) >= 9:
-        batterOneAway = battingOrderAway[0]
-        lineup.append(battingOrderAway[0])
-        teamsLineup.append(awayTeamName)
-        batterTwoAway = battingOrderAway[1]
-        lineup.append(battingOrderAway[1])
-        teamsLineup.append(awayTeamName)
-        batterThreeAway = battingOrderAway[2]
-        lineup.append(battingOrderAway[2])
-        teamsLineup.append(awayTeamName)
-        batterFourAway = battingOrderAway[3]
-        lineup.append(battingOrderAway[3])
-        teamsLineup.append(awayTeamName)
-        batterFiveAway = battingOrderAway[4]
-        lineup.append(battingOrderAway[4])
-        teamsLineup.append(awayTeamName)
-        batterSixAway = battingOrderAway[5]
-        lineup.append(battingOrderAway[5])
-        teamsLineup.append(awayTeamName)
-        batterSevenAway = battingOrderAway[6]
-        lineup.append(battingOrderAway[6])
-        teamsLineup.append(awayTeamName)
-        batterEightAway = battingOrderAway[7]
-        lineup.append(battingOrderAway[7])
-        teamsLineup.append(awayTeamName)
-        batterNineAway = battingOrderAway[8]
-        lineup.append(battingOrderAway[8])
-        teamsLineup.append(awayTeamName)
-    else:
-        # Set default values or handle the case where there are not enough elements
-        batterOneAway = None
-        batterTwoAway = None
-        batterThreeAway = None
-        batterFourAway = None
-        batterFiveAway = None
-        batterSixAway = None
-        batterSevenAway = None
-        batterEightAway = None
-        batterNineAway = None
-
-    # Check if battingOrderHome has at least 9 elements
-    if len(battingOrderHome) >= 9:
-        batterOneHome = battingOrderHome[0]
-        lineup.append(battingOrderHome[0])
-        teamsLineup.append(homeTeamName)
-        batterTwoHome = battingOrderHome[1]
-        lineup.append(battingOrderHome[1])
-        teamsLineup.append(homeTeamName)
-        batterThreeHome = battingOrderHome[2]
-        lineup.append(battingOrderHome[2])
-        teamsLineup.append(homeTeamName)
-        batterFourHome = battingOrderHome[3]
-        lineup.append(battingOrderHome[3])
-        teamsLineup.append(homeTeamName)
-        batterFiveHome = battingOrderHome[4]
-        lineup.append(battingOrderHome[4])
-        teamsLineup.append(homeTeamName)
-        batterSixHome = battingOrderHome[5]
-        lineup.append(battingOrderHome[5])
-        teamsLineup.append(homeTeamName)
-        batterSevenHome = battingOrderHome[6]
-        lineup.append(battingOrderHome[6])
-        teamsLineup.append(homeTeamName)
-        batterEightHome = battingOrderHome[7]
-        lineup.append(battingOrderHome[7])
-        teamsLineup.append(homeTeamName)
-        batterNineHome = battingOrderHome[8]
-        lineup.append(battingOrderHome[8])
-        teamsLineup.append(homeTeamName)
-    else:
-        # Set default values or handle the case where there are not enough elements
-        batterOneHome = None
-        batterTwoHome = None
-        batterThreeHome = None
-        batterFourHome = None
-        batterFiveHome = None
-        batterSixHome = None
-        batterSevenHome = None
-        batterEightHome = None
-        batterNineHome = None
-
-
-
-
-# TODO - Create a table that shows individual stats - such as the starting pitchers stats, the individual batters in the lineup stats, etc.
-# so for every player in game - return their pitching stats
-# get pitching stats from https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=pitching&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb
-currentDate = datetime.now().strftime("%m/%d/%Y")
 
 # Define the SQL statement to create the table
 cursor.execute("""
@@ -168,7 +62,6 @@ cursor.execute("""
     );
 """)
 
-
 # Truncate the table before inserting new data
 cursor.execute("TRUNCATE TABLE probablesStats;")
 
@@ -183,8 +76,6 @@ for index, player_id in enumerate(starters):
     )
     response = requests.get(api_url)
     data = response.json()
-
-    
     for stat in data['stats']:
         for split in stat["splits"]:
             if split["sport"]["abbreviation"] == "MLB":
