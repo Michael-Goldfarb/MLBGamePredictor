@@ -1,10 +1,9 @@
-
 import requests
 import json
 import psycopg2
 from datetime import datetime
 
-# MAKE ANOTHER TABLE WITH LAST YEARS STATS -- USE THIS TABLE IF GAMES_STARTED IS LESS THAN 5
+# TABLE WITH LAST YEARS STATS -- USE THIS TABLE IF GAMES_STARTED IS LESS THAN 5
 
 # Set up connection to ElephantSQL
 conn = psycopg2.connect(
@@ -18,8 +17,6 @@ conn = psycopg2.connect(
 cursor = conn.cursor()
 
 starters = []
-lineup = []
-teamsLineup = []
 teamsStarters = []
 starter = []
 game_ids = set()
@@ -43,20 +40,6 @@ for game in unique_games:
 
     awayTeamName = data['gameData']['teams']['away']['name']
     homeTeamName = data['gameData']['teams']['home']['name']
-
-    # Parse battingOrder if it is a string representation of an array
-    battingOrderHome_str = data['liveData']['boxscore']['teams']['home'].get('battingOrder')
-    if isinstance(battingOrderHome_str, str):
-        battingOrderHome = json.loads(battingOrderHome_str)
-    else:
-        battingOrderHome = battingOrderHome_str
-
-    battingOrderAway_str = data['liveData']['boxscore']['teams']['away'].get('battingOrder')
-    if isinstance(battingOrderAway_str, str):
-        battingOrderAway = json.loads(battingOrderAway_str)
-    else:
-        battingOrderAway = battingOrderAway_str
-
     probablePitcherHome = data['gameData']['probablePitchers']['home']
     starter.append(probablePitcherHome['fullName'])
     starters.append(probablePitcherHome['id'])
@@ -65,90 +48,6 @@ for game in unique_games:
     starter.append(probablePitcherAway['fullName'])
     starters.append(probablePitcherAway['id'])
     teamsStarters.append(awayTeamName)
-
-
-    # Check if battingOrderAway has at least 9 elements
-    if len(battingOrderAway) >= 9:
-        batterOneAway = battingOrderAway[0]
-        lineup.append(battingOrderAway[0])
-        teamsLineup.append(awayTeamName)
-        batterTwoAway = battingOrderAway[1]
-        lineup.append(battingOrderAway[1])
-        teamsLineup.append(awayTeamName)
-        batterThreeAway = battingOrderAway[2]
-        lineup.append(battingOrderAway[2])
-        teamsLineup.append(awayTeamName)
-        batterFourAway = battingOrderAway[3]
-        lineup.append(battingOrderAway[3])
-        teamsLineup.append(awayTeamName)
-        batterFiveAway = battingOrderAway[4]
-        lineup.append(battingOrderAway[4])
-        teamsLineup.append(awayTeamName)
-        batterSixAway = battingOrderAway[5]
-        lineup.append(battingOrderAway[5])
-        teamsLineup.append(awayTeamName)
-        batterSevenAway = battingOrderAway[6]
-        lineup.append(battingOrderAway[6])
-        teamsLineup.append(awayTeamName)
-        batterEightAway = battingOrderAway[7]
-        lineup.append(battingOrderAway[7])
-        teamsLineup.append(awayTeamName)
-        batterNineAway = battingOrderAway[8]
-        lineup.append(battingOrderAway[8])
-        teamsLineup.append(awayTeamName)
-    else:
-        # Set default values or handle the case where there are not enough elements
-        batterOneAway = None
-        batterTwoAway = None
-        batterThreeAway = None
-        batterFourAway = None
-        batterFiveAway = None
-        batterSixAway = None
-        batterSevenAway = None
-        batterEightAway = None
-        batterNineAway = None
-
-    # Check if battingOrderHome has at least 9 elements
-    if len(battingOrderHome) >= 9:
-        batterOneHome = battingOrderHome[0]
-        lineup.append(battingOrderHome[0])
-        teamsLineup.append(homeTeamName)
-        batterTwoHome = battingOrderHome[1]
-        lineup.append(battingOrderHome[1])
-        teamsLineup.append(homeTeamName)
-        batterThreeHome = battingOrderHome[2]
-        lineup.append(battingOrderHome[2])
-        teamsLineup.append(homeTeamName)
-        batterFourHome = battingOrderHome[3]
-        lineup.append(battingOrderHome[3])
-        teamsLineup.append(homeTeamName)
-        batterFiveHome = battingOrderHome[4]
-        lineup.append(battingOrderHome[4])
-        teamsLineup.append(homeTeamName)
-        batterSixHome = battingOrderHome[5]
-        lineup.append(battingOrderHome[5])
-        teamsLineup.append(homeTeamName)
-        batterSevenHome = battingOrderHome[6]
-        lineup.append(battingOrderHome[6])
-        teamsLineup.append(homeTeamName)
-        batterEightHome = battingOrderHome[7]
-        lineup.append(battingOrderHome[7])
-        teamsLineup.append(homeTeamName)
-        batterNineHome = battingOrderHome[8]
-        lineup.append(battingOrderHome[8])
-        teamsLineup.append(homeTeamName)
-    else:
-        # Set default values or handle the case where there are not enough elements
-        batterOneHome = None
-        batterTwoHome = None
-        batterThreeHome = None
-        batterFourHome = None
-        batterFiveHome = None
-        batterSixHome = None
-        batterSevenHome = None
-        batterEightHome = None
-        batterNineHome = None
-
 
 
 cursor.execute("""
