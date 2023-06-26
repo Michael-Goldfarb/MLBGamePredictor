@@ -41,6 +41,7 @@ for date_info in data["dates"]:
     for game in date_info["games"]:
         gameId = game['gamePk']
         gameDate = game['officialDate']
+        print(gameDate)
         awayTeamId = game['teams']['away']['team']['id']
         homeTeamId = game['teams']['home']['team']['id']
         awayTeamName = game['teams']['away']['team']['name']
@@ -52,12 +53,10 @@ for date_info in data["dates"]:
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
-
         awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&season=2022&group=pitching&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
         awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
         awayTeamStatsData = awayTeamStatsResponse.json()
         awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
-
 
         # Insert data into the PitchingStats2022 table for the away team
         cursor.execute("""
