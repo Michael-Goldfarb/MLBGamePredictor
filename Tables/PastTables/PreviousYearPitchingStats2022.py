@@ -82,6 +82,8 @@ for date_info in data["dates"]:
         );
     """)
 
+    cursor.execute("TRUNCATE TABLE PreviousYearPitchingStats2022;")
+
     strikeoutWalkRatio = None
     games_started = None
     hitsPer9Inn = None
