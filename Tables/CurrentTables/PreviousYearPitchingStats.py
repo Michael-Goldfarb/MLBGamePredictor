@@ -32,6 +32,7 @@ games = data['dates'][0]['games']
 for game in games:
     gameId = game['gamePk']
     gameIdss.append(gameId)
+    gameIdss.append(gameId)
     if gameId not in game_ids:
         unique_games.append(game)
         game_ids.add(gameId)

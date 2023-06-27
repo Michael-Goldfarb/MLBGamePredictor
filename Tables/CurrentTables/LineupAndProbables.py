@@ -87,10 +87,13 @@ for game in unique_games:
     else:
         battingOrderAway = battingOrderAway_str
 
-    probablePitcherHome = data['gameData']['probablePitchers']['home']
-    probablePitcherHomeId = data['gameData']['probablePitchers']['home']['id']
-    probablePitcherAway = data['gameData']['probablePitchers']['away']
-    probablePitcherAwayId = data['gameData']['probablePitchers']['away']['id']
+    probablePitcherHome = data['gameData']['probablePitchers'].get('home')
+    probablePitcherHomeId = probablePitcherHome.get('id') if probablePitcherHome else None
+    probablePitcherAway = data['gameData']['probablePitchers'].get('away')
+    probablePitcherAwayId = probablePitcherAway.get('id') if probablePitcherAway else None
+    pitcherNameHome = probablePitcherHome.get('fullName') if probablePitcherHome else None
+    pitcherNameAway = probablePitcherAway.get('fullName') if probablePitcherAway else None
+
 
     # Check if battingOrderAway has at least 9 elements
     if len(battingOrderAway) >= 9:
@@ -152,7 +155,7 @@ for game in unique_games:
         gamesId, awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway, batterFourAway,
         batterFiveAway, batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome,
         batterFourHome, batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome,
-        probablePitcherHome['id'], probablePitcherAway['id'], probablePitcherHome['fullName'], probablePitcherAway['fullName']
+        probablePitcherHomeId, probablePitcherAwayId, pitcherNameHome, pitcherNameAway
     ))
 
 
