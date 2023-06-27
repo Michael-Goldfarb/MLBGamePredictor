@@ -1,17 +1,8 @@
 import requests
 import json
-import psycopg2
 from datetime import datetime
+import csv
 
-conn = psycopg2.connect(
-    host = 'rajje.db.elephantsql.com',
-    database = 'syabkhtb',
-    user = 'syabkhtb',
-    port = '5432',
-    password = 'J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
-)
-
-cursor = conn.cursor()
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
 data = response.json()
 lineup = []
@@ -131,88 +122,47 @@ for date_info in data["dates"]:
             lineup.append(battingOrderHome[8])
             teamsLineup.append(homeTeamName)
 
-    # Define the SQL statement to create the table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS lineupStats2022 (
-            gameID TEXT,
-            theDate DATE,
-            player_id TEXT,
-            player_name TEXT,
-            obp TEXT,
-            slg TEXT,
-            ops TEXT,
-            at_bats_per_home_run TEXT,
-            team_name TEXT,
-            games_played INTEGER,
-            babip TEXT,
-            isWinner BOOLEAN
-        );
-    """)
+    # Create the CSV file and write the data
+    with open('lineup_stats.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['gameID', 'theDate', 'player_id', 'player_name', 'obp', 'slg', 'ops', 'at_bats_per_home_run', 'team_name', 'games_played', 'babip', 'isWinner'])
+
+        # Loop through each player in the lineup
+        for index, player_id in enumerate(lineup):
+            team_name = teamsLineup[index]  # Get the team name corresponding to the current player
+            newGameId = gamesId[index]
+            isWinner = outcomes[index]
+            theDate = dates[index]
+
+            try:
+                # Make the API request to fetch player stats
+                api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={currentDate}&leagueListId=mlb_milb".format(
+                    playerId=player_id,
+                    currentDate=theDate
+                )
+                response = requests.get(api_url)
+                data = response.json()
+
+                # Extract the required fields
+                stats = data["stats"][0]["splits"][0]["stat"]
+                api_url2 = "https://statsapi.mlb.com/api/v1/people/{playerId2}".format(
+                    playerId2=player_id,
+                )
+                response2 = requests.get(api_url2)
+                data2 = response2.json()
+                player_name = data2["people"][0]["fullName"]
+                games_played = stats["gamesPlayed"]
+                obp = stats["obp"]
+                slg = stats["slg"]
+                ops = stats["ops"]
+                at_bats_per_home_run = stats["atBatsPerHomeRun"]
+                babip = stats["babip"]
+                print(babip)
+
+                # Write the player stats to the CSV file
+                writer.writerow([newGameId, theDate, player_id, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner])
+
+            except IndexError:
+                print("Player stats not available for player ID:", player_id)
                 
-# Define the SQL statement to select data from the table with a limit
-limit = len(lineup)
-select_query = f"SELECT * FROM lineupStats2022 LIMIT {limit}"
-
-# Execute the SELECT statement
-cursor.execute(select_query)
-
-# Fetch all the selected records
-records = cursor.fetchall()
-
-dates_length = len(dates)
-print("Length of dates:", dates_length)
-lineup_length = len(lineup)
-print("Length of lineup:", lineup_length)
-
-# Loop through each player in the lineup
-for index, player_id in enumerate(lineup):
-    team_name = teamsLineup[index]  # Get the team name corresponding to the current player
-    print(team_name)
-    newGameId = gamesId[index]
-    isWinner = outcomes[index]
-    print(newGameId)
-
-    try:
-        # Make the API request to fetch player stats
-        api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={currentDate}&leagueListId=mlb_milb".format(
-            playerId=player_id,
-            currentDate = dates[index]
-        )
-        theDate = dates[index]
-        print(theDate)
-        response = requests.get(api_url)
-        data = response.json()
-
-        # Extract the required fields
-        stats = data["stats"][0]["splits"][0]["stat"]
-        api_url2 = "https://statsapi.mlb.com/api/v1/people/{playerId2}".format(
-            playerId2=player_id,
-        )
-        response2 = requests.get(api_url2)
-        data2 = response2.json()
-        player_name = data2["people"][0]["fullName"]
-        games_played = stats["gamesPlayed"]
-        obp = stats["obp"]
-        slg = stats["slg"]
-        ops = stats["ops"]
-        at_bats_per_home_run = stats["atBatsPerHomeRun"]
-        babip = stats["babip"]
-        print(babip)
-
-        # Insert the player stats into the table
-        cursor.execute("""
-            INSERT INTO lineupStats2022 (
-                gameId, theDate, player_id, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            newGameId, theDate, player_id, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
-        ))
-
-    except IndexError:
-        print("Player stats not available for player ID:", player_id)
-
-# Commit the changes and close the cursor and connection
-conn.commit()
-cursor.close()
-conn.close()
+print("Data saved to lineup_stats.csv")

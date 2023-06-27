@@ -20,6 +20,7 @@ teamsStarters = []
 starter = []
 dates = []
 gameIdss = []
+outcomes = []
 
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
 data = response.json()
@@ -42,8 +43,16 @@ for date_info in data["dates"]:
         dates.append(gameDate)
         awayTeamName = game['teams']['away']['team']['name']
         homeTeamName = game['teams']['home']['team']['name']
-        isWinnerAway = game['teams']['away'].get('isWinner')
         isWinnerHome = game['teams']['home'].get('isWinner')
+        if isWinnerHome is not None:
+            outcomes.append(isWinnerHome)
+        else:
+            outcomes.append(False)
+        isWinnerAway = game['teams']['away'].get('isWinner')
+        if isWinnerAway is not None:
+            outcomes.append(isWinnerAway)
+        else:
+            outcomes.append(False)
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
@@ -78,7 +87,8 @@ for date_info in data["dates"]:
             team_name TEXT,
             era TEXT,
             whip TEXT,
-            walksPer9Inn TEXT
+            walksPer9Inn TEXT,
+            isWinner BOOLEAN
         );
     """)
 
@@ -97,6 +107,7 @@ for index, playerId in enumerate(starters):
     player_name = starter[index]
     game_ids = gameIdss[index]
     theDate = dates[index]
+    isWinner = outcomes[index]
      #   game_date = dates[index]
     url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=07/24/2020&endDate=10/03/2021&leagueListId=mlb_milb"
     response = requests.get(url)
@@ -151,11 +162,11 @@ for index, playerId in enumerate(starters):
      # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearPitchingStats2022 (
-            player_id, gameDate, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+            player_id, gameDate, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, theDate, game_ids, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+        player_id, theDate, game_ids, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
     ))
 
 # Commit the changes and close the cursor and connection

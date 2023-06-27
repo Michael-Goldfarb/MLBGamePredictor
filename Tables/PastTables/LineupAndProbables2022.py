@@ -20,6 +20,7 @@ cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS LineupAndProbables2022 (
         gameDate DATE,
+        gameId TEXT,
         awayId INTEGER,
         awayName TEXT,
         homeId INTEGER,
@@ -126,15 +127,15 @@ for date_info in data["dates"]:
         # Insert the data into the "LineupAndProbables2022" table
         cursor.execute("""
             INSERT INTO LineupAndProbables2022 (
-            gameDate, awayId, awayName, homeId, homeName, batterOneAway, batterTwoAway, batterThreeAway, batterFourAway, batterFiveAway,
+            gameDate, gameId, awayId, awayName, homeId, homeName, batterOneAway, batterTwoAway, batterThreeAway, batterFourAway, batterFiveAway,
             batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome, batterFourHome, 
             batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome, pitcherIdHome, pitcherIdAway, pitcherNameHome, 
             pitcherNameAway, isWinnerAway, isWinnerHome
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """,
         (
-            gameDate, awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway, batterFourAway,
+            gameDate, gameId, awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway, batterFourAway,
             batterFiveAway, batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome,
             batterFourHome, batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome,
             probablePitcherHome['id'], probablePitcherAwayId, probablePitcherHome['fullName'], probablePitcherAwayName, isWinnerAway, isWinnerHome

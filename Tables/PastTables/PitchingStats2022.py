@@ -18,6 +18,7 @@ cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS PitchingStats2022 (
         teamId INTEGER,
+        gameId TEXT,
         gameDate DATE,
         teamName VARCHAR(255),
         era VARCHAR(255),
@@ -61,12 +62,12 @@ for date_info in data["dates"]:
         # Insert data into the PitchingStats2022 table for the away team
         cursor.execute("""
             INSERT INTO PitchingStats2022 (
-                teamId, gameDate, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+                teamId, gameId, gameDate, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
                 strikeOuts, saves, blownSaves, strikeoutWalkRatio, isWinner
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            awayTeamId, gameDate, awayTeamName, awayTeamStats['era'], awayTeamStats['whip'], awayTeamStats['hitsPer9Inn'],
+            awayTeamId, gameId, gameDate, awayTeamName, awayTeamStats['era'], awayTeamStats['whip'], awayTeamStats['hitsPer9Inn'],
             awayTeamStats['runsScoredPer9'], awayTeamStats['homeRunsPer9'], awayTeamStats['obp'], awayTeamStats['slg'],
             awayTeamStats['ops'], awayTeamStats['gamesPitched'], awayTeamStats['strikeOuts'], awayTeamStats['saves'],
             awayTeamStats['blownSaves'], awayTeamStats['strikeoutWalkRatio'], isWinnerAway
@@ -80,12 +81,12 @@ for date_info in data["dates"]:
         # Insert data into the PitchingStats2022 table for the home team
         cursor.execute("""
             INSERT INTO PitchingStats2022 (
-                teamId, gameDate, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+                teamId, gameId, gameDate, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
                 strikeOuts, saves, blownSaves, strikeoutWalkRatio, isWinner
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            homeTeamId, gameDate, homeTeamName, homeTeamStats['era'], homeTeamStats['whip'], homeTeamStats['hitsPer9Inn'],
+            homeTeamId, gameId, gameDate, homeTeamName, homeTeamStats['era'], homeTeamStats['whip'], homeTeamStats['hitsPer9Inn'],
             homeTeamStats['runsScoredPer9'], homeTeamStats['homeRunsPer9'], homeTeamStats['obp'], homeTeamStats['slg'],
             homeTeamStats['ops'], homeTeamStats['gamesPitched'], homeTeamStats['strikeOuts'], homeTeamStats['saves'],
             homeTeamStats['blownSaves'], homeTeamStats['strikeoutWalkRatio'], isWinnerHome

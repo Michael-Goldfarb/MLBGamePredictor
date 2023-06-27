@@ -48,6 +48,7 @@ for date_info in data["dates"]:
         homeTeamName = game['teams']['home']['team']['name']
         gameStatus = game["status"]["detailedState"]
         gameDate = game['gameDate']
+        print(gameDate)
         gameTime = game['gameDate'][11:16]
         awayTeamScore = game['teams']['away'].get('score')
         homeTeamScore = game['teams']['home'].get('score')

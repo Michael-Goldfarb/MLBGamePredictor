@@ -12,7 +12,7 @@ conn = psycopg2.connect(
 )
 
 cursor = conn.cursor()
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-07-07&endDate=2022-08-07")
 data = response.json()
 lineup = []
 teamsLineup = []
@@ -133,7 +133,7 @@ for date_info in data["dates"]:
 
     # Define the SQL statement to create the table
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS lineupStats2022 (
+        CREATE TABLE IF NOT EXISTS pt2lineupStats2022 (
             gameID TEXT,
             theDate DATE,
             player_id TEXT,
@@ -151,7 +151,7 @@ for date_info in data["dates"]:
                 
 # Define the SQL statement to select data from the table with a limit
 limit = len(lineup)
-select_query = f"SELECT * FROM lineupStats2022 LIMIT {limit}"
+select_query = f"SELECT * FROM pt2lineupStats2022 LIMIT {limit}"
 
 # Execute the SELECT statement
 cursor.execute(select_query)
@@ -201,7 +201,7 @@ for index, player_id in enumerate(lineup):
 
         # Insert the player stats into the table
         cursor.execute("""
-            INSERT INTO lineupStats2022 (
+            INSERT INTO pt2lineupStats2022 (
                 gameId, theDate, player_id, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
