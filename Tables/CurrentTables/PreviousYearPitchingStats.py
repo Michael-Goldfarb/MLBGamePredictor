@@ -43,14 +43,20 @@ for game in unique_games:
 
     awayTeamName = data['gameData']['teams']['away']['name']
     homeTeamName = data['gameData']['teams']['home']['name']
-    probablePitcherHome = data['gameData']['probablePitchers']['home']
-    starter.append(probablePitcherHome['fullName'])
-    starters.append(probablePitcherHome['id'])
-    teamsStarters.append(homeTeamName)
-    probablePitcherAway = data['gameData']['probablePitchers']['away']
-    starter.append(probablePitcherAway['fullName'])
-    starters.append(probablePitcherAway['id'])
-    teamsStarters.append(awayTeamName)
+
+     # Check if 'home' exists in probablePitchers
+    if 'home' in data['gameData']['probablePitchers']:
+        probablePitcherHome = data['gameData']['probablePitchers']['home']
+        starter.append(probablePitcherHome['fullName'])
+        starters.append(probablePitcherHome['id'])
+        teamsStarters.append(homeTeamName)
+
+    # Check if 'away' exists in probablePitchers
+    if 'away' in data['gameData']['probablePitchers']:
+        probablePitcherAway = data['gameData']['probablePitchers']['away']
+        starter.append(probablePitcherAway['fullName'])
+        starters.append(probablePitcherAway['id'])
+        teamsStarters.append(awayTeamName)
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearPitchingStats (
@@ -82,7 +88,9 @@ walksPer9Inn = None
 for index, playerId in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
     player_name = starter[index]
+    print(player_name)
     gamesId = gameIdss[index]
+    print(gamesId)
     url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=05/01/2021&endDate=10/05/2022&leagueListId=mlb_milb"
     response = requests.get(url)
     data = json.loads(response.text)
@@ -104,24 +112,6 @@ for index, playerId in enumerate(starters):
                     era = stat.get("era")
                     whip = stat.get("whip")
                     walksPer9Inn = stat.get("walksPer9Inn")
-            else:
-                # Handle the case where 'splits' field is empty
-                strikeoutWalkRatio = None
-                games_started = None
-                hitsPer9Inn = None
-                strikeoutsPer9Inn = None
-                era = None
-                whip = None
-                walksPer9Inn = None
-        else:
-            # Handle the case where 'stats' field is empty
-            strikeoutWalkRatio = None
-            games_started = None
-            hitsPer9Inn = None
-            strikeoutsPer9Inn = None
-            era = None
-            whip = None
-            walksPer9Inn = None
     else:
         # Handle the case where 'stats' field is missing
         strikeoutWalkRatio = None

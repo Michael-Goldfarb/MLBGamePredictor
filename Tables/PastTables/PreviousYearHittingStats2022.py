@@ -40,7 +40,7 @@ for date_info in data["dates"]:
         if game['gamePk'] == "662183": # for some reason the away pitcher is not provided for this game
             continue
         for _ in range(18):
-            gameIdss.append(gameDate)
+            gameIdss.append(gameId)
         awayTeamName = game['teams']['away']['team']['name']
         homeTeamName = game['teams']['home']['team']['name']
         isWinnerAway = game['teams']['away'].get('isWinner')
@@ -141,6 +141,7 @@ for date_info in data["dates"]:
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearHittingStats2022 (
         player_id TEXT,
+        theDate DATE,
         gameId TEXT,
         player_name TEXT,
         obp TEXT,
@@ -224,11 +225,11 @@ for index, playerId in enumerate(lineup):
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearHittingStats2022 (
-            player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
+            player_id, theDate, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
+        player_id, theDate, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
     ))
 
 # Commit the changes and close the cursor and connection

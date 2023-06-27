@@ -149,7 +149,7 @@ cursor.execute("""
         at_bats_per_home_run TEXT,
         team_name TEXT,
         games_played INTEGER,
-        babip TEXT,
+        babip TEXT
     );
 """)
                

@@ -20,8 +20,6 @@ games = data['dates'][0]['games']
 
 # cursor.execute("TRUNCATE TABLE lineupStats;")
 
-
-
 records = []
 unique_games = []
 game_ids = set()
@@ -136,8 +134,6 @@ for game in unique_games:
         batterSevenHome = None
         batterEightHome = None
         batterNineHome = None
-
-
 
 # Define the SQL statement to create the table
 cursor.execute("""

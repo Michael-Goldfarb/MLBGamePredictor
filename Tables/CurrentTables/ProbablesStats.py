@@ -96,14 +96,14 @@ for index, player_id in enumerate(starters):
                     strikeoutsPer9Inn = split['stat']['strikeoutsPer9Inn']
                     walksPer9Inn = split['stat']['walksPer9Inn']
     else:
-        era = "None"
-        whip = "None"
-        strikeoutWalkRatio = "None"
-        strikeoutWalkRatio = "None"
-        games_started = 0
-        hitsPer9Inn = "None"
-        strikeoutsPer9Inn = "None"
-        walksPer9Inn = "None"
+        era = None
+        whip = None
+        strikeoutWalkRatio = None
+        strikeoutWalkRatio = None
+        games_started = None
+        hitsPer9Inn = None
+        strikeoutsPer9Inn = None
+        walksPer9Inn = None
 
     # Insert the player stats into the table
     cursor.execute("""
