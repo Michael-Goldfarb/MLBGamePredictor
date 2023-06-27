@@ -26,6 +26,7 @@ cursor = conn.cursor()
 # Create the hittingStats table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS HittingStats (
+        gameId TEXT,
         teamId INTEGER,
         teamName VARCHAR(255),
         runs INTEGER,
@@ -43,6 +44,7 @@ cursor.execute("TRUNCATE TABLE hittingStats;")
 
 # Get the hitting stats for the away team
 for game in games:
+    gameId = game['gamePk']
     awayTeamId = game['teams']['away']['team']['id']
     awayTeamName = game['teams']['away']['team']['name']
     homeTeamId = game['teams']['home']['team']['id']
@@ -55,11 +57,11 @@ for game in games:
     # Insert data into the hittingStats table
     cursor.execute("""
         INSERT INTO hittingStats (
-            teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
+            gameId, teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        awayTeamId, awayTeamName, awayTeamStats['runs'], awayTeamStats['obp'], awayTeamStats['slg'],
+        gameId, awayTeamId, awayTeamName, awayTeamStats['runs'], awayTeamStats['obp'], awayTeamStats['slg'],
         awayTeamStats['ops'], awayTeamStats['gamesPlayed'], awayTeamStats['leftOnBase'],
         awayTeamStats['stolenBases']
     ))
@@ -73,11 +75,11 @@ for game in games:
     # Insert data into the hittingStats table
     cursor.execute("""
         INSERT INTO hittingStats (
-            teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
+            gameId, teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        homeTeamId, homeTeamName, homeTeamStats['runs'], homeTeamStats['obp'], homeTeamStats['slg'],
+        gameId, homeTeamId, homeTeamName, homeTeamStats['runs'], homeTeamStats['obp'], homeTeamStats['slg'],
         homeTeamStats['ops'], homeTeamStats['gamesPlayed'], homeTeamStats['leftOnBase'],
         homeTeamStats['stolenBases']
     ))

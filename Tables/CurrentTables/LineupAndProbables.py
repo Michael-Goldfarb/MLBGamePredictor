@@ -20,6 +20,7 @@ cursor = conn.cursor()
 # Create the "LineupAndProbables" table (if it doesn't exist)
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS LineupAndProbables (
+        gamesId TEXT,
         awayId INTEGER,
         awayName TEXT,
         homeId INTEGER,
@@ -66,6 +67,7 @@ for game in games:
         unique_games.append(game)
         game_ids.add(gameId)
 for game in unique_games:
+    gamesId = game['gamePk']
     url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
     response = requests.get(url)
     data = response.json()
@@ -139,15 +141,15 @@ for game in unique_games:
     # Insert the data into the "LineupAndProbables" table
     cursor.execute("""
         INSERT INTO LineupAndProbables (
-        awayId, awayName, homeId, homeName, batterOneAway, batterTwoAway, batterThreeAway, batterFourAway, batterFiveAway,
+        gamesId, awayId, awayName, homeId, homeName, batterOneAway, batterTwoAway, batterThreeAway, batterFourAway, batterFiveAway,
         batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome, batterFourHome, 
         batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome, pitcherIdHome, pitcherIdAway, pitcherNameHome, 
         pitcherNameAway
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """,
     (
-        awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway, batterFourAway,
+        gamesId, awayTeam['id'], awayTeam['name'], homeTeam['id'], homeTeam['name'], batterOneAway, batterTwoAway, batterThreeAway, batterFourAway,
         batterFiveAway, batterSixAway, batterSevenAway, batterEightAway, batterNineAway, batterOneHome, batterTwoHome, batterThreeHome,
         batterFourHome, batterFiveHome, batterSixHome, batterSevenHome, batterEightHome, batterNineHome,
         probablePitcherHome['id'], probablePitcherAway['id'], probablePitcherHome['fullName'], probablePitcherAway['fullName']

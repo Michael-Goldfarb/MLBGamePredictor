@@ -19,6 +19,7 @@ cursor = conn.cursor()
 starters = []
 teamsStarters = []
 starter = []
+gameIdss = []
 game_ids = set()
 unique_games = []
 
@@ -30,6 +31,7 @@ games = data['dates'][0]['games']
 # Loop through each gameId and create rows in the "LineupAndProbables" table
 for game in games:
     gameId = game['gamePk']
+    gameIdss.append(gameId)
     if gameId not in game_ids:
         unique_games.append(game)
         game_ids.add(gameId)
@@ -52,6 +54,7 @@ for game in unique_games:
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearPitchingStats (
         player_id TEXT,
+        gameId TEXT,
         player_name TEXT,
         strikeoutWalkRatio TEXT,
         games_started INTEGER,
@@ -78,6 +81,7 @@ walksPer9Inn = None
 for index, playerId in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
     player_name = starter[index]
+    gamesId = gameIdss[index]
     url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=05/01/2021&endDate=10/05/2022&leagueListId=mlb_milb"
     response = requests.get(url)
     data = json.loads(response.text)
@@ -130,11 +134,11 @@ for index, playerId in enumerate(starters):
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearPitchingStats (
-            player_id, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+            player_id, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+        player_id, gamesId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
     ))
 
 # Commit the changes and close the cursor and connection
