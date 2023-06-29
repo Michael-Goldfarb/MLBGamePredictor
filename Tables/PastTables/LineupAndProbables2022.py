@@ -112,7 +112,6 @@ for date_info in data["dates"]:
         batterEightAway = battingOrderAway[7]
         batterNineAway = battingOrderAway[8]
 
-
         batterOneHome = battingOrderHome[0]
         batterTwoHome = battingOrderHome[1]
         batterThreeHome = battingOrderHome[2]

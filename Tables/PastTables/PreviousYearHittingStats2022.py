@@ -194,6 +194,7 @@ for index, playerId in enumerate(lineup):
                     obp = stat.get("obp")
                     slg = stat.get("slg")
                     ops = stat.get("ops")
+                    print(ops)
                     at_bats_per_home_run = stat.get("atBatsPerHomeRun")
                     games_played = stat.get("gamesPlayed")
                     babip = stat.get("babip")

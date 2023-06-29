@@ -150,8 +150,8 @@ for date_info in data["dates"]:
     """)
                 
 # Define the SQL statement to select data from the table with a limit
-limit = len(lineup)
-select_query = f"SELECT * FROM lineupStats2022 LIMIT {limit}"
+# limit = len(lineup)
+# select_query = f"SELECT * FROM lineupStats2022 LIMIT {limit}"
 
 # Execute the SELECT statement
 cursor.execute(select_query)

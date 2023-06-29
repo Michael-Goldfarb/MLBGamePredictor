@@ -60,7 +60,8 @@ cursor.execute("""
         homeTeamWinPct FLOAT,
         venue VARCHAR(255),
         isWinnerAway BOOLEAN,
-        isWinnerHome BOOLEAN
+        isWinnerHome BOOLEAN,
+        predictedWinner VARCHAR(255)
     )
 """)
 

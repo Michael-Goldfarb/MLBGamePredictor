@@ -27,11 +27,10 @@ lineup = []
 teamsLineup = []
 gameIdss = []
 for game in games:
-    gameId = game['gamePk']
-    gameIdss.append(gameId)
-    if gameId not in game_ids:
+    gamesId = game['gamePk']
+    if gamesId not in game_ids:
         unique_games.append(game)
-        game_ids.add(gameId)
+        game_ids.add(gamesId)
 for game in unique_games:
     url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
     response = requests.get(url)
@@ -57,31 +56,25 @@ for game in unique_games:
     # Check if battingOrderAway has at least 9 elements
         batterOneAway = battingOrderAway[0]
         lineup.append(battingOrderAway[0])
-        teamsLineup.append(awayTeamName)
+        for _ in range(9):
+            teamsLineup.append(awayTeamName)
+            gameIdss.append(gamesId)
         batterTwoAway = battingOrderAway[1]
         lineup.append(battingOrderAway[1])
-        teamsLineup.append(awayTeamName)
         batterThreeAway = battingOrderAway[2]
         lineup.append(battingOrderAway[2])
-        teamsLineup.append(awayTeamName)
         batterFourAway = battingOrderAway[3]
         lineup.append(battingOrderAway[3])
-        teamsLineup.append(awayTeamName)
         batterFiveAway = battingOrderAway[4]
         lineup.append(battingOrderAway[4])
-        teamsLineup.append(awayTeamName)
         batterSixAway = battingOrderAway[5]
         lineup.append(battingOrderAway[5])
-        teamsLineup.append(awayTeamName)
         batterSevenAway = battingOrderAway[6]
         lineup.append(battingOrderAway[6])
-        teamsLineup.append(awayTeamName)
         batterEightAway = battingOrderAway[7]
         lineup.append(battingOrderAway[7])
-        teamsLineup.append(awayTeamName)
         batterNineAway = battingOrderAway[8]
         lineup.append(battingOrderAway[8])
-        teamsLineup.append(awayTeamName)
     else:
         # Set default values or handle the case where there are not enough elements
         batterOneAway = None
@@ -98,31 +91,25 @@ for game in unique_games:
     if len(battingOrderHome) >= 9:
         batterOneHome = battingOrderHome[0]
         lineup.append(battingOrderHome[0])
-        teamsLineup.append(homeTeamName)
+        for _ in range(9):
+            teamsLineup.append(homeTeamName)
+            gameIdss.append(gamesId)
         batterTwoHome = battingOrderHome[1]
         lineup.append(battingOrderHome[1])
-        teamsLineup.append(homeTeamName)
         batterThreeHome = battingOrderHome[2]
         lineup.append(battingOrderHome[2])
-        teamsLineup.append(homeTeamName)
         batterFourHome = battingOrderHome[3]
         lineup.append(battingOrderHome[3])
-        teamsLineup.append(homeTeamName)
         batterFiveHome = battingOrderHome[4]
         lineup.append(battingOrderHome[4])
-        teamsLineup.append(homeTeamName)
         batterSixHome = battingOrderHome[5]
         lineup.append(battingOrderHome[5])
-        teamsLineup.append(homeTeamName)
         batterSevenHome = battingOrderHome[6]
         lineup.append(battingOrderHome[6])
-        teamsLineup.append(homeTeamName)
         batterEightHome = battingOrderHome[7]
         lineup.append(battingOrderHome[7])
-        teamsLineup.append(homeTeamName)
         batterNineHome = battingOrderHome[8]
         lineup.append(battingOrderHome[8])
-        teamsLineup.append(homeTeamName)
     else:
         # Set default values or handle the case where there are not enough elements
         batterOneHome = None
@@ -139,7 +126,7 @@ for game in unique_games:
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS lineupStats (
         player_id TEXT,
-        gamesId TEXT,
+        gameId TEXT,
         player_name TEXT,
         obp TEXT,
         slg TEXT,
@@ -165,7 +152,7 @@ records = cursor.fetchall()
 # Loop through each player in the lineup
 for index, player_id in enumerate(lineup):
     team_name = teamsLineup[index]  # Get the team name corresponding to the current player
-    gamesId = gameIdss[index]
+    gameId = gameIdss[index]
     
     # Make the API request to fetch player stats
     api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
@@ -193,11 +180,11 @@ for index, player_id in enumerate(lineup):
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO lineupStats (
-            player_id, gamesId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
+            player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
         )
-        VALUES (%s, %s. %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, gamesId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
+        player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
     ))
 
 # Commit the changes and close the cursor and connection
