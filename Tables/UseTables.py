@@ -4,6 +4,8 @@ import numpy as np
 import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 
 # Create a SQLAlchemy engine
@@ -19,11 +21,11 @@ probables_stats_df = pd.read_sql_query(query, engine)
 query = "SELECT * FROM previousYearPitchingStats2022"
 previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-query = "SELECT * FROM previousYearHittingStats2022"
-previous_hitting_stats_df = pd.read_sql_query(query, engine)
+# query = "SELECT * FROM previousYearHittingStats2022"
+# previous_hitting_stats_df = pd.read_sql_query(query, engine)
 
-query = "SELECT * FROM lineupStats2022"
-lineup_stats_df = pd.read_sql_query(query, engine)
+# query = "SELECT * FROM lineupStats2022"
+# lineup_stats_df = pd.read_sql_query(query, engine)
 
 query = "SELECT * FROM HittingStats2022"
 hitting_stats_df = pd.read_sql_query(query, engine)
@@ -31,19 +33,20 @@ hitting_stats_df = pd.read_sql_query(query, engine)
 # Merge the relevant historical tables based on common keys
 historical_data = pd.merge(pitching_stats_df, probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
 historical_data = pd.merge(historical_data, previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-historical_data = pd.merge(historical_data, previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
-historical_data = pd.merge(historical_data, lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
+# historical_data = pd.merge(historical_data, previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
+# historical_data = pd.merge(historical_data, lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
 historical_data = pd.merge(historical_data, hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
 # Adjust the features list to include the correct column names
 features = ["era", "whip", "hitsper9inn", "runsscoredper9", "homerunsper9",
             "strikeoutwalkratio_pitching", "games_started", "gamespitched", "strikeouts", "saves", "blownsaves",
             "obp", "slg_hitting", "ops", "strikeoutwalkratio_probables",
-            "at_bats_per_home_run", "babip"]
+            ]
 target = "iswinner"
 
 # Replace non-numeric values with NaN
 historical_data[features] = historical_data[features].apply(pd.to_numeric, errors='coerce')
+historical_data_mean = historical_data[features].mean()
 
 X = historical_data[features]
 y = historical_data[target]
@@ -53,7 +56,7 @@ imputer = SimpleImputer(strategy='mean')
 X_imputed = imputer.fit_transform(X)
 
 # Train the logistic regression model (only if the model hasn't been trained and saved before)
-model_filename = "logistic_regression_model.pkl"
+model_filename = "logistic_regression_modelv2.pkl"
 
 try:
     # Load the trained model
@@ -71,6 +74,26 @@ except FileNotFoundError:
     with open(model_filename, 'wb') as file:
         pickle.dump(model, file)
     print("Trained model saved to file.")
+
+# model_filename = "randomForestModel.pkl"
+
+# try:
+#     # Load the trained model
+#     with open(model_filename, 'rb') as file:
+#         model = pickle.load(file)
+#     print("Trained model loaded from file.")
+# except FileNotFoundError:
+#     # Split the data into training and testing sets
+#     X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
+
+#     # Train the model if the saved model file is not found
+#     print("Training model...")
+#     model = RandomForestClassifier()
+#     model.fit(X_train, y_train)
+#     with open(model_filename, 'wb') as file:
+#         pickle.dump(model, file)
+#     print("Trained model saved to file.")
+
 
 # Fetch the gameIds from the 'games' table
 query = "SELECT gameId FROM games"
@@ -92,15 +115,15 @@ for gameId in gameIds:
     query = f"SELECT * FROM previousYearPitchingStats WHERE gameid = '{gameId}'"
     current_previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-    query = f"SELECT * FROM previousYearHittingStats WHERE gameid = '{gameId}'"
-    print("Query:", query)
-    current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
-    print("Number of rows returned:", current_previous_hitting_stats_df.shape[0])
+    # query = f"SELECT * FROM previousYearHittingStats WHERE gameid = '{gameId}'"
+    # print("Query:", query)
+    # current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
+    # print("Number of rows returned:", current_previous_hitting_stats_df.shape[0])
 
-    query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
-    print("Query:", query)
-    current_lineup_stats_df = pd.read_sql_query(query, engine)
-    print("Number of rows returned:", current_lineup_stats_df.shape[0])
+    # query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
+    # print("Query:", query)
+    # current_lineup_stats_df = pd.read_sql_query(query, engine)
+    # print("Number of rows returned:", current_lineup_stats_df.shape[0])
 
     query = f"SELECT * FROM HittingStats WHERE gameid = '{gameId}'"
     current_hitting_stats_df = pd.read_sql_query(query, engine)
@@ -108,24 +131,31 @@ for gameId in gameIds:
     # Merge the relevant current date tables based on common keys
     current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
     current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-    current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
-    current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
+    # current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
+    # current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
     current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
     print("Current Data Shape:", current_data.shape)  # Add this line to print the shape
     
+    # Check for missing values in current_data
+    missing_values = current_data.isnull()
+
+    # Check if any row has at least one missing value
+    rows_with_missing_values = missing_values.any(axis=1)
+
+    # Get the rows with missing values
+    rows_with_missing_values_indices = rows_with_missing_values[rows_with_missing_values].index
+
+    # Print the indices of rows with missing values
+    print("Rows with missing values:")
+    print(rows_with_missing_values_indices)
+
     # Handle missing values in the current_data DataFrame
     current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
 
     # Check if the current_data DataFrame has at least one sample
     if not current_data.empty:
-        # Iterate over each feature and handle missing values
-        for feature in features:
-            if current_data[feature].isnull().any():
-                # Handle missing values for the current feature
-                # For example, you can use the mean value to fill in missing values
-                current_data[feature].fillna(current_data[feature].mean(), inplace=True)
-
+        current_data.fillna(current_data["team_name"], inplace=True)
         # Preprocess the current_data to handle missing values
         current_data_imputed = imputer.transform(current_data[features])
 
@@ -143,16 +173,18 @@ for gameId in gameIds:
 
         # Get the predicted winners as a list of team names
         predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
-
+        
         # Add the gameId and predicted winners to the updated_data list
         updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
 
         print(f"GameId: {gameId} - Winner prediction stored in the database.")
+    else:
+        # Handle the case when current_data is empty (no samples available)
+        updated_data.append(("Unknown", gameId))
+        print(f"GameId: {gameId} - Missing data, prediction marked as unknown.")
 
 # Prepare the query to update all rows at once
 update_query = "UPDATE games SET predictedWinner = %(winner)s WHERE gameId = %(gameId)s"
-
-print("Im him")
 
 # Convert the updated_data list into a dictionary
 parameters = [{'winner': winner, 'gameId': gameId} for winner, gameId in updated_data]
