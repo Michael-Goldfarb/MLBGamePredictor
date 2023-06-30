@@ -54,8 +54,8 @@ for date_info in data["dates"]:
         response = requests.get(url)
         data = response.json()
 
-        awayTeamName = data['gameData']['teams']['away']['name']
-        homeTeamName = data['gameData']['teams']['home']['name']
+        awayTeamName = data['gameData']['teams']['away']['id']
+        homeTeamName = data['gameData']['teams']['home']['id']
         # Parse battingOrder if it is a string representation of an array
         battingOrderHome_str = data['liveData']['boxscore']['teams']['home'].get('battingOrder')
         if isinstance(battingOrderHome_str, str):
@@ -72,105 +72,77 @@ for date_info in data["dates"]:
         if len(battingOrderAway) >= 9:
             for _ in range(9):
                 dates.append(gameDate)
+                teamsLineup.append(awayTeamName)
             batterOneAway = battingOrderAway[0]
             lineup.append(battingOrderAway[0])
-            teamsLineup.append(awayTeamName)
             batterTwoAway = battingOrderAway[1]
             lineup.append(battingOrderAway[1])
-            teamsLineup.append(awayTeamName)
             batterThreeAway = battingOrderAway[2]
             lineup.append(battingOrderAway[2])
-            teamsLineup.append(awayTeamName)
             batterFourAway = battingOrderAway[3]
             lineup.append(battingOrderAway[3])
-            teamsLineup.append(awayTeamName)
             batterFiveAway = battingOrderAway[4]
             lineup.append(battingOrderAway[4])
-            teamsLineup.append(awayTeamName)
             batterSixAway = battingOrderAway[5]
             lineup.append(battingOrderAway[5])
-            teamsLineup.append(awayTeamName)
             batterSevenAway = battingOrderAway[6]
             lineup.append(battingOrderAway[6])
-            teamsLineup.append(awayTeamName)
             batterEightAway = battingOrderAway[7]
             lineup.append(battingOrderAway[7])
-            teamsLineup.append(awayTeamName)
             batterNineAway = battingOrderAway[8]
             lineup.append(battingOrderAway[8])
-            teamsLineup.append(awayTeamName)
 
         if len(battingOrderHome) >= 9:
             for _ in range(9):
                 dates.append(gameDate)
+                teamsLineup.append(homeTeamName)
             batterOneHome = battingOrderHome[0]
             lineup.append(battingOrderHome[0])
-            teamsLineup.append(homeTeamName)
             batterTwoHome = battingOrderHome[1]
             lineup.append(battingOrderHome[1])
-            teamsLineup.append(homeTeamName)
             batterThreeHome = battingOrderHome[2]
             lineup.append(battingOrderHome[2])
-            teamsLineup.append(homeTeamName)
             batterFourHome = battingOrderHome[3]
             lineup.append(battingOrderHome[3])
-            teamsLineup.append(homeTeamName)
             batterFiveHome = battingOrderHome[4]
             lineup.append(battingOrderHome[4])
-            teamsLineup.append(homeTeamName)
             batterSixHome = battingOrderHome[5]
             lineup.append(battingOrderHome[5])
-            teamsLineup.append(homeTeamName)
             batterSevenHome = battingOrderHome[6]
             lineup.append(battingOrderHome[6])
-            teamsLineup.append(homeTeamName)
             batterEightHome = battingOrderHome[7]
             lineup.append(battingOrderHome[7])
-            teamsLineup.append(homeTeamName)
             batterNineHome = battingOrderHome[8]
             lineup.append(battingOrderHome[8])
-            teamsLineup.append(homeTeamName)
 
     # Define the SQL statement to create the table
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS lineupStats2022 (
-            gameID TEXT,
-            theDate DATE,
-            player_id TEXT,
-            player_name TEXT,
+        CREATE TABLE IF NOT EXISTS lineupStats2022v2 (
+            date DATE,
+            gameId TEXT,
+            teamId TEXT,
             obp TEXT,
             slg TEXT,
             ops TEXT,
             at_bats_per_home_run TEXT,
-            team_name TEXT,
             games_played INTEGER,
             babip TEXT,
             isWinner BOOLEAN
         );
     """)
+
+    # Clear the table before inserting new data
+    cursor.execute("TRUNCATE TABLE lineupStats2022v2;")
                 
-# Define the SQL statement to select data from the table with a limit
-# limit = len(lineup)
-# select_query = f"SELECT * FROM lineupStats2022 LIMIT {limit}"
 
-# Execute the SELECT statement
-cursor.execute(select_query)
-
-# Fetch all the selected records
-records = cursor.fetchall()
-
-dates_length = len(dates)
-print("Length of dates:", dates_length)
-lineup_length = len(lineup)
-print("Length of lineup:", lineup_length)
+team_stats = {}
 
 # Loop through each player in the lineup
 for index, player_id in enumerate(lineup):
-    team_name = teamsLineup[index]  # Get the team name corresponding to the current player
-    print(team_name)
-    newGameId = gamesId[index]
+    teamId = teamsLineup[index]  # Get the team name corresponding to the current player
+    gameId = gamesId[index]
     isWinner = outcomes[index]
-    print(newGameId)
+    print(gameId)
 
     try:
         # Make the API request to fetch player stats
@@ -181,36 +153,76 @@ for index, player_id in enumerate(lineup):
         theDate = dates[index]
         print(theDate)
         response = requests.get(api_url)
-        data = response.json()
+        data = response.json()    
 
-        # Extract the required fields
         stats = data["stats"][0]["splits"][0]["stat"]
-        api_url2 = "https://statsapi.mlb.com/api/v1/people/{playerId2}".format(
-            playerId2=player_id,
-        )
-        response2 = requests.get(api_url2)
-        data2 = response2.json()
-        player_name = data2["people"][0]["fullName"]
-        games_played = stats["gamesPlayed"]
-        obp = stats["obp"]
-        slg = stats["slg"]
-        ops = stats["ops"]
-        at_bats_per_home_run = stats["atBatsPerHomeRun"]
-        babip = stats["babip"]
+        games_played = int(stats["gamesPlayed"])
+        obp = float(stats["obp"])
+        slg = float(stats["slg"])
+        ops = float(stats["ops"])
+        if stats["babip"] != ".---":
+            babip = float(stats["babip"])
+        else:
+            babip = 0.0
+        if stats["atBatsPerHomeRun"] != "-.--":
+            at_bats_per_home_run = float(stats["atBatsPerHomeRun"])
+        else:
+            at_bats_per_home_run = 0.0
         print(babip)
-
-        # Insert the player stats into the table
-        cursor.execute("""
-            INSERT INTO lineupStats2022 (
-                gameId, theDate, player_id, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            newGameId, theDate, player_id, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip, isWinner
-        ))
-
+        
+        # Update the cumulative values for the current team
+        team_game_key = (teamId, gameId)
+        if team_game_key in team_stats:
+            team_stats[team_game_key]["games_played"] += games_played
+            print(team_stats[team_game_key]["games_played"])
+            team_stats[team_game_key]["obp"] += obp
+            team_stats[team_game_key]["slg"] += slg
+            team_stats[team_game_key]["ops"] += ops
+            # at_bats_per_home_run = float(stats["atBatsPerHomeRun"]) if stats["atBatsPerHomeRun"] != "-.--" else 0.0
+            team_stats[team_game_key]["babip"] += babip
+            # team_stats[team_game_key]["gameId"] = gameId
+            # team_stats[team_game_key]["isWinner"] = isWinner
+            # team_stats[team_game_key]["date"] = theDate
+        else:
+            team_stats[team_game_key] = {
+                "games_played": games_played,
+                "obp": obp,
+                "slg": slg,
+                "ops": ops,
+                "at_bats_per_home_run": at_bats_per_home_run,
+                "babip": babip #,
+                # "gameIds": gameId,
+                # "isWinner": isWinner,
+                # "date": theDate
+            }
+            team_stats[team_game_key]["isWinner"] = isWinner
+            team_stats[team_game_key]["date"] = theDate
     except IndexError:
         print("Player stats not available for player ID:", player_id)
+
+# Calculate the averages for each column per team
+for team_game_key, stats in team_stats.items():
+    teamId, gameId = team_game_key
+    num_players = 9  # Assuming lineup contains all players for each team
+    games_played_avg = stats["games_played"] / num_players
+    obp_avg = stats["obp"] / num_players
+    slg_avg = stats["slg"] / num_players
+    ops_avg = stats["ops"] / num_players
+    at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players
+    babip_avg = stats["babip"] / num_players
+    isWinner = stats["isWinner"]
+    dates = stats["date"]
+    print(dates)
+
+    # Insert the player stats into the table
+    cursor.execute("""
+        INSERT INTO lineupStats2022v2 (
+            date, gameId, teamId, obp, slg, ops, at_bats_per_home_run, games_played, babip, isWinner
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        dates, gameId, teamId, obp_avg, slg_avg, ops_avg, at_bats_per_home_run_avg, games_played_avg, babip_avg, isWinner
+    ))
 
 # Commit the changes and close the cursor and connection
 conn.commit()

@@ -22,6 +22,7 @@ starter = []
 gameIdss = []
 game_ids = set()
 unique_games = []
+teamsId = []
 
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
@@ -43,6 +44,8 @@ for game in unique_games:
 
     awayTeamName = data['gameData']['teams']['away']['name']
     homeTeamName = data['gameData']['teams']['home']['name']
+    awayTeamId = data['gameData']['teams']['away']['id']
+    homeTeamId = data['gameData']['teams']['home']['id']
 
      # Check if 'home' exists in probablePitchers
     if 'home' in data['gameData']['probablePitchers']:
@@ -50,6 +53,7 @@ for game in unique_games:
         starter.append(probablePitcherHome['fullName'])
         starters.append(probablePitcherHome['id'])
         teamsStarters.append(homeTeamName)
+        teamsId.append(homeTeamId)
 
     # Check if 'away' exists in probablePitchers
     if 'away' in data['gameData']['probablePitchers']:
@@ -57,11 +61,13 @@ for game in unique_games:
         starter.append(probablePitcherAway['fullName'])
         starters.append(probablePitcherAway['id'])
         teamsStarters.append(awayTeamName)
+        teamsId.append(awayTeamId)
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearPitchingStats (
         player_id TEXT,
         gameId TEXT,
+        teamId TEXT,
         player_name TEXT,
         strikeoutWalkRatio TEXT,
         games_started INTEGER,
@@ -88,6 +94,7 @@ walksPer9Inn = None
 for index, playerId in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
     player_name = starter[index]
+    teamId = teamsId[index]
     print(player_name)
     gamesId = gameIdss[index]
     print(gamesId)
@@ -125,11 +132,11 @@ for index, playerId in enumerate(starters):
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearPitchingStats (
-            player_id, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+            player_id, gameId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, gamesId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+        player_id, gamesId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
     ))
 
 # Commit the changes and close the cursor and connection

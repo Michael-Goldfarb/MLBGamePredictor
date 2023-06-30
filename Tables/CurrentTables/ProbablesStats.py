@@ -19,6 +19,7 @@ starters = []
 gameIdss = []
 teamsStarters = []
 startersName = []
+teamIds = []
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
@@ -38,22 +39,27 @@ for game in unique_games:
 
     awayTeamName = data['gameData']['teams']['away']['name']
     homeTeamName = data['gameData']['teams']['home']['name']
+    awayTeamId = data['gameData']['teams']['away']['id']
+    homeTeamId = data['gameData']['teams']['home']['id']
     probablePitcherHome = data['gameData']['probablePitchers'].get('home')
     probablePitcherHomeId = probablePitcherHome.get('id') if probablePitcherHome else None
     starters.append(probablePitcherHomeId)
     startersName.append(probablePitcherHome['fullName'] if probablePitcherHome else None)
     teamsStarters.append(homeTeamName)
+    teamIds.append(homeTeamId)
     probablePitcherAway = data['gameData']['probablePitchers'].get('away')
     probablePitcherAwayId = probablePitcherAway.get('id') if probablePitcherAway else None
     starters.append(probablePitcherAwayId)
     startersName.append(probablePitcherAway['fullName'] if probablePitcherAway else None)
     teamsStarters.append(awayTeamName)
+    teamIds.append(awayTeamId)
 
 # Define the SQL statement to create the table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS probablesStats (
         player_id TEXT,
         gameId TEXT,
+        teamId VARCHAR(255),
         player_name TEXT,
         strikeoutWalkRatio TEXT,
         games_started INTEGER,
@@ -72,6 +78,7 @@ cursor.execute("TRUNCATE TABLE probablesStats;")
 for index, player_id in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
     player_name = startersName[index]
+    teamId = teamIds[index]
     print(player_name)
     gamesId = gameIdss[index]
     print(gamesId)
@@ -108,10 +115,10 @@ for index, player_id in enumerate(starters):
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO probablesStats (
-            player_id, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
+            player_id, gameId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (player_id, gamesId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn))
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (player_id, gamesId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn))
 
 # Commit the changes and close the cursor and connection
 conn.commit()

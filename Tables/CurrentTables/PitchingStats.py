@@ -28,7 +28,7 @@ cursor.execute("""
     CREATE TABLE IF NOT EXISTS PitchingStats (
         teamId INTEGER,
         gameId TEXT,
-        teamName VARCHAR(255),
+        team_name VARCHAR(255),
         era VARCHAR(255),
         whip VARCHAR(255),
         hitsPer9Inn VARCHAR(255),
@@ -46,7 +46,7 @@ cursor.execute("""
 """)
                
 # Truncate the table before inserting new data
-cursor.execute("TRUNCATE TABLE pitchingStats;")
+cursor.execute("TRUNCATE TABLE PitchingStats;")
 
 # Loop through each game and get the pitching statistics
 for game in games:
@@ -66,7 +66,7 @@ for game in games:
     # Insert data into the PitchingStats table for the away team
     cursor.execute("""
         INSERT INTO PitchingStats (
-            teamId, gameId, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+            teamId, gameId, team_name, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
             strikeOuts, saves, blownSaves, strikeoutWalkRatio
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -85,7 +85,7 @@ for game in games:
     # Insert data into the PitchingStats table for the home team
     cursor.execute("""
         INSERT INTO PitchingStats (
-            teamId, gameId, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
+            teamId, gameId, team_name, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
             strikeOuts, saves, blownSaves, strikeoutWalkRatio
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)

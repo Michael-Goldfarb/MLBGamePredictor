@@ -20,6 +20,7 @@ startersName = []
 dates = []
 gameIdss = []
 outcomes = []
+teamIdss = []
 
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
 data = response.json()
@@ -62,15 +63,19 @@ for date_info in data["dates"]:
         data = response.json()
         awayTeamName = data['gameData']['teams']['away']['name']
         homeTeamName = data['gameData']['teams']['home']['name']
+        homeTeamId = data['gameData']['teams']['home']['id']
+        awayTeamId = data['gameData']['teams']['away']['id']
         probablePitcherHome = data['gameData']['probablePitchers']['home']
         startersName.append(probablePitcherHome['fullName'])
         starters.append(probablePitcherHome['id'])
         teamsStarters.append(homeTeamName)
+        teamIdss.append(homeTeamId)
         probablePitcherAway = data['gameData']['probablePitchers'].get('away')  # Use get() method to handle missing key
         print(probablePitcherHome['fullName'])
         if probablePitcherAway is not None:
             startersName.append(probablePitcherAway['fullName'])
             starters.append(probablePitcherAway['id'])
+            teamIdss.append(homeTeamId)
             teamsStarters.append(awayTeamName)
 
 # Define the SQL statement to create the table
@@ -79,6 +84,7 @@ cursor.execute("""
             player_id TEXT,
             gameDate DATE,
             gameId TEXT,
+            teamId TEXT,
             player_name TEXT,
             strikeoutWalkRatio TEXT,
             games_started INTEGER,
@@ -100,7 +106,9 @@ for index, player_id in enumerate(starters):
     player_name = startersName[index]
     isWinner = outcomes[index]
     theDate = dates[index]
+    print(theDate)
     game_ids = gameIdss[index]
+    teamId = teamIdss[index]
 
     # Make the API request to fetch player stats
     api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2022&group=pitching&startDate=04/07/2022&endDate={currentDate}&leagueListId=mlb_milb".format(
@@ -124,10 +132,10 @@ for index, player_id in enumerate(starters):
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO probablesStats2022 (
-           player_id, gameDate, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
+           player_id, gameDate, gameId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (player_id, theDate, game_ids, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner))
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (player_id, theDate, game_ids, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner))
 
 
 # Commit the changes and close the cursor and connection

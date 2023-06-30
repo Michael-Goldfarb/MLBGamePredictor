@@ -21,6 +21,7 @@ starter = []
 dates = []
 gameIdss = []
 outcomes = []
+teamIdss = []
 
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
 data = response.json()
@@ -37,8 +38,8 @@ for date_info in data["dates"]:
         homeTeamId = game['teams']['home']['team']['id']
         if game['gamePk'] == "662183": # for some reason the away pitcher is not provided for this game
             continue
-        gameIdss.append(gameId)
-        gameIdss.append(gameId)
+        teamIdss.append(gameId)
+        teamIdss.append(gameId)
         dates.append(gameDate)
         dates.append(gameDate)
         awayTeamName = game['teams']['away']['team']['name']
@@ -63,22 +64,27 @@ for date_info in data["dates"]:
         data = response.json()
         awayTeamName = data['gameData']['teams']['away']['name']
         homeTeamName = data['gameData']['teams']['home']['name']
+        awayTeamId = data['gameData']['teams']['away']['id']
+        homeTeamId = data['gameData']['teams']['home']['id']
         probablePitcherHome = data['gameData']['probablePitchers']['home']
         starter.append(probablePitcherHome['fullName'])
         starters.append(probablePitcherHome['id'])
         teamsStarters.append(homeTeamName)
+        gameIdss.append(homeTeamId)
         probablePitcherAway = data['gameData']['probablePitchers'].get('away')  # Use get() method to handle missing key
         print(probablePitcherHome['fullName'])
         if probablePitcherAway is not None:
             starter.append(probablePitcherAway['fullName'])
             starters.append(probablePitcherAway['id'])
             teamsStarters.append(awayTeamName)
+            gameIdss.append(awayTeamId)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS previousYearPitchingStats2022 (
             player_id TEXT,
             gameDate DATE,
             gameId TEXT,
+            teamId TEXT,
             player_name TEXT,
             strikeoutWalkRatio TEXT,
             games_started INTEGER,
@@ -107,6 +113,7 @@ for index, playerId in enumerate(starters):
     player_name = starter[index]
     game_ids = gameIdss[index]
     theDate = dates[index]
+    teamId = teamIdss[index]
     isWinner = outcomes[index]
      #   game_date = dates[index]
     url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=07/24/2020&endDate=10/03/2021&leagueListId=mlb_milb"
@@ -162,11 +169,11 @@ for index, playerId in enumerate(starters):
      # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearPitchingStats2022 (
-            player_id, gameDate, gameId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
+            player_id, gameDate, gameId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, theDate, game_ids, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
+        player_id, theDate, game_ids, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
     ))
 
 # Commit the changes and close the cursor and connection

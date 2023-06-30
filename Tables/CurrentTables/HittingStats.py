@@ -28,7 +28,7 @@ cursor.execute("""
     CREATE TABLE IF NOT EXISTS HittingStats (
         gameId TEXT,
         teamId INTEGER,
-        teamName VARCHAR(255),
+        team_name VARCHAR(255),
         runs INTEGER,
         obp VARCHAR(255),
         slg VARCHAR(255),
@@ -57,7 +57,7 @@ for game in games:
     # Insert data into the hittingStats table
     cursor.execute("""
         INSERT INTO hittingStats (
-            gameId, teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
+            gameId, teamId, team_name, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
@@ -75,7 +75,7 @@ for game in games:
     # Insert data into the hittingStats table
     cursor.execute("""
         INSERT INTO hittingStats (
-            gameId, teamId, teamName, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
+            gameId, teamId, team_name, runs, obp, slg, ops, gamesPlayed, leftOnBase, stolenBases
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
