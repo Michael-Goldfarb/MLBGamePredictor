@@ -93,53 +93,61 @@ for gameId in gameIds:
     current_previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
     query = f"SELECT * FROM previousYearHittingStats WHERE gameid = '{gameId}'"
+    print("Query:", query)
     current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
+    print("Number of rows returned:", current_previous_hitting_stats_df.shape[0])
 
     query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
+    print("Query:", query)
     current_lineup_stats_df = pd.read_sql_query(query, engine)
+    print("Number of rows returned:", current_lineup_stats_df.shape[0])
 
     query = f"SELECT * FROM HittingStats WHERE gameid = '{gameId}'"
     current_hitting_stats_df = pd.read_sql_query(query, engine)
 
     # Merge the relevant current date tables based on common keys
-    current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="left", suffixes=('_pitching', '_probables'))
-    current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="left", suffixes=('', '_previous_pitching'))
-    current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="left", suffixes=('', '_previous_hitting'))
-    current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="left", suffixes=('', '_lineup'))
-    current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="left", suffixes=('', '_hitting'))
+    current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
+    current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
+    current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
+    current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
+    current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
+    print("Current Data Shape:", current_data.shape)  # Add this line to print the shape
+    
     # Handle missing values in the current_data DataFrame
     current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
-    current_data_imputed = imputer.transform(current_data[features])
 
-    # Drop rows with missing values
-    current_data_imputed = pd.DataFrame(current_data_imputed, columns=features)
-    current_data_imputed.dropna(inplace=True)
+    # Check if the current_data DataFrame has at least one sample
+    if not current_data.empty:
+        # Iterate over each feature and handle missing values
+        for feature in features:
+            if current_data[feature].isnull().any():
+                # Handle missing values for the current feature
+                # For example, you can use the mean value to fill in missing values
+                current_data[feature].fillna(current_data[feature].mean(), inplace=True)
 
-    print(gameId)
+        # Preprocess the current_data to handle missing values
+        current_data_imputed = imputer.transform(current_data[features])
 
-    # Check if current_data_imputed is not empty
-    if current_data_imputed.empty:
-        print(f"GameId: {gameId} - No valid data available for prediction.")
-        continue  # Skip to the next iteration of the loop
+        # Use the trained model to predict the winner of current date games
+        X_current = current_data_imputed
+        current_data["predicted_winner"] = model.predict(X_current)
 
-    # Use the trained model to predict the winner of current date games
-    X_current = current_data_imputed.values
-    current_data["predicted_winner"] = model.predict(X_current)
+        # Store the predicted winners in the database
+        current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
 
-    # Reset the index of the current_data DataFrame
-    current_data.reset_index(drop=True, inplace=True)
+        # Map team IDs to team names (or appropriate identifiers) using a dictionary
+        team_id_to_name = {
+            team_id: team_name for team_id, team_name in zip(current_data["teamid"], current_data["team_name"])
+        }
 
-    # Store the predicted winners in the database
-    current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
+        # Get the predicted winners as a list of team names
+        predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
 
-    # Get the predicted winners as a list of integers
-    predicted_winners = current_data["predicted_winner"].astype(int).tolist()
+        # Add the gameId and predicted winners to the updated_data list
+        updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
 
-    # Add the gameId and predicted winners to the updated_data list
-    updated_data.extend([(winner, gameId) for winner in predicted_winners])
-
-    print(f"GameId: {gameId} - Winner prediction stored in the database.")
+        print(f"GameId: {gameId} - Winner prediction stored in the database.")
 
 # Prepare the query to update all rows at once
 update_query = "UPDATE games SET predictedWinner = %(winner)s WHERE gameId = %(gameId)s"
