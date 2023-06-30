@@ -3,8 +3,6 @@ import json
 import psycopg2
 from datetime import datetime
 
-currentDate = datetime.now().strftime("%m/%d/%Y")
-
 conn = psycopg2.connect(
     host = 'rajje.db.elephantsql.com',
     database = 'syabkhtb',
@@ -18,7 +16,7 @@ response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=
 data = response.json()
 games = data['dates'][0]['games']
 
-# cursor.execute("TRUNCATE TABLE lineupStats;")
+cursor.execute("TRUNCATE TABLE lineupStats;")
 
 records = []
 unique_games = []
@@ -27,17 +25,13 @@ lineup = []
 teamsLineup = []
 gameIdss = []
 for game in games:
-    gamesId = game['gamePk']
-    if gamesId not in game_ids:
-        unique_games.append(game)
-        game_ids.add(gamesId)
-for game in unique_games:
+    gamessId = game['gamePk']
     url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
     response = requests.get(url)
     data = response.json()
 
-    awayTeamName = data['gameData']['teams']['away']['name']
-    homeTeamName = data['gameData']['teams']['home']['name']
+    awayTeamId = data['gameData']['teams']['away']['id']
+    homeTeamId = data['gameData']['teams']['home']['id']
     # Parse battingOrder if it is a string representation of an array
     battingOrderHome_str = data['liveData']['boxscore']['teams']['home'].get('battingOrder')
     if isinstance(battingOrderHome_str, str):
@@ -57,8 +51,8 @@ for game in unique_games:
         batterOneAway = battingOrderAway[0]
         lineup.append(battingOrderAway[0])
         for _ in range(9):
-            teamsLineup.append(awayTeamName)
-            gameIdss.append(gamesId)
+            teamsLineup.append(awayTeamId)
+            gameIdss.append(gamessId)
         batterTwoAway = battingOrderAway[1]
         lineup.append(battingOrderAway[1])
         batterThreeAway = battingOrderAway[2]
@@ -92,8 +86,8 @@ for game in unique_games:
         batterOneHome = battingOrderHome[0]
         lineup.append(battingOrderHome[0])
         for _ in range(9):
-            teamsLineup.append(homeTeamName)
-            gameIdss.append(gamesId)
+            teamsLineup.append(homeTeamId)
+            gameIdss.append(gamessId)
         batterTwoHome = battingOrderHome[1]
         lineup.append(battingOrderHome[1])
         batterThreeHome = battingOrderHome[2]
@@ -125,34 +119,28 @@ for game in unique_games:
 # Define the SQL statement to create the table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS lineupStats (
-        player_id TEXT,
         gameId TEXT,
-        player_name TEXT,
+        teamId TEXT,
         obp TEXT,
         slg TEXT,
         ops TEXT,
         at_bats_per_home_run TEXT,
-        team_name TEXT,
         games_played INTEGER,
         babip TEXT
     );
 """)
                
-# Define the SQL statement to select data from the table with a limit
-limit = len(lineup)
-select_query = f"SELECT * FROM lineupStats LIMIT {limit}"
-
-# Execute the SELECT statement
-cursor.execute(select_query)
-
-# Fetch all the selected records
-records = cursor.fetchall()
-
+# Create a dictionary to store the cumulative values per team
+team_stats = {}
+gamess = []
 
 # Loop through each player in the lineup
 for index, player_id in enumerate(lineup):
-    team_name = teamsLineup[index]  # Get the team name corresponding to the current player
+    teamId = teamsLineup[index]  # Get the team name corresponding to the current player
+    gamess.append(teamId)
+    print(teamId)
     gameId = gameIdss[index]
+    print(gameId)
     
     # Make the API request to fetch player stats
     api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
@@ -164,27 +152,57 @@ for index, player_id in enumerate(lineup):
 
     # Extract the required fields
     stats = data["stats"][0]["splits"][0]["stat"]
-    api_url2 = "https://statsapi.mlb.com/api/v1/people/{playerId2}".format(
-        playerId2=player_id,
-    )
-    response2 = requests.get(api_url2)
-    data2 = response2.json()
-    player_name = data2["people"][0]["fullName"]
-    games_played = stats["gamesPlayed"]
-    obp = stats["obp"]
-    slg = stats["slg"]
-    ops = stats["ops"]
-    at_bats_per_home_run = stats["atBatsPerHomeRun"]
-    babip = stats["babip"]
+    games_played = int(stats["gamesPlayed"])
+    obp = float(stats["obp"])
+    slg = float(stats["slg"])
+    ops = float(stats["ops"])
+    babip = float(stats["babip"])
+    if stats["atBatsPerHomeRun"] != "-.--":
+        at_bats_per_home_run = float(stats["atBatsPerHomeRun"])
+    else:
+        at_bats_per_home_run = 0.0
+
+    # Update the cumulative values for the current team
+    if teamId in team_stats:
+        team_stats[teamId]["games_played"] += games_played
+        print(team_stats[teamId]["games_played"])
+        team_stats[teamId]["obp"] += obp
+        team_stats[teamId]["slg"] += slg
+        team_stats[teamId]["ops"] += ops
+        at_bats_per_home_run = float(stats["atBatsPerHomeRun"]) if stats["atBatsPerHomeRun"] != "-.--" else 0.0
+        team_stats[teamId]["babip"] += babip
+        team_stats[teamId]["gameId"] = gameId
+    else:
+        team_stats[teamId] = {
+            "games_played": games_played,
+            "obp": obp,
+            "slg": slg,
+            "ops": ops,
+            "at_bats_per_home_run": at_bats_per_home_run,
+            "babip": babip,
+            "gameIds": gameId
+        }
+
+# Calculate the averages for each column per team
+for teamId, stats in team_stats.items():
+    num_players = 9  # Assuming lineup contains all players for each team
+    games_played_avg = stats["games_played"] / num_players
+    obp_avg = stats["obp"] / num_players
+    print("GOTTEM")
+    slg_avg = stats["slg"] / num_players
+    ops_avg = stats["ops"] / num_players
+    at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players
+    babip_avg = stats["babip"] / num_players
+    gameId = stats["gameIds"]
 
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO lineupStats (
-            player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
+            gameId, teamId, obp, slg, ops, at_bats_per_home_run, games_played, babip
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
+        gameId, teamId, obp_avg, slg_avg, ops_avg, at_bats_per_home_run_avg, games_played_avg, babip_avg
     ))
 
 # Commit the changes and close the cursor and connection

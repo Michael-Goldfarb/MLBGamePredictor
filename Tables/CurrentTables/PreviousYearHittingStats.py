@@ -19,8 +19,7 @@ cursor = conn.cursor()
 lineup = []
 teamsLineup = []
 gameIdss = []
-game_ids = set()
-unique_games = []
+gamess = []
 
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
@@ -29,10 +28,6 @@ games = data['dates'][0]['games']
 # Loop through each gameId and create rows in the "LineupAndProbables" table
 for game in games:
     gamesId = game['gamePk']
-    if gamesId not in game_ids:
-        unique_games.append(game)
-        game_ids.add(gamesId)
-for game in unique_games:
     url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
     response = requests.get(url)
     data = response.json()
@@ -127,14 +122,12 @@ for game in unique_games:
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearHittingStats (
-        player_id TEXT,
         gameId TEXT,
-        player_name TEXT,
+        teamId TEXT,
         obp TEXT,
         slg TEXT,
         ops TEXT,
         at_bats_per_home_run TEXT,
-        team_name TEXT,
         games_played INTEGER,
         babip TEXT
     );
@@ -143,26 +136,24 @@ cursor.execute("""
 # Clear the table before inserting new data
 cursor.execute("TRUNCATE TABLE previousYearHittingStats;")
 
-obp = None
-slg = None
-ops = None
-at_bats_per_home_run = None
-games_played = None
-babip = None
-# Iterate over the lineup
+team_stats = {}
+
+# Make the API request to fetch player stats and insert into the table
 for index, playerId in enumerate(lineup):
-    team_name = teamsLineup[index]  # Get the team name corresponding to the current player
+    teamId = teamsLineup[index]  # Get the team name corresponding to the current player
+    gamess.append(teamId)
+    print(teamId)
     gameId = gameIdss[index]
-    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=hitting&startDate=05/01/2021&endDate=10/05/2022&leagueListId=mlb_milb"
-    response = requests.get(url)
-    data = json.loads(response.text)
-    player_id = playerId
-    api_url2 = "https://statsapi.mlb.com/api/v1/people/{playerId2}".format(
-        playerId2 = player_id,
+    print(gameId)
+
+    # Make the API request to fetch player stats
+    api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
+        playerId=playerId,
+        currentDate=datetime.now().strftime("%m/%d/%Y")
     )
-    response2 = requests.get(api_url2)
-    data2 = response2.json()
-    player_name = data2["people"][0]["fullName"]
+    response = requests.get(api_url)
+    data = response.json()
+
     if 'stats' in data and data['stats']:
         stats_list = data['stats']
         if stats_list:
@@ -173,46 +164,83 @@ for index, playerId in enumerate(lineup):
                 if 'stat' in last_split:
                     stat = last_split['stat']
                     # Retrieve the required fields
-                    obp = stat.get("obp")
-                    slg = stat.get("slg")
-                    ops = stat.get("ops")
-                    at_bats_per_home_run = stat.get("atBatsPerHomeRun")
-                    games_played = stat.get("gamesPlayed")
-                    babip = stat.get("babip")
+                    games_played = int(stat.get("gamesPlayed"))
+                    obp = float(stat.get("obp"))
+                    slg = float(stat.get("slg"))
+                    ops = float(stat.get("ops"))
+                    babip = float(stat.get("babip"))
+                    if stat.get("atBatsPerHomeRun") != "-.--":
+                        at_bats_per_home_run = float(stat.get("atBatsPerHomeRun"))
+                    else:
+                        at_bats_per_home_run = 0.0
             else:
                 # Handle the case where 'splits' field is empty
+                games_played = None
                 obp = None
                 slg = None
                 ops = None
                 at_bats_per_home_run = None
-                games_played = None
                 babip = None
         else:
             # Handle the case where 'stats' field is empty
+            games_played = None
             obp = None
             slg = None
             ops = None
             at_bats_per_home_run = None
-            games_played = None
             babip = None
     else:
         # Handle the case where 'stats' field is missing
+        games_played = None
         obp = None
         slg = None
         ops = None
         at_bats_per_home_run = None
-        games_played = None
         babip = None
+
+    # Update the cumulative values for the current team
+    if teamId in team_stats:
+        team_stats[teamId]["games_played"] += games_played
+        print(team_stats[teamId]["games_played"])
+        team_stats[teamId]["obp"] += obp
+        team_stats[teamId]["slg"] += slg
+        team_stats[teamId]["ops"] += ops
+        at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if stat.get("atBatsPerHomeRun") != "-.--" else 0.0
+        team_stats[teamId]["babip"] += babip
+        team_stats[teamId]["gameId"] = gameId
+    else:
+        team_stats[teamId] = {
+            "games_played": games_played,
+            "obp": obp,
+            "slg": slg,
+            "ops": ops,
+            "at_bats_per_home_run": at_bats_per_home_run,
+            "babip": babip,
+            "gameIds": gameId
+        }
+
+# Calculate the averages for each column per team
+for teamId, stats in team_stats.items():
+    num_players = 9  # Assuming lineup contains all players for each team
+    games_played_avg = stats["games_played"] / num_players
+    obp_avg = stats["obp"] / num_players
+    print("GOTTEM")
+    slg_avg = stats["slg"] / num_players
+    ops_avg = stats["ops"] / num_players
+    at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players
+    babip_avg = stats["babip"] / num_players
+    gameId = stats["gameIds"]
 
     # Insert the player stats into the table
     cursor.execute("""
         INSERT INTO previousYearHittingStats (
-            player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
+            gameId, teamId, obp, slg, ops, at_bats_per_home_run, games_played, babip
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        player_id, gameId, player_name, obp, slg, ops, at_bats_per_home_run, team_name, games_played, babip
+        gameId, teamId, obp_avg, slg_avg, ops_avg, at_bats_per_home_run_avg, games_played_avg, babip_avg
     ))
+
 
 # Commit the changes and close the cursor and connection
 conn.commit()
