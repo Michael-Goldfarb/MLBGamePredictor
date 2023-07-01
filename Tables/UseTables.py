@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 import pandas as pd
 import numpy as np
+import os
 import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -21,11 +22,11 @@ probables_stats_df = pd.read_sql_query(query, engine)
 query = "SELECT * FROM previousYearPitchingStats2022"
 previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-# query = "SELECT * FROM previousYearHittingStats2022"
+# query = "SELECT * FROM previousYearHittingStats2022v2"
 # previous_hitting_stats_df = pd.read_sql_query(query, engine)
 
-# query = "SELECT * FROM lineupStats2022"
-# lineup_stats_df = pd.read_sql_query(query, engine)
+query = "SELECT * FROM lineupStats2022v2"
+lineup_stats_df = pd.read_sql_query(query, engine)
 
 query = "SELECT * FROM HittingStats2022"
 hitting_stats_df = pd.read_sql_query(query, engine)
@@ -34,13 +35,15 @@ hitting_stats_df = pd.read_sql_query(query, engine)
 historical_data = pd.merge(pitching_stats_df, probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
 historical_data = pd.merge(historical_data, previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
 # historical_data = pd.merge(historical_data, previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
-# historical_data = pd.merge(historical_data, lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
+historical_data = pd.merge(historical_data, lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
 historical_data = pd.merge(historical_data, hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
 # Adjust the features list to include the correct column names
-features = ["era", "whip", "hitsper9inn", "runsscoredper9", "homerunsper9",
-            "strikeoutwalkratio_pitching", "games_started", "gamespitched", "strikeouts", "saves", "blownsaves",
-            "obp", "slg_hitting", "ops", "strikeoutwalkratio_probables",
+features = ["era_probables", "era_pitching", "era", "whip_pitching", "whip_probables", "whip",
+             "hitsper9inn_pitching", "hitsper9inn_probables", "hitsper9inn", "runsscoredper9", "homerunsper9",
+            "strikeoutwalkratio_pitching", "games_started", "gamespitched", "strikeouts", "saves", "blownsaves", "strikeoutwalkratio_probables",
+            "obp_hitting", "slg_hitting", "ops_hitting", "strikeoutwalkratio", "ops_lineup", "obp_lineup", "slg_lineup", "babip" # try to change babip to babip_lineup
+            # "babip_previous_hitting", "ops_previous_hitting", "obp_previous_hitting", "slg_previous_hitting"
             ]
 target = "iswinner"
 
@@ -51,49 +54,36 @@ historical_data_mean = historical_data[features].mean()
 X = historical_data[features]
 y = historical_data[target]
 
+# Handle missing values in y_train
+missing_values = pd.isnull(y)
+X_train = X[~missing_values]
+y_train = y[~missing_values]
+
 # Preprocess the data to handle missing values
 imputer = SimpleImputer(strategy='mean')
 X_imputed = imputer.fit_transform(X)
 
-# Train the logistic regression model (only if the model hasn't been trained and saved before)
-model_filename = "logistic_regression_modelv2.pkl"
+model_filename = "randomForestModelv3.pkl"
 
-try:
+if os.path.isfile(model_filename):
     # Load the trained model
     with open(model_filename, 'rb') as file:
         model = pickle.load(file)
     print("Trained model loaded from file.")
-except FileNotFoundError:
+else:
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
+    print("Unique labels in y_train:", np.unique(y_train))
 
     # Train the model if the saved model file is not found
     print("Training model...")
-    model = LogisticRegression(max_iter=2000)
-    model.fit(X_train, y_train)
+    model = RandomForestClassifier()
+    model.fit(X_imputed, y)
+    print("Training Accuracy:", model.score(X_train, y_train))  # Debugging statement
+    print("Testing Accuracy:", model.score(X_test, y_test))  # Debugging statement
     with open(model_filename, 'wb') as file:
         pickle.dump(model, file)
     print("Trained model saved to file.")
-
-# model_filename = "randomForestModel.pkl"
-
-# try:
-#     # Load the trained model
-#     with open(model_filename, 'rb') as file:
-#         model = pickle.load(file)
-#     print("Trained model loaded from file.")
-# except FileNotFoundError:
-#     # Split the data into training and testing sets
-#     X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
-
-#     # Train the model if the saved model file is not found
-#     print("Training model...")
-#     model = RandomForestClassifier()
-#     model.fit(X_train, y_train)
-#     with open(model_filename, 'wb') as file:
-#         pickle.dump(model, file)
-#     print("Trained model saved to file.")
-
 
 # Fetch the gameIds from the 'games' table
 query = "SELECT gameId FROM games"
@@ -120,10 +110,10 @@ for gameId in gameIds:
     # current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
     # print("Number of rows returned:", current_previous_hitting_stats_df.shape[0])
 
-    # query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
-    # print("Query:", query)
-    # current_lineup_stats_df = pd.read_sql_query(query, engine)
-    # print("Number of rows returned:", current_lineup_stats_df.shape[0])
+    query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
+    print("Query:", query)
+    current_lineup_stats_df = pd.read_sql_query(query, engine)
+    print("Number of rows returned:", current_lineup_stats_df.shape[0])
 
     query = f"SELECT * FROM HittingStats WHERE gameid = '{gameId}'"
     current_hitting_stats_df = pd.read_sql_query(query, engine)
@@ -132,32 +122,30 @@ for gameId in gameIds:
     current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
     current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
     # current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
-    # current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
+    current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
     current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
     print("Current Data Shape:", current_data.shape)  # Add this line to print the shape
-    
-    # Check for missing values in current_data
-    missing_values = current_data.isnull()
 
-    # Check if any row has at least one missing value
-    rows_with_missing_values = missing_values.any(axis=1)
-
-    # Get the rows with missing values
-    rows_with_missing_values_indices = rows_with_missing_values[rows_with_missing_values].index
-
-    # Print the indices of rows with missing values
-    print("Rows with missing values:")
-    print(rows_with_missing_values_indices)
-
-    # Handle missing values in the current_data DataFrame
-    current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
 
     # Check if the current_data DataFrame has at least one sample
     if not current_data.empty:
-        current_data.fillna(current_data["team_name"], inplace=True)
+        # Calculate the mean values from the training data
+        mean_values = X_train.mean()
+
+        # Function to impute missing values with column means
+        def impute_missing_values(data):
+            for feature in features:
+                # Check if the feature has missing values
+                if data[feature].isnull().any():
+                    # Fill missing values with the corresponding column mean
+                    data[feature].fillna(mean_values[feature], inplace=True)
+            return data
+
         # Preprocess the current_data to handle missing values
-        current_data_imputed = imputer.transform(current_data[features])
+        current_data = impute_missing_values(current_data[features])
+        current_data_imputed = current_data[features]
+
 
         # Use the trained model to predict the winner of current date games
         X_current = current_data_imputed
