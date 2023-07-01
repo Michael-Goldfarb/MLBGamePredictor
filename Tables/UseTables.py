@@ -6,6 +6,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 
@@ -22,8 +23,8 @@ probables_stats_df = pd.read_sql_query(query, engine)
 query = "SELECT * FROM previousYearPitchingStats2022"
 previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-# query = "SELECT * FROM previousYearHittingStats2022v2"
-# previous_hitting_stats_df = pd.read_sql_query(query, engine)
+query = "SELECT * FROM previousYearHittingStats2022v2"
+previous_hitting_stats_df = pd.read_sql_query(query, engine)
 
 query = "SELECT * FROM lineupStats2022v2"
 lineup_stats_df = pd.read_sql_query(query, engine)
@@ -34,7 +35,7 @@ hitting_stats_df = pd.read_sql_query(query, engine)
 # Merge the relevant historical tables based on common keys
 historical_data = pd.merge(pitching_stats_df, probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
 historical_data = pd.merge(historical_data, previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-# historical_data = pd.merge(historical_data, previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
+historical_data = pd.merge(historical_data, previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
 historical_data = pd.merge(historical_data, lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
 historical_data = pd.merge(historical_data, hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
@@ -42,28 +43,29 @@ historical_data = pd.merge(historical_data, hitting_stats_df, on=["gameid"], how
 features = ["era_probables", "era_pitching", "era", "whip_pitching", "whip_probables", "whip",
              "hitsper9inn_pitching", "hitsper9inn_probables", "hitsper9inn", "runsscoredper9", "homerunsper9",
             "strikeoutwalkratio_pitching", "games_started", "gamespitched", "strikeouts", "saves", "blownsaves", "strikeoutwalkratio_probables",
-            "obp_hitting", "slg_hitting", "ops_hitting", "strikeoutwalkratio", "ops_lineup", "obp_lineup", "slg_lineup", "babip" # try to change babip to babip_lineup
-            # "babip_previous_hitting", "ops_previous_hitting", "obp_previous_hitting", "slg_previous_hitting"
+            "obp_hitting", "slg_hitting", "ops_hitting", "strikeoutwalkratio", "ops_lineup", "obp_lineup", "slg_lineup", "babip_lineup",
+            "babip", "ops_previous_hitting", "obp_previous_hitting", "slg_previous_hitting"
             ]
 target = "iswinner"
 
-# Replace non-numeric values with NaN
-historical_data[features] = historical_data[features].apply(pd.to_numeric, errors='coerce')
-historical_data_mean = historical_data[features].mean()
+# Replace "-.--" with NaN
+historical_data.replace("-.--", np.nan, inplace=True)
+
+# Drop rows with unknown labels and NaN values
+unknown_labels = historical_data[target] == 'unknown'
+historical_data = historical_data[~unknown_labels]
 
 X = historical_data[features]
-y = historical_data[target]
-
-# Handle missing values in y_train
-missing_values = pd.isnull(y)
-X_train = X[~missing_values]
-y_train = y[~missing_values]
+y = historical_data[target].astype(bool)
 
 # Preprocess the data to handle missing values
 imputer = SimpleImputer(strategy='mean')
 X_imputed = imputer.fit_transform(X)
 
-model_filename = "randomForestModelv3.pkl"
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
+
+model_filename = "HistGradientBoostingClassifier.pkl"
 
 if os.path.isfile(model_filename):
     # Load the trained model
@@ -71,16 +73,11 @@ if os.path.isfile(model_filename):
         model = pickle.load(file)
     print("Trained model loaded from file.")
 else:
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
-    print("Unique labels in y_train:", np.unique(y_train))
-
-    # Train the model if the saved model file is not found
     print("Training model...")
-    model = RandomForestClassifier()
-    model.fit(X_imputed, y)
-    print("Training Accuracy:", model.score(X_train, y_train))  # Debugging statement
-    print("Testing Accuracy:", model.score(X_test, y_test))  # Debugging statement
+    model = HistGradientBoostingClassifier()
+    model.fit(X_train, y_train)
+    print("Training Accuracy:", model.score(X_train, y_train))
+    print("Testing Accuracy:", model.score(X_test, y_test))
     with open(model_filename, 'wb') as file:
         pickle.dump(model, file)
     print("Trained model saved to file.")
@@ -105,15 +102,11 @@ for gameId in gameIds:
     query = f"SELECT * FROM previousYearPitchingStats WHERE gameid = '{gameId}'"
     current_previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-    # query = f"SELECT * FROM previousYearHittingStats WHERE gameid = '{gameId}'"
-    # print("Query:", query)
-    # current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
-    # print("Number of rows returned:", current_previous_hitting_stats_df.shape[0])
+    query = f"SELECT * FROM previousYearHittingStats WHERE gameid = '{gameId}'"
+    current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
 
     query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
-    print("Query:", query)
     current_lineup_stats_df = pd.read_sql_query(query, engine)
-    print("Number of rows returned:", current_lineup_stats_df.shape[0])
 
     query = f"SELECT * FROM HittingStats WHERE gameid = '{gameId}'"
     current_hitting_stats_df = pd.read_sql_query(query, engine)
@@ -121,34 +114,17 @@ for gameId in gameIds:
     # Merge the relevant current date tables based on common keys
     current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
     current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-    # current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
+    current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
     current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
     current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
-
-    print("Current Data Shape:", current_data.shape)  # Add this line to print the shape
-
 
     # Check if the current_data DataFrame has at least one sample
     if not current_data.empty:
         # Calculate the mean values from the training data
         mean_values = X_train.mean()
 
-        # Function to impute missing values with column means
-        def impute_missing_values(data):
-            for feature in features:
-                # Check if the feature has missing values
-                if data[feature].isnull().any():
-                    # Fill missing values with the corresponding column mean
-                    data[feature].fillna(mean_values[feature], inplace=True)
-            return data
-
-        # Preprocess the current_data to handle missing values
-        current_data = impute_missing_values(current_data[features])
-        current_data_imputed = current_data[features]
-
-
-        # Use the trained model to predict the winner of current date games
-        X_current = current_data_imputed
+        # Predict winner
+        X_current = current_data[features]
         current_data["predicted_winner"] = model.predict(X_current)
 
         # Store the predicted winners in the database
