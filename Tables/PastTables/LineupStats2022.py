@@ -2,6 +2,8 @@ import requests
 import json
 import psycopg2
 from datetime import datetime
+from requests.exceptions import SSLError
+import time
 
 conn = psycopg2.connect(
     host = 'rajje.db.elephantsql.com',
@@ -37,14 +39,14 @@ for date_info in data["dates"]:
                 outcomes.append(isWinnerAway)
         else:
             for _ in range(9):
-                outcomes.append(False)
+                outcomes.append(None)
         isWinnerHome = game['teams']['home'].get('isWinner')
         if isWinnerHome is not None:
             for _ in range(9):
                 outcomes.append(isWinnerHome)
         else:
             for _ in range(9):
-                outcomes.append(False)
+                outcomes.append(None)
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
@@ -197,8 +199,10 @@ for index, player_id in enumerate(lineup):
             }
             team_stats[team_game_key]["isWinner"] = isWinner
             team_stats[team_game_key]["date"] = theDate
-    except IndexError:
-        print("Player stats not available for player ID:", player_id)
+    except SSLError as e:
+        print("SSL handshake failure occurred. Retrying in 5 seconds...")
+        time.sleep(5)  # Wait for 5 seconds before retrying
+        continue  # Continue to the next iteration
 
 # Calculate the averages for each column per team
 for team_game_key, stats in team_stats.items():

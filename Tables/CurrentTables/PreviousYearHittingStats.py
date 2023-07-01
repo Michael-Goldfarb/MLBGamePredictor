@@ -3,15 +3,13 @@ import json
 import psycopg2
 from datetime import datetime
 
-# TABLE WITH LAST YEARS STATS -- USE THIS TABLE IF GAMES PLAYED IS LESS THAN 5
-
 # Set up connection to ElephantSQL
 conn = psycopg2.connect(
-    host = 'rajje.db.elephantsql.com',
-    database = 'syabkhtb',
-    user = 'syabkhtb',
-    port = '5432',
-    password = 'J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
+    host='rajje.db.elephantsql.com',
+    database='syabkhtb',
+    user='syabkhtb',
+    port='5432',
+    password='J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
 )
 
 cursor = conn.cursor()
@@ -19,7 +17,6 @@ cursor = conn.cursor()
 lineup = []
 teamsLineup = []
 gameIdss = []
-gamess = []
 
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
@@ -32,8 +29,8 @@ for game in games:
     response = requests.get(url)
     data = response.json()
 
-    awayTeamName = data['gameData']['teams']['away']['name']
-    homeTeamName = data['gameData']['teams']['home']['name']
+    awayTeamName = data['gameData']['teams']['away']['id']
+    homeTeamName = data['gameData']['teams']['home']['id']
 
     # Parse battingOrder if it is a string representation of an array
     battingOrderHome_str = data['liveData']['boxscore']['teams']['home'].get('battingOrder')
@@ -132,7 +129,7 @@ cursor.execute("""
         babip TEXT
     );
 """)
-               
+
 # Clear the table before inserting new data
 cursor.execute("TRUNCATE TABLE previousYearHittingStats;")
 
@@ -141,10 +138,7 @@ team_stats = {}
 # Make the API request to fetch player stats and insert into the table
 for index, playerId in enumerate(lineup):
     teamId = teamsLineup[index]  # Get the team name corresponding to the current player
-    gamess.append(teamId)
-    print(teamId)
     gameId = gameIdss[index]
-    print(gameId)
 
     # Make the API request to fetch player stats
     api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
@@ -168,7 +162,7 @@ for index, playerId in enumerate(lineup):
                     obp = float(stat.get("obp"))
                     slg = float(stat.get("slg"))
                     ops = float(stat.get("ops"))
-                    babip = float(stat.get("babip"))
+                    babip = float(stat.get("babip")) if stat.get("babip") != ".---" else 0.0
                     if stat.get("atBatsPerHomeRun") != "-.--":
                         at_bats_per_home_run = float(stat.get("atBatsPerHomeRun"))
                     else:
@@ -199,37 +193,36 @@ for index, playerId in enumerate(lineup):
         babip = None
 
     # Update the cumulative values for the current team
-    if teamId in team_stats:
-        team_stats[teamId]["games_played"] += games_played
-        print(team_stats[teamId]["games_played"])
-        team_stats[teamId]["obp"] += obp
-        team_stats[teamId]["slg"] += slg
-        team_stats[teamId]["ops"] += ops
+    team_game_key = (teamId, gameId)
+    if team_game_key in team_stats:
+        team_stats[team_game_key]["games_played"] += games_played
+        team_stats[team_game_key]["obp"] += obp
+        team_stats[team_game_key]["slg"] += slg
+        team_stats[team_game_key]["ops"] += ops
         at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if stat.get("atBatsPerHomeRun") != "-.--" else 0.0
-        team_stats[teamId]["babip"] += babip
-        team_stats[teamId]["gameId"] = gameId
+        team_stats[team_game_key]["at_bats_per_home_run"] += at_bats_per_home_run
+        team_stats[team_game_key]["babip"] += babip
     else:
-        team_stats[teamId] = {
+        # Create a new entry in the team_stats dictionary for the current team
+        team_stats[team_game_key] = {
             "games_played": games_played,
             "obp": obp,
             "slg": slg,
             "ops": ops,
             "at_bats_per_home_run": at_bats_per_home_run,
             "babip": babip,
-            "gameIds": gameId
         }
 
 # Calculate the averages for each column per team
-for teamId, stats in team_stats.items():
+for team_game_key, stats in team_stats.items():
+    teamId, gameId = team_game_key
     num_players = 9  # Assuming lineup contains all players for each team
     games_played_avg = stats["games_played"] / num_players
     obp_avg = stats["obp"] / num_players
-    print("GOTTEM")
     slg_avg = stats["slg"] / num_players
     ops_avg = stats["ops"] / num_players
     at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players
     babip_avg = stats["babip"] / num_players
-    gameId = stats["gameIds"]
 
     # Insert the player stats into the table
     cursor.execute("""
@@ -241,8 +234,9 @@ for teamId, stats in team_stats.items():
         gameId, teamId, obp_avg, slg_avg, ops_avg, at_bats_per_home_run_avg, games_played_avg, babip_avg
     ))
 
-
-# Commit the changes and close the cursor and connection
+# Commit the changes to the database
 conn.commit()
+
+# Close the database connection
 cursor.close()
 conn.close()

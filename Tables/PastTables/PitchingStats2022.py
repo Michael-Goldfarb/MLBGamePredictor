@@ -51,9 +51,9 @@ for date_info in data["dates"]:
         isWinnerHome = game['teams']['home'].get('isWinner')
         if gameId == 663466: # all star game
             continue
-        if i == 0: # uses the first game twice for some reason
-            i += 1
-            continue
+        # if i == 0: # uses the first game twice for some reason
+        #     i += 1
+        #     continue
         awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&season=2022&group=pitching&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
         awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
         awayTeamStatsData = awayTeamStatsResponse.json()

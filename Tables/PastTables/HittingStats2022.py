@@ -45,14 +45,15 @@ for date_info in data["dates"]:
         isWinnerHome = game['teams']['home'].get('isWinner')
         if gameId == 663466: # all star game
             continue
-        if i == 0: # uses the first game twice for some reason
-            i += 1
-            continue
+        # if i == 0: # uses the first game twice for some reason
+        #     i += 1
+        #     continue
 
         awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
         awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
         awayTeamStatsData = awayTeamStatsResponse.json()
         awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
+        print(gameId)
 
         # Insert data into the HittingStats2022 table for the away team
         cursor.execute("""
@@ -82,6 +83,8 @@ for date_info in data["dates"]:
             homeTeamStats['ops'], homeTeamStats['gamesPlayed'], homeTeamStats['leftOnBase'],
             homeTeamStats['stolenBases'], isWinnerHome
         ))
+
+        print("DONE")
 
 # Commit the changes and close the cursor and connection
 conn.commit()

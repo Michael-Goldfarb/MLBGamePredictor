@@ -38,8 +38,8 @@ for date_info in data["dates"]:
         homeTeamId = game['teams']['home']['team']['id']
         if game['gamePk'] == "662183": # for some reason the away pitcher is not provided for this game
             continue
-        teamIdss.append(gameId)
-        teamIdss.append(gameId)
+        gameIdss.append(gameId)
+        gameIdss.append(gameId)
         dates.append(gameDate)
         dates.append(gameDate)
         awayTeamName = game['teams']['away']['team']['name']
@@ -48,12 +48,12 @@ for date_info in data["dates"]:
         if isWinnerHome is not None:
             outcomes.append(isWinnerHome)
         else:
-            outcomes.append(False)
+            outcomes.append(None)
         isWinnerAway = game['teams']['away'].get('isWinner')
         if isWinnerAway is not None:
             outcomes.append(isWinnerAway)
         else:
-            outcomes.append(False)
+            outcomes.append(None)
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
@@ -70,14 +70,14 @@ for date_info in data["dates"]:
         starter.append(probablePitcherHome['fullName'])
         starters.append(probablePitcherHome['id'])
         teamsStarters.append(homeTeamName)
-        gameIdss.append(homeTeamId)
+        teamIdss.append(homeTeamId)
         probablePitcherAway = data['gameData']['probablePitchers'].get('away')  # Use get() method to handle missing key
         print(probablePitcherHome['fullName'])
         if probablePitcherAway is not None:
             starter.append(probablePitcherAway['fullName'])
             starters.append(probablePitcherAway['id'])
             teamsStarters.append(awayTeamName)
-            gameIdss.append(awayTeamId)
+            teamIdss.append(awayTeamId)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS previousYearPitchingStats2022 (
@@ -98,7 +98,7 @@ for date_info in data["dates"]:
         );
     """)
 
-    cursor.execute("TRUNCATE TABLE PreviousYearPitchingStats2022;")
+    cursor.execute("TRUNCATE TABLE previousYearPitchingStats2022;")
 
     strikeoutWalkRatio = None
     games_started = None

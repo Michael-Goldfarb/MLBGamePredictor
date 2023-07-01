@@ -156,24 +156,25 @@ for index, player_id in enumerate(lineup):
     obp = float(stats["obp"])
     slg = float(stats["slg"])
     ops = float(stats["ops"])
-    babip = float(stats["babip"])
+    babip = float(stats.get("babip")) if stats.get("babip") != ".---" else 0.0
     if stats["atBatsPerHomeRun"] != "-.--":
         at_bats_per_home_run = float(stats["atBatsPerHomeRun"])
     else:
         at_bats_per_home_run = 0.0
 
     # Update the cumulative values for the current team
-    if teamId in team_stats:
-        team_stats[teamId]["games_played"] += games_played
-        print(team_stats[teamId]["games_played"])
-        team_stats[teamId]["obp"] += obp
-        team_stats[teamId]["slg"] += slg
-        team_stats[teamId]["ops"] += ops
+    team_game_key = (teamId, gameId)
+    if team_game_key in team_stats:
+        team_stats[team_game_key]["games_played"] += games_played
+        print(team_stats[team_game_key]["games_played"])
+        team_stats[team_game_key]["obp"] += obp
+        team_stats[team_game_key]["slg"] += slg
+        team_stats[team_game_key]["ops"] += ops
         at_bats_per_home_run = float(stats["atBatsPerHomeRun"]) if stats["atBatsPerHomeRun"] != "-.--" else 0.0
-        team_stats[teamId]["babip"] += babip
-        team_stats[teamId]["gameId"] = gameId
+        team_stats[team_game_key]["babip"] += babip
+        team_stats[team_game_key]["gameId"] = gameId
     else:
-        team_stats[teamId] = {
+        team_stats[team_game_key] = {
             "games_played": games_played,
             "obp": obp,
             "slg": slg,
@@ -184,11 +185,11 @@ for index, player_id in enumerate(lineup):
         }
 
 # Calculate the averages for each column per team
-for teamId, stats in team_stats.items():
+for team_game_key, stats in team_stats.items():
+    teamId, gameId = team_game_key
     num_players = 9  # Assuming lineup contains all players for each team
     games_played_avg = stats["games_played"] / num_players
     obp_avg = stats["obp"] / num_players
-    print("GOTTEM")
     slg_avg = stats["slg"] / num_players
     ops_avg = stats["ops"] / num_players
     at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players

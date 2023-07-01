@@ -47,12 +47,12 @@ for date_info in data["dates"]:
         if isWinnerHome is not None:
             outcomes.append(isWinnerHome)
         else:
-            outcomes.append(False)
+            outcomes.append(None) 
         isWinnerAway = game['teams']['away'].get('isWinner')
         if isWinnerAway is not None:
             outcomes.append(isWinnerAway)
         else:
-            outcomes.append(False)
+            outcomes.append(None) 
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue

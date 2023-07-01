@@ -2,6 +2,8 @@ import requests
 import json
 import psycopg2
 from datetime import datetime
+from requests.exceptions import SSLError
+import time
 
 # TABLE WITH LAST YEARS STATS -- USE THIS TABLE IF GAMES PLAYED IS LESS THAN 5
 
@@ -50,14 +52,14 @@ for date_info in data["dates"]:
                 outcomes.append(isWinnerAway)
         else:
             for _ in range(9):
-                outcomes.append(False)
+                outcomes.append(None)
         isWinnerHome = game['teams']['home'].get('isWinner')
         if isWinnerHome is not None:
             for _ in range(9):
                 outcomes.append(isWinnerHome)
         else:
             for _ in range(9):
-                outcomes.append(False)
+                outcomes.append(None)
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
@@ -199,7 +201,11 @@ for index, playerId in enumerate(lineup):
                         obp = float(stat.get("obp"))
                         slg = float(stat.get("slg"))
                         ops = float(stat.get("ops"))
-                        babip = float(stat.get("babip"))
+                        babip = stat.get("babip")
+                        if babip and babip != '.---':
+                            babip = float(babip)
+                        else:
+                            babip = None
                         if stat.get("atBatsPerHomeRun") != "-.--":
                             at_bats_per_home_run = float(stat.get("atBatsPerHomeRun"))
                         else:
@@ -233,13 +239,21 @@ for index, playerId in enumerate(lineup):
         # Update the cumulative values for the current team
         team_game_key = (teamId, gameId)
         if team_game_key in team_stats:
-            team_stats[team_game_key]["games_played"] += games_played
+            if games_played is not None:
+                team_stats[team_game_key]["games_played"] += games_played
             print(team_stats[team_game_key]["games_played"])
-            team_stats[team_game_key]["obp"] += obp
-            team_stats[team_game_key]["slg"] += slg
-            team_stats[team_game_key]["ops"] += ops
+            if obp is not None:
+                team_stats[team_game_key]["obp"] += obp
+            if slg is not None:
+                team_stats[team_game_key]["slg"] += slg
+            if ops is not None:
+                team_stats[team_game_key]["ops"] += ops
             # at_bats_per_home_run = float(stats["atBatsPerHomeRun"]) if stats["atBatsPerHomeRun"] != "-.--" else 0.0
-            team_stats[team_game_key]["babip"] += babip
+            if babip is not None:
+                if team_stats[team_game_key]["babip"] is None:
+                    team_stats[team_game_key]["babip"] = babip
+                else:
+                    team_stats[team_game_key]["babip"] += babip
             # team_stats[team_game_key]["gameId"] = gameId
             # team_stats[team_game_key]["isWinner"] = isWinner
             # team_stats[team_game_key]["date"] = theDate
@@ -250,15 +264,14 @@ for index, playerId in enumerate(lineup):
                 "slg": slg,
                 "ops": ops,
                 "at_bats_per_home_run": at_bats_per_home_run,
-                "babip": babip #,
-                # "gameIds": gameId,
-                # "isWinner": isWinner,
-                # "date": theDate
+                "babip": babip if babip is not None else 0.0
             }
             team_stats[team_game_key]["isWinner"] = isWinner
             team_stats[team_game_key]["date"] = theDate
-    except IndexError:
-        print("Player stats not available for player ID:", player_id)
+    except SSLError as e:
+        print("SSL handshake failure occurred. Retrying in 5 seconds...")
+        time.sleep(5)  # Wait for 5 seconds before retrying
+        continue  # Continue to the next iteration
 
 # Calculate the averages for each column per team
 for team_game_key, stats in team_stats.items():
