@@ -24,39 +24,38 @@ for game in games:
     awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
     homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
     venue = game['venue']['name']
-    # if it has ended, get a "isWinner" field to see who wins
     isWinnerAway = game['teams']['away'].get('isWinner')
     isWinnerHome = game['teams']['home'].get('isWinner')
-    records.append((gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
+
+    # Append record for the away team
+    records.append((gameId, link, awayTeamId, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, awayTeamWinPct, venue, isWinnerAway, None, None, None, None, None))
+
+    # Append record for the home team
+    records.append((gameId, link, homeTeamId, homeTeamName, gameStatus, gameDate, gameTime, homeTeamScore, homeTeamWinPct, venue, isWinnerHome, None, None, None, None, None))
 
 # Set up connection to ElephantSQL
 conn = psycopg2.connect(
-    host = 'rajje.db.elephantsql.com',
-    database = 'syabkhtb',
-    user = 'syabkhtb',
-    port = '5432',
-    password = 'J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
+    host='rajje.db.elephantsql.com',
+    database='syabkhtb',
+    user='syabkhtb',
+    port='5432',
+    password='J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
 )
 
 cursor = conn.cursor()
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS games (
+    CREATE TABLE IF NOT EXISTS gamesv3 (
         gameId TEXT,
         link VARCHAR(255),
-        awayTeamId INTEGER,
-        homeTeamId INTEGER,
-        awayTeamName VARCHAR(255),
-        homeTeamName VARCHAR(255),
+        teamId INTEGER,
+        teamName VARCHAR(255),
         gameStatus VARCHAR(255),
         gameDate DATE,
         gameTime TIME,
-        awayTeamScore INTEGER,
-        homeTeamScore INTEGER,
-        awayTeamWinPct FLOAT,
-        homeTeamWinPct FLOAT,
+        teamScore INTEGER,
+        teamWinPct FLOAT,
         venue VARCHAR(255),
-        isWinnerAway BOOLEAN,
-        isWinnerHome BOOLEAN,
+        isWinner BOOLEAN,
         predictedWinner VARCHAR(255),
         predictedWinner2 VARCHAR(255),
         predictedWinner3 VARCHAR(255),
@@ -68,11 +67,11 @@ cursor.execute("""
 conn.commit()
 
 # Insert data into the table
-cursor.execute("TRUNCATE TABLE games;")
+cursor.execute("TRUNCATE TABLE gamesv3;")
 
 cursor.executemany("""
-    INSERT INTO games (gameId, link, awayTeamId, homeTeamId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
-    VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO gamesv3 (gameId, link, teamId, teamName, gameStatus, gameDate, gameTime, teamScore, teamWinPct, venue, isWinner, predictedWinner, predictedWinner2, predictedWinner3, predictedWinner4, predictedWinner5)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """, records)
 
 # Commit the changes and close the cursor and connection

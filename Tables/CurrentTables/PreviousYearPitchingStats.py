@@ -3,8 +3,6 @@ import json
 import psycopg2
 from datetime import datetime
 
-# TABLE WITH LAST YEARS STATS -- USE THIS TABLE IF GAMES_STARTED IS LESS THAN 5
-
 # Set up connection to ElephantSQL
 conn = psycopg2.connect(
     host = 'rajje.db.elephantsql.com',
@@ -111,14 +109,28 @@ for index, playerId in enumerate(starters):
                 last_split = splits[-1]  # Get the last instance of 'splits'
                 if 'stat' in last_split:
                     stat = last_split['stat']
-                    # Retrieve the required fields
+                    # Retrieve the required fields and handle "-" values
                     strikeoutWalkRatio = stat.get("strikeoutWalkRatio")
+                    if "-" in strikeoutWalkRatio:
+                        strikeoutWalkRatio = 0
                     games_started = stat.get("gamesStarted")
+                    if games_started is not None and "-" in str(games_started):
+                        games_started = 0
                     hitsPer9Inn = stat.get("hitsPer9Inn")
+                    if "-" in hitsPer9Inn:
+                        hitsPer9Inn = 0
                     strikeoutsPer9Inn = stat.get("strikeoutsPer9Inn")
+                    if "-" in strikeoutsPer9Inn:
+                        strikeoutsPer9Inn = 0
                     era = stat.get("era")
+                    if "-" in era:
+                        era = 0
                     whip = stat.get("whip")
+                    if "-" in whip:
+                        whip = 0
                     walksPer9Inn = stat.get("walksPer9Inn")
+                    if "-" in walksPer9Inn:
+                        walksPer9Inn = 0
     else:
         # Handle the case where 'stats' field is missing
         strikeoutWalkRatio = None

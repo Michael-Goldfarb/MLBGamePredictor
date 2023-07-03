@@ -95,13 +95,24 @@ for index, player_id in enumerate(starters):
             for split in stat["splits"]:
                 if split["sport"]["abbreviation"] == "MLB":
                     era = split["stat"]["era"]
+                    if "-" in era:
+                        era = 0
                     whip = split['stat']['whip']
-                    strikeoutWalkRatio = split['stat']['strikeoutWalkRatio']
+                    if "-" in whip:
+                        whip = 0
                     strikeoutWalkRatio = split['stat']['strikeoutWalkRatio']
                     games_started = split['stat']['gamesStarted']
                     hitsPer9Inn = split['stat']['hitsPer9Inn']
+                    if "-" in hitsPer9Inn:
+                        hitsPer9Inn = 0
                     strikeoutsPer9Inn = split['stat']['strikeoutsPer9Inn']
+                    if "-" in strikeoutsPer9Inn:
+                        strikeoutsPer9Inn = 0
                     walksPer9Inn = split['stat']['walksPer9Inn']
+                    if "-" in walksPer9Inn:
+                        walksPer9Inn = 0
+                    strikeoutWalkRatio = stat.get("strikeoutWalkRatio")
+
     else:
         era = None
         whip = None

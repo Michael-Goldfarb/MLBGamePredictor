@@ -11,7 +11,6 @@ conn = psycopg2.connect(
     port='5432',
     password='J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE'
 )
-
 cursor = conn.cursor()
 
 lineup = []
@@ -141,7 +140,7 @@ for index, playerId in enumerate(lineup):
     gameId = gameIdss[index]
 
     # Make the API request to fetch player stats
-    api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
+    api_url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=hitting&startDate=05/01/2021&endDate=10/05/2022&leagueListId=mlb_milb".format(
         playerId=playerId,
         currentDate=datetime.now().strftime("%m/%d/%Y")
     )
@@ -158,39 +157,36 @@ for index, playerId in enumerate(lineup):
                 if 'stat' in last_split:
                     stat = last_split['stat']
                     # Retrieve the required fields
-                    games_played = int(stat.get("gamesPlayed"))
-                    obp = float(stat.get("obp"))
-                    slg = float(stat.get("slg"))
-                    ops = float(stat.get("ops"))
-                    babip = float(stat.get("babip")) if stat.get("babip") != ".---" else 0.0
-                    if stat.get("atBatsPerHomeRun") != "-.--":
-                        at_bats_per_home_run = float(stat.get("atBatsPerHomeRun"))
-                    else:
-                        at_bats_per_home_run = 0.0
+                    games_played = int(stat.get("gamesPlayed")) if stat.get("gamesPlayed") is not None else 0
+                    obp = float(stat.get("obp")) if stat.get("obp") is not None else 0.0
+                    slg = float(stat.get("slg")) if stat.get("slg") is not None else 0.0
+                    ops = float(stat.get("ops")) if stat.get("ops") is not None else 0.0
+                    babip = float(stat.get("babip")) if (stat.get("babip") is not None and stat.get("babip") != ".---") else 0.0
+                    at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if (stat.get("atBatsPerHomeRun") is not None and stat.get("atBatsPerHomeRun") != "-.--") else 0.0
             else:
                 # Handle the case where 'splits' field is empty
-                games_played = None
-                obp = None
-                slg = None
-                ops = None
-                at_bats_per_home_run = None
-                babip = None
+                games_played = 0
+                obp = 0.0
+                slg = 0.0
+                ops = 0.0
+                at_bats_per_home_run = 0.0
+                babip = 0.0
         else:
             # Handle the case where 'stats' field is empty
-            games_played = None
-            obp = None
-            slg = None
-            ops = None
-            at_bats_per_home_run = None
-            babip = None
+            games_played = 0
+            obp = 0.0
+            slg = 0.0
+            ops = 0.0
+            at_bats_per_home_run = 0.0
+            babip = 0.0
     else:
         # Handle the case where 'stats' field is missing
-        games_played = None
-        obp = None
-        slg = None
-        ops = None
-        at_bats_per_home_run = None
-        babip = None
+        games_played = 0
+        obp = 0.0
+        slg = 0.0
+        ops = 0.0
+        at_bats_per_home_run = 0.0
+        babip = 0.0
 
     # Update the cumulative values for the current team
     team_game_key = (teamId, gameId)

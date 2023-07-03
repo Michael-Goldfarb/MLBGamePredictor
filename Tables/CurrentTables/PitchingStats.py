@@ -3,12 +3,6 @@ import json
 import psycopg2
 from datetime import datetime
 
-# ONLY RETURN PREDICTION OF WHO IS GOING TO WIN IF GAME HASN'T STARTED
-
-# CLEAR TABLE pitchingstats
-
-# first table with game information
-
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
