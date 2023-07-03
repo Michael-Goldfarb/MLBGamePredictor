@@ -23,7 +23,7 @@ gameIdss = []
 outcomes = []
 teamIdss = []
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
 data = response.json()
 
 i = 0
@@ -80,7 +80,7 @@ for date_info in data["dates"]:
             teamIdss.append(awayTeamId)
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS previousYearPitchingStats2022 (
+        CREATE TABLE IF NOT EXISTS previousYearPitchingStats2022V3 (
             player_id TEXT,
             gameDate DATE,
             gameId TEXT,
@@ -98,7 +98,7 @@ for date_info in data["dates"]:
         );
     """)
 
-    cursor.execute("TRUNCATE TABLE previousYearPitchingStats2022;")
+    cursor.execute("TRUNCATE TABLE previousYearPitchingStats2022V3;")
 
     strikeoutWalkRatio = None
     games_started = None
@@ -168,7 +168,7 @@ for index, playerId in enumerate(starters):
 
      # Insert the player stats into the table
     cursor.execute("""
-        INSERT INTO previousYearPitchingStats2022 (
+        INSERT INTO previousYearPitchingStats2022V3 (
             player_id, gameDate, gameId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)

@@ -3,7 +3,7 @@ import json
 import psycopg2
 from datetime import datetime
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
 data = response.json()
 
 conn = psycopg2.connect(

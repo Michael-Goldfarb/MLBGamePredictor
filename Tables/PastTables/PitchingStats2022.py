@@ -3,7 +3,7 @@ import json
 import psycopg2
 from datetime import datetime
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
 data = response.json()
 
 conn = psycopg2.connect(
@@ -16,7 +16,7 @@ conn = psycopg2.connect(
 
 cursor = conn.cursor()
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS PitchingStats2022 (
+    CREATE TABLE IF NOT EXISTS PitchingStats2022v3 (
         teamId INTEGER,
         gameId TEXT,
         gameDate DATE,
@@ -61,7 +61,7 @@ for date_info in data["dates"]:
 
         # Insert data into the PitchingStats2022 table for the away team
         cursor.execute("""
-            INSERT INTO PitchingStats2022 (
+            INSERT INTO PitchingStats2022v3 (
                 teamId, gameId, gameDate, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
                 strikeOuts, saves, blownSaves, strikeoutWalkRatio, isWinner
             )
@@ -80,7 +80,7 @@ for date_info in data["dates"]:
         
         # Insert data into the PitchingStats2022 table for the home team
         cursor.execute("""
-            INSERT INTO PitchingStats2022 (
+            INSERT INTO PitchingStats2022v3 (
                 teamId, gameId, gameDate, teamName, era, whip, hitsPer9Inn, runsScoredPer9, homeRunsPer9, obp, slg, ops, gamesPitched,
                 strikeOuts, saves, blownSaves, strikeoutWalkRatio, isWinner
             )

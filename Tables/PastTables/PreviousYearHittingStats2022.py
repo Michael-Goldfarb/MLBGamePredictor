@@ -3,6 +3,7 @@ import json
 import psycopg2
 from datetime import datetime
 from requests.exceptions import SSLError
+from requests.exceptions import ConnectionError
 import time
 
 # TABLE WITH LAST YEARS STATS -- USE THIS TABLE IF GAMES PLAYED IS LESS THAN 5
@@ -25,8 +26,7 @@ gameIdss = []
 outcomes = []
 gamess = []
 
-
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
 data = response.json()
 
 i = 0
@@ -142,7 +142,7 @@ for date_info in data["dates"]:
         teamsLineup.append(homeTeamName)
 
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS previousYearHittingStats2022v2 (
+    CREATE TABLE IF NOT EXISTS previousYearHittingStats2022v3 (
         date DATE,
         teamId TEXT,
         gameId TEXT,
@@ -157,7 +157,7 @@ cursor.execute("""
 """)
                
 # Clear the table before inserting new data
-cursor.execute("TRUNCATE TABLE previousYearHittingStats2022v2;")
+cursor.execute("TRUNCATE TABLE previousYearHittingStats2022v3;")
 
 obp = None
 slg = None
@@ -172,9 +172,8 @@ for index, playerId in enumerate(lineup):
     gameId = gameIdss[index]
     isWinner = outcomes[index]
     try:
-        api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={currentDate}&leagueListId=mlb_milb".format(
+        api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=hitting&startDate=07/24/2020&endDate=10/03/2021&leagueListId=mlb_milb".format(
             playerId=playerId,
-            currentDate = dates[index]
         )
         theDate = dates[index]
         print(theDate)
@@ -197,66 +196,47 @@ for index, playerId in enumerate(lineup):
                     if 'stat' in last_split:
                         stat = last_split['stat']
                         # Retrieve the required fields
-                        games_played = int(stat.get("gamesPlayed"))
-                        obp = float(stat.get("obp"))
-                        slg = float(stat.get("slg"))
-                        ops = float(stat.get("ops"))
-                        babip = stat.get("babip")
-                        if babip and babip != '.---':
-                            babip = float(babip)
-                        else:
-                            babip = None
-                        if stat.get("atBatsPerHomeRun") != "-.--":
-                            at_bats_per_home_run = float(stat.get("atBatsPerHomeRun"))
-                        else:
-                            at_bats_per_home_run = 0.0
+                        games_played = int(stat.get("gamesPlayed")) if stat.get("gamesPlayed") is not None else 0
+                        obp = float(stat.get("obp")) if stat.get("obp") is not None else 0.0
+                        slg = float(stat.get("slg")) if stat.get("slg") is not None else 0.0
+                        ops = float(stat.get("ops")) if stat.get("ops") is not None else 0.0
+                        babip = float(stat.get("babip")) if (stat.get("babip") is not None and stat.get("babip") != ".---") else 0.0
+                        at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if (stat.get("atBatsPerHomeRun") is not None and stat.get("atBatsPerHomeRun") != "-.--") else 0.0
                 else:
                     # Handle the case where 'splits' field is empty
-                    games_played = None
-                    obp = None
-                    slg = None
-                    ops = None
-                    at_bats_per_home_run = None
-                    babip = None
+                    games_played = 0
+                    obp = 0.0
+                    slg = 0.0
+                    ops = 0.0
+                    at_bats_per_home_run = 0.0
+                    babip = 0.0
             else:
                 # Handle the case where 'stats' field is empty
-                games_played = None
-                obp = None
-                slg = None
-                ops = None
-                at_bats_per_home_run = None
-                babip = None
+                games_played = 0
+                obp = 0.0
+                slg = 0.0
+                ops = 0.0
+                at_bats_per_home_run = 0.0
+                babip = 0.0
         else:
             # Handle the case where 'stats' field is missing
-            games_played = None
-            obp = None
-            slg = None
-            ops = None
-            at_bats_per_home_run = None
-            babip = None
-
+            games_played = 0
+            obp = 0.0
+            slg = 0.0
+            ops = 0.0
+            at_bats_per_home_run = 0.0
+            babip = 0.0
 
         # Update the cumulative values for the current team
         team_game_key = (teamId, gameId)
         if team_game_key in team_stats:
-            if games_played is not None:
-                team_stats[team_game_key]["games_played"] += games_played
-            print(team_stats[team_game_key]["games_played"])
-            if obp is not None:
-                team_stats[team_game_key]["obp"] += obp
-            if slg is not None:
-                team_stats[team_game_key]["slg"] += slg
-            if ops is not None:
-                team_stats[team_game_key]["ops"] += ops
-            # at_bats_per_home_run = float(stats["atBatsPerHomeRun"]) if stats["atBatsPerHomeRun"] != "-.--" else 0.0
-            if babip is not None:
-                if team_stats[team_game_key]["babip"] is None:
-                    team_stats[team_game_key]["babip"] = babip
-                else:
-                    team_stats[team_game_key]["babip"] += babip
-            # team_stats[team_game_key]["gameId"] = gameId
-            # team_stats[team_game_key]["isWinner"] = isWinner
-            # team_stats[team_game_key]["date"] = theDate
+            team_stats[team_game_key]["games_played"] += games_played
+            team_stats[team_game_key]["obp"] += obp
+            team_stats[team_game_key]["slg"] += slg
+            team_stats[team_game_key]["ops"] += ops
+            at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if stat.get("atBatsPerHomeRun") != "-.--" else 0.0
+            team_stats[team_game_key]["at_bats_per_home_run"] += at_bats_per_home_run
+            team_stats[team_game_key]["babip"] += babip
         else:
             team_stats[team_game_key] = {
                 "games_played": games_played,
@@ -268,34 +248,61 @@ for index, playerId in enumerate(lineup):
             }
             team_stats[team_game_key]["isWinner"] = isWinner
             team_stats[team_game_key]["date"] = theDate
+    except (ConnectionResetError, ConnectionError) as e:
+            # Handle the connection-related exception
+            print(f"Connection error occurred: {e}")
+            # Optionally, you can wait for some time before retrying
+            time.sleep(1)  # Wait for 1 second before retrying the request
+            continue
+    
     except SSLError as e:
         print("SSL handshake failure occurred. Retrying in 5 seconds...")
         time.sleep(5)  # Wait for 5 seconds before retrying
         continue  # Continue to the next iteration
 
-# Calculate the averages for each column per team
-for team_game_key, stats in team_stats.items():
-    teamId, gameId = team_game_key
-    num_players = 9  # Assuming lineup contains all players for each team
-    games_played_avg = stats["games_played"] / num_players
-    obp_avg = stats["obp"] / num_players
-    slg_avg = stats["slg"] / num_players
-    ops_avg = stats["ops"] / num_players
-    at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players
-    babip_avg = stats["babip"] / num_players
-    isWinner = stats["isWinner"]
-    dates = stats["date"]
-    print(dates)
+while True:
+    try:
+        # Calculate the averages for each column per team
+        for team_game_key, stats in team_stats.items():
+            teamId, gameId = team_game_key
+            num_players = 9  # Assuming lineup contains all players for each team
+            games_played_avg = stats["games_played"] / num_players
+            obp_avg = stats["obp"] / num_players
+            slg_avg = stats["slg"] / num_players
+            ops_avg = stats["ops"] / num_players
+            at_bats_per_home_run_avg = stats["at_bats_per_home_run"] / num_players
+            babip_avg = stats["babip"] / num_players
+            isWinner = stats["isWinner"]
+            dates = stats["date"]
+            print(dates)
 
-    # Insert the player stats into the table
-    cursor.execute("""
-        INSERT INTO previousYearHittingStats2022v2 (
-            date, gameId, teamId, obp, slg, ops, at_bats_per_home_run, games_played, babip, isWinner
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (
-        dates, gameId, teamId, obp_avg, slg_avg, ops_avg, at_bats_per_home_run_avg, games_played_avg, babip_avg, isWinner
-    ))
+            # Insert the player stats into the table
+            cursor.execute("""
+                INSERT INTO previousYearHittingStats2022v3 (
+                    date, gameId, teamId, obp, slg, ops, at_bats_per_home_run, games_played, babip, isWinner
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                dates, gameId, teamId, obp_avg, slg_avg, ops_avg, at_bats_per_home_run_avg, games_played_avg, babip_avg, isWinner
+            ))
+
+        break
+
+    except psycopg2.Error as e:
+        print("Error occurred during database insertion:", e)
+        time.sleep(1)  # Wait for 1 second before retrying the request
+        continue
+    except (ConnectionResetError, ConnectionError) as e:
+        # Handle the connection-related exception
+        print(f"Connection error occurred: {e}")
+        # Optionally, you can wait for some time before retrying
+        time.sleep(1)  # Wait for 1 second before retrying the request
+        continue
+        
+    except SSLError as e:
+        print("SSL handshake failure occurred. Retrying in 5 seconds...")
+        time.sleep(5)  # Wait for 5 seconds before retrying
+        continue  # Continue to the next iteration
 
 
 # Commit the changes and close the cursor and connection

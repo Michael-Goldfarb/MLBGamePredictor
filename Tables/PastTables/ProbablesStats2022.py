@@ -22,7 +22,7 @@ gameIdss = []
 outcomes = []
 teamIdss = []
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
 data = response.json()
 
 i = 0
@@ -80,7 +80,7 @@ for date_info in data["dates"]:
 
 # Define the SQL statement to create the table
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS probablesStats2022 (
+    CREATE TABLE IF NOT EXISTS probablesStats2022V3 (
             player_id TEXT,
             gameDate DATE,
             gameId TEXT,
@@ -99,7 +99,7 @@ cursor.execute("""
 """)
 
 # Truncate the table before inserting new data
-cursor.execute("TRUNCATE TABLE probablesStats2022;")
+cursor.execute("TRUNCATE TABLE probablesStats2022V3;")
 
 for index, player_id in enumerate(starters):
     team_name = teamsStarters[index]  # Get the team name corresponding to the current player
@@ -131,7 +131,7 @@ for index, player_id in enumerate(starters):
 
     # Insert the player stats into the table
     cursor.execute("""
-        INSERT INTO probablesStats2022 (
+        INSERT INTO probablesStats2022V3 (
            player_id, gameDate, gameId, teamId, player_name, strikeoutWalkRatio, games_started, hitsPer9Inn, strikeoutsPer9Inn, team_name, era, whip, walksPer9Inn, isWinner
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)

@@ -3,6 +3,7 @@ import json
 import psycopg2
 from datetime import datetime
 from requests.exceptions import SSLError
+from requests.exceptions import ConnectionError
 import time
 
 conn = psycopg2.connect(
@@ -14,7 +15,7 @@ conn = psycopg2.connect(
 )
 
 cursor = conn.cursor()
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-06-07&endDate=2022-08-07")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
 data = response.json()
 lineup = []
 teamsLineup = []
@@ -119,7 +120,7 @@ for date_info in data["dates"]:
 
     # Define the SQL statement to create the table
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS lineupStats2022v2 (
+        CREATE TABLE IF NOT EXISTS lineupStats2022v3 (
             date DATE,
             gameId TEXT,
             teamId TEXT,
@@ -134,7 +135,7 @@ for date_info in data["dates"]:
     """)
 
     # Clear the table before inserting new data
-    cursor.execute("TRUNCATE TABLE lineupStats2022v2;")
+    cursor.execute("TRUNCATE TABLE lineupStats2022v3;")
                 
 
 team_stats = {}
@@ -199,6 +200,12 @@ for index, player_id in enumerate(lineup):
             }
             team_stats[team_game_key]["isWinner"] = isWinner
             team_stats[team_game_key]["date"] = theDate
+    except (ConnectionResetError, ConnectionError) as e:
+            # Handle the connection-related exception
+            print(f"Connection error occurred: {e}")
+            # Optionally, you can wait for some time before retrying
+            time.sleep(1)  # Wait for 1 second before retrying the request
+            continue
     except SSLError as e:
         print("SSL handshake failure occurred. Retrying in 5 seconds...")
         time.sleep(5)  # Wait for 5 seconds before retrying
@@ -220,7 +227,7 @@ for team_game_key, stats in team_stats.items():
 
     # Insert the player stats into the table
     cursor.execute("""
-        INSERT INTO lineupStats2022v2 (
+        INSERT INTO lineupStats2022v3 (
             date, gameId, teamId, obp, slg, ops, at_bats_per_home_run, games_played, babip, isWinner
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
