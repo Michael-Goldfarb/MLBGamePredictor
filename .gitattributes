@@ -4,3 +4,4 @@ RandomForestModelv6.py filter=lfs diff=lfs merge=lfs -text
 logistic_regression_modelv2.pkl filter=lfs diff=lfs merge=lfs -text
 logistic_regression_model.pkl filter=lfs diff=lfs merge=lfs -text
 HistGradientBoostingClassifier.pkl filter=lfs diff=lfs merge=lfs -text
+Tables/RandomForestModelv6.pkl filter=lfs diff=lfs merge=lfs -text
