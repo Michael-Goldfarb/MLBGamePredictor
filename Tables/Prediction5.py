@@ -178,10 +178,75 @@ for gameId, gameStatus in gameIds:
             predicted_winner = teamTwo  # Tie or no winner
 
         if gameStatus == "warmup":
-             # Store the predicted winner in both prediction5 and prediction6 columns
-            conn.execute("UPDATE games SET predictedwinner5 = %s, predictedwinner6 = %s WHERE gameId = CAST(%s AS text)",
-                     (predicted_winner, predicted_winner, str(gameId)))
-            print(f"GameId: {gameId} - Winner prediction stored in the database.")
+
+            # Fetch the current values of the columns 'predictedwinner1', 'predictedwinner2', 'predictedwinner3', and 'predictedwinner4' for the current gameId
+            predictions = conn.execute(
+                "SELECT predictedwinner, predictedwinner2, predictedwinner3, predictedwinner4 FROM games WHERE gameId = CAST(%s AS text)",
+                (str(gameId),)
+            ).fetchone()
+            
+            # Extract the values from the predictions tuple
+            prediction1, prediction2, prediction3, prediction4 = predictions
+            
+            # Set initial values for variables
+            numOneWins = 0
+            numTwoWins = 0
+            firstWinner = ''
+            secondWinner = ''
+            
+            # Check if the predictions are not 'NaN', 'Unknown', firstWinner, or secondWinner
+            if prediction1 not in ['NaN', 'Unknown', firstWinner, secondWinner]:
+                firstWinner = prediction1
+                numOneWins += 1
+            if prediction2 not in ['NaN', 'Unknown', firstWinner, secondWinner]:
+                firstWinner = prediction2
+                numOneWins += 1
+            if prediction3 not in ['NaN', 'Unknown', firstWinner, secondWinner]:
+                firstWinner = prediction3
+                numOneWins += 1
+            if prediction4 not in ['NaN', 'Unknown', firstWinner, secondWinner]:
+                firstWinner = prediction4
+                numOneWins += 1
+            
+            if prediction2 not in ['NaN', 'Unknown', firstWinner]:
+                secondWinner = prediction2
+                numTwoWins += 1
+            if prediction3 not in ['NaN', 'Unknown', firstWinner]:
+                secondWinner = prediction3
+                numTwoWins += 1
+            if prediction4 not in ['NaN', 'Unknown', firstWinner]:
+                secondWinner = prediction4
+                numTwoWins += 1
+            
+            # Perform additional calculations and comparisons if needed
+            
+            # Update the values of 'predictedwinner5' and 'predictedwinner6' based on the comparison
+            if numOneWins > numTwoWins:
+                conn.execute(
+                    "UPDATE games SET predictedwinner5 = %s, predictedwinner6 = %s WHERE gameId = CAST(%s AS text)",
+                    (firstWinner, firstWinner, str(gameId))
+                )
+            elif numTwoWins > numOneWins:
+                conn.execute(
+                    "UPDATE games SET predictedwinner5 = %s, predictedwinner6 = %s WHERE gameId = CAST(%s AS text)",
+                    (secondWinner, secondWinner, str(gameId))
+                )
+            else:
+                conn.execute(
+                    "UPDATE games SET predictedwinner5 = %s, predictedwinner6 = %s WHERE gameId = CAST(%s AS text)",
+                    (predicted_winner, predicted_winner, str(gameId))
+                )
+            if(numOneWins > 3):
+                conn.execute(
+                    "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
+                    (firstWinner, firstWinner, str(gameId))
+                )
+            elif(numTwoWins > 3):
+                conn.execute(
+                    "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
+                    (secondWinner, secondWinner, str(gameId))
+                )
+            
         else:
             # Store the predicted winner only in the prediction5 column
             conn.execute("UPDATE games SET predictedwinner5 = %s WHERE gameId = CAST(%s AS text)",

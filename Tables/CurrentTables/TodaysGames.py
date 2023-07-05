@@ -62,7 +62,8 @@ cursor.execute("""
         predictedWinner3 VARCHAR(255),
         predictedWinner4 VARCHAR(255),
         predictedWinner5 VARCHAR(255),
-        predictedWinner6 VARCHAR(255)
+        predictedWinner6 VARCHAR(255),
+        featuredWinner VARCHAR(255)
     )
 """)
 
