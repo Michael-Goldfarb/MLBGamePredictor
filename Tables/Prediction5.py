@@ -177,7 +177,7 @@ for gameId, gameStatus in gameIds:
         else:
             predicted_winner = teamTwo  # Tie or no winner
 
-        if gameStatus == "warmup":
+        if gameStatus == "Warmup" or gameStatus == "In Progress":
 
             # Fetch the current values of the columns 'predictedwinner1', 'predictedwinner2', 'predictedwinner3', and 'predictedwinner4' for the current gameId
             predictions = conn.execute(
@@ -224,12 +224,12 @@ for gameId, gameStatus in gameIds:
             if numOneWins > numTwoWins:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, predictedwinner6 = %s WHERE gameId = CAST(%s AS text)",
-                    (firstWinner, firstWinner, str(gameId))
+                    (predicted_winner, firstWinner, str(gameId))
                 )
             elif numTwoWins > numOneWins:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, predictedwinner6 = %s WHERE gameId = CAST(%s AS text)",
-                    (secondWinner, secondWinner, str(gameId))
+                    (predicted_winner, secondWinner, str(gameId))
                 )
             else:
                 conn.execute(
