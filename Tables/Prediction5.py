@@ -88,9 +88,9 @@ for gameId in gameIds:
             era_probables_team.append(float(era_probables))
     if len(era_probables_team) >= 2:
         if era_probables_team[0] > era_probables_team[1]:
-            countTeamOne += 1
+            countTeamOne += 3
         elif era_probables_team[1] > era_probables_team[0]:
-            countTeamTwo += 1
+            countTeamTwo += 3
         print(f"Count for Team One: {countTeamOne}")
         print(f"Count for Team Two: {countTeamTwo}")
                 
@@ -168,7 +168,7 @@ for gameId in gameIds:
     elif countTeamTwo > countTeamOne:
         predicted_winner = teamTwo
     else:
-        predicted_winner = 0  # Tie or no winner
+        predicted_winner = teamTwo  # Tie or no winner
 
     # Update the 'games' table with the predicted winner
     conn.execute("UPDATE games SET predictedWinner5 = %s WHERE gameId = CAST(%s AS text)", (predicted_winner, str(gameId)))
