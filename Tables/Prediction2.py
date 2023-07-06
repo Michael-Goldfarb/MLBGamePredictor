@@ -21,20 +21,12 @@ probables_stats_df = pd.read_sql_query(query, engine)
 query = "SELECT * FROM previousYearPitchingStats2022"
 previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-# query = "SELECT * FROM previousYearHittingStats2022"
-# previous_hitting_stats_df = pd.read_sql_query(query, engine)
-
-# query = "SELECT * FROM lineupStats2022"
-# lineup_stats_df = pd.read_sql_query(query, engine)
-
 query = "SELECT * FROM HittingStats2022"
 hitting_stats_df = pd.read_sql_query(query, engine)
 
 # Merge the relevant historical tables based on common keys
 historical_data = pd.merge(pitching_stats_df, probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
 historical_data = pd.merge(historical_data, previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-# historical_data = pd.merge(historical_data, previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
-# historical_data = pd.merge(historical_data, lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
 historical_data = pd.merge(historical_data, hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
 
 # Adjust the features list to include the correct column names
@@ -74,31 +66,18 @@ except FileNotFoundError:
     with open(model_filename, 'wb') as file:
         pickle.dump(model, file)
     print("Trained model saved to file.")
+# Access the coefficients of the logistic regression model
+coefficients = model.coef_
 
-# model_filename = "randomForestModel.pkl"
+# Access the intercept of the logistic regression model
+intercept = model.intercept_
 
-# try:
-#     # Load the trained model
-#     with open(model_filename, 'rb') as file:
-#         model = pickle.load(file)
-#     print("Trained model loaded from file.")
-# except FileNotFoundError:
-#     # Split the data into training and testing sets
-#     X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
-
-#     # Train the model if the saved model file is not found
-#     print("Training model...")
-#     model = RandomForestClassifier()
-#     model.fit(X_train, y_train)
-#     with open(model_filename, 'wb') as file:
-#         pickle.dump(model, file)
-#     print("Trained model saved to file.")
-
+# Print the above attributes
+print("Coefficients:", coefficients)
 
 # Fetch the gameIds from the 'games' table
 query = "SELECT gameId FROM games"
 gameIds = pd.read_sql_query(query, engine)["gameid"].tolist()
-print(gameIds)
 
 # Create a list to store the updated data
 updated_data = []
@@ -115,40 +94,13 @@ for gameId in gameIds:
     query = f"SELECT * FROM previousYearPitchingStats WHERE gameid = '{gameId}'"
     current_previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-    # query = f"SELECT * FROM previousYearHittingStats WHERE gameid = '{gameId}'"
-    # print("Query:", query)
-    # current_previous_hitting_stats_df = pd.read_sql_query(query, engine)
-    # print("Number of rows returned:", current_previous_hitting_stats_df.shape[0])
-
-    # query = f"SELECT * FROM lineupStats WHERE gameid = '{gameId}'"
-    # print("Query:", query)
-    # current_lineup_stats_df = pd.read_sql_query(query, engine)
-    # print("Number of rows returned:", current_lineup_stats_df.shape[0])
-
     query = f"SELECT * FROM HittingStats WHERE gameid = '{gameId}'"
     current_hitting_stats_df = pd.read_sql_query(query, engine)
 
     # Merge the relevant current date tables based on common keys
     current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
     current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-    # current_data = pd.merge(current_data, current_previous_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_hitting'))
-    # current_data = pd.merge(current_data, current_lineup_stats_df, on=["gameid"], how="inner", suffixes=('', '_lineup'))
     current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
-
-    print("Current Data Shape:", current_data.shape)  # Add this line to print the shape
-    
-    # Check for missing values in current_data
-    missing_values = current_data.isnull()
-
-    # Check if any row has at least one missing value
-    rows_with_missing_values = missing_values.any(axis=1)
-
-    # Get the rows with missing values
-    rows_with_missing_values_indices = rows_with_missing_values[rows_with_missing_values].index
-
-    # Print the indices of rows with missing values
-    print("Rows with missing values:")
-    print(rows_with_missing_values_indices)
 
     # Handle missing values in the current_data DataFrame
     current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
@@ -163,6 +115,12 @@ for gameId in gameIds:
         X_current = current_data_imputed
         current_data["predicted_winner"] = model.predict(X_current)
 
+        predicted_probabilities = model.predict_proba(X_current)
+
+        # Create a DataFrame to display the current data and the model's decision
+        current_data_with_prediction = current_data.copy()
+        current_data_with_prediction['predicted_probability'] = predicted_probabilities[:, 1]  # Probability of winning (class 1)
+        
         # Store the predicted winners in the database
         current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
 
