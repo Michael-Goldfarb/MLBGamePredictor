@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./Login.js";
 import Dashboard from "./dashboard.js";
+import Prediction from "./pages/PredictionsPage.js"
 import Navbar from "./pages/components/NavBar.js";
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/mlbgamepredictions" />
+          <Route path="/predictions" element={<Prediction />} />
         </Routes>
       </Router>
     </div>

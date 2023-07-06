@@ -47,7 +47,7 @@ function Dashboard() {
             <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mt-4" onClick={logout}>
               Logout
             </button>
-            <Link to="/mlbgamepredictions" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mt-4">
+            <Link to="/predictions" className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mt-4">
               Go to MLB Game Predictions
             </Link>
           </>
