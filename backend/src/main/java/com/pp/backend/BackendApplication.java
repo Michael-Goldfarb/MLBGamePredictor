@@ -18,20 +18,20 @@ public class BackendApplication implements WebMvcConfigurer {
         SpringApplication.run(BackendApplication.class, args);
     }
 
-    @Bean
-    public UserService userService(DataSource dataSource) {
-        return new UserService(dataSource);
-    }
+    // @Bean
+    // public UserService userService(DataSource dataSource) {
+    //     return new UserService(dataSource);
+    // }
 
-    @Bean
-    public MLBGameService mlbGameService(DataSource dataSource) {
-        return new MLBGameService(dataSource);
-    }
+    // @Bean
+    // public MLBGameService mlbGameService(DataSource dataSource) {
+    //     return new MLBGameService(dataSource);
+    // }
 
-    @Bean
-    public PredictionService predictionService(DataSource dataSource) {
-        return new PredictionService(dataSource);
-    }
+    // @Bean
+    // public PredictionService predictionService(DataSource dataSource) {
+    //     return new PredictionService(dataSource);
+    // }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

@@ -8,7 +8,8 @@ const PredictionsPage = () => {
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
-        const response = await axios.get('/api/predictions'); // Replace with your backend API endpoint for predictions
+        const response = await axios.get('http://localhost:8000/api/predictions')
+        console.log(response.data);
         setPredictions(response.data);
       } catch (error) {
         console.error(error);

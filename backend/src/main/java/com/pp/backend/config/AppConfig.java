@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pp.backend.service.UserCoinsService;
+import com.pp.backend.service.MLBGameService;
 import com.pp.backend.service.UserService;
-import com.pp.backend.service.OddsService;
+import com.pp.backend.service.PredictionService;
 
 @Configuration
 public class AppConfig {
@@ -56,8 +56,8 @@ public class AppConfig {
     }
 
     @Bean
-    public OddsService oddsService(DataSource dataSource, RestTemplate restTemplate, ObjectMapper objectMapper) {
-        return new OddsService(dataSource, restTemplate, objectMapper);
+    public MLBGameService mlbGameService(DataSource dataSource) {
+        return new MLBGameService(dataSource);
     }
 
 

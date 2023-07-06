@@ -22,29 +22,30 @@ public class MLBGameService {
         List<MLBGame> mlbGames = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection()) {
-            String query = "SELECT gameId, homeTeamName, awayTeamName, gameStatus, gameDate, gameTime, isWinnerHome, isWinnerAway" +
+            String query = "SELECT gameId, homeTeamName, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway " +
                     "FROM gamesRefresh";
 
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                String gameId = resultSet.getString("game_id");
+                String gameId = resultSet.getString("gameId");
                 String homeTeam = resultSet.getString("homeTeamName");
                 String awayTeam = resultSet.getString("awayTeamName");
                 String status = resultSet.getString("gameStatus");
-                String gameTime = resultSet.getString("gameTime");
                 String gameDate = resultSet.getString("gameDate");
-                String isWinnerHome = resultSet.getString("isWinnerHome");
-                String isWinnerAway = resultSet.getString("isWinnerAway");
+                String gameTime = resultSet.getString("gameTime");
+                String awayTeamScore = resultSet.getString("awayTeamScore");
+                String homeTeamScore = resultSet.getString("homeTeamScore");
+                Boolean isWinnerHome = resultSet.getBoolean("isWinnerHome");
+                Boolean isWinnerAway = resultSet.getBoolean("isWinnerAway");
 
-                MLBGame mlbGame = new MLBGame(gameId, homeTeam, awayTeam, status, gameTime, gameDate, isWinnerHome, isWinnerAway);
+                MLBGame mlbGame = new MLBGame(gameId, homeTeam, awayTeam, status, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway);
                 mlbGames.add(mlbGame);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return mlbGames;
     }
 }

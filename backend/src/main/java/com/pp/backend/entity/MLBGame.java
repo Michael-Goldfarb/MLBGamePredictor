@@ -14,11 +14,17 @@ public class MLBGame {
     @JsonProperty("gameStatus")
     private String status;
 
+    @JsonProperty("gameDate")
+    private String gameDate;
+    
     @JsonProperty("gameTime")
     private String gameTime;
 
-    @JsonProperty("gameDate")
-    private String gameDate;
+    @JsonProperty("awayTeamScore")
+    private String awayTeamScore;
+
+    @JsonProperty("homeTeamScore")
+    private String homeTeamScore;
 
     @JsonProperty("isWinnerHome")
     private Boolean isWinnerHome;
@@ -29,13 +35,15 @@ public class MLBGame {
     public MLBGame() {
     }
 
-    public MLBGame(String gameId, String homeTeam, String awayTeam, String status, String gameTime, String gameDate, Boolean isWinnerHome, Boolean isWinnerAway) {
+    public MLBGame(String gameId, String homeTeam, String awayTeam, String status, String gameDate, String gameTime, String awayTeamScore, String homeTeamScore, Boolean isWinnerHome, Boolean isWinnerAway) {
         this.gameId = gameId;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.status = status;
-        this.gameTime = gameTime;
         this.gameDate = gameDate;
+        this.gameTime = gameTime;
+        this.awayTeamScore = awayTeamScore;
+        this.homeTeamScore = homeTeamScore;
         this.isWinnerHome = isWinnerHome;
         this.isWinnerAway = isWinnerAway;
     }
@@ -72,6 +80,14 @@ public class MLBGame {
         this.status = status;
     }
 
+    public String getGameDate() {
+        return gameDate;
+    }
+
+    public void setGameDate(String gameDate) {
+        this.gameDate = gameDate;
+    }
+    
     public String getGameTime() {
         return gameTime;
     }
@@ -80,12 +96,20 @@ public class MLBGame {
         this.gameTime = gameTime;
     }
 
-    public String getGameDate() {
-        return gameDate;
+    public String getAwayTeamScore() {
+        return awayTeamScore;
     }
 
-    public void setGameDate(String gameDate) {
-        this.gameDate = gameDate;
+    public void setAwayTeamScore(String awayTeamScore) {
+        this.awayTeamScore = awayTeamScore;
+    }
+
+    public String getHomeTeamScore() {
+        return homeTeamScore;
+    }
+
+    public void setHomeTeamScore(String homeTeamScore) {
+        this.homeTeamScore = homeTeamScore;
     }
 
     public Boolean getIsWinnerHome() {
