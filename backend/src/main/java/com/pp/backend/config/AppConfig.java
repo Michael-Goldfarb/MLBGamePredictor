@@ -1,16 +1,11 @@
 package com.pp.backend.config;
-
 import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
 import com.pp.backend.service.UserCoinsService;
 import com.pp.backend.service.UserService;
 import com.pp.backend.service.OddsService;
@@ -46,8 +41,8 @@ public class AppConfig {
     }
 
     @Bean
-    public UserCoinsService userCoinsService(DataSource dataSource) {
-        return new UserCoinsService(dataSource);
+    public PredictionService predictionService(DataSource dataSource) {
+        return new PredictionService(dataSource);
     }
 
     @Bean

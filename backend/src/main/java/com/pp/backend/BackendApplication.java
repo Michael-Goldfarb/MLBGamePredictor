@@ -1,11 +1,8 @@
 package com.pp.backend;
-
 import javax.sql.DataSource;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
 import com.pp.backend.service.*;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,13 +24,13 @@ public class BackendApplication implements WebMvcConfigurer {
     }
 
     @Bean
-    public UserCoinsService userCoinsService(DataSource dataSource) {
-        return new UserCoinsService(dataSource);
+    public MLBGameService mlbGameService(DataSource dataSource) {
+        return new MLBGameService(dataSource);
     }
 
     @Bean
-    public OddsService oddsService(DataSource dataSource, RestTemplate restTemplate, ObjectMapper objectMapper) {
-        return new OddsService(dataSource, restTemplate, objectMapper);
+    public PredictionService predictionService(DataSource dataSource) {
+        return new PredictionService(dataSource);
     }
 
     @Override

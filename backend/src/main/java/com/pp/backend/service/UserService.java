@@ -1,5 +1,4 @@
 package com.pp.backend.service;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,9 +31,6 @@ public class UserService {
                     User user = new User();
                     user.setEmail(resultSet.getString("email"));
                     user.setName(resultSet.getString("name"));
-                    user.setPhoneNumber(resultSet.getString("phone_number"));
-                    user.setAgeOrOlder(resultSet.getString("age_or_older"));
-                    user.setUserStatus(resultSet.getString("user_status"));
                     users.add(user);
                 }
             }

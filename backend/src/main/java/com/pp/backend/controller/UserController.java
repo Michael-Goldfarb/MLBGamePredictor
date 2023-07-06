@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import java.util.List;
-
 import com.pp.backend.entity.User;
 import com.pp.backend.service.UserService;
 
