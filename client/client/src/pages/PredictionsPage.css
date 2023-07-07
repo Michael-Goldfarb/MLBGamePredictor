@@ -1,32 +1,53 @@
 .predictions-page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .predictions-title-wrapper {
+    text-align: center;
   }
   
   .predictions-title {
+    margin: 0;
     font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: rgb(255, 255, 255); /* Set text color to black */
   }
   
   .prediction-item {
-    background-color: #f5f5f5;
-    border-radius: 5px;
+    border: 1px solid #ccc;
     padding: 10px;
     margin-bottom: 10px;
   }
   
-  .prediction-item h2 {
-    font-size: 18px;
-    margin-bottom: 5px;
-    color: black; /* Set text color to black */
+  .team-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
   }
   
-  .prediction-item p {
-    font-size: 16px;
-    margin-bottom: 5px;
-    color: black; /* Set text color to black */
+  .away-team,
+  .home-team {
+    width: 50%;
+    text-align: center;
   }
   
+  .away-team p,
+  .home-team p {
+    margin: 0;
+  }
+  
+  .game-status {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  
+  .game-date,
+  .game-time {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  
+  .prediction {
+    font-style: italic;
+    text-align: center;
+  }  

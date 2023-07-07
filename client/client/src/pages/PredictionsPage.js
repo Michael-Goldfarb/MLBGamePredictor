@@ -8,7 +8,7 @@ const PredictionsPage = () => {
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/games')
+        const response = await axios.get('http://localhost:8000/games');
         console.log(response.data);
         setPredictions(response.data);
       } catch (error) {
@@ -19,18 +19,36 @@ const PredictionsPage = () => {
     fetchPredictions();
   }, []);
 
+  const convertToEST = (gameTime) => {
+    const [hours, minutes] = gameTime.split(':');
+    const estTime = new Date();
+    estTime.setUTCHours(hours);
+    estTime.setUTCMinutes(minutes);
+
+    const options = { timeZone: 'America/New_York', hour12: true, hour: 'numeric', minute: 'numeric' };
+    return estTime.toLocaleString('en-US', options);
+  };
+
   return (
     <div className="predictions-page">
-      <h1 className="predictions-title">MLB Game Predictions</h1>
+      <div className="predictions-title-wrapper">
+        <h1 className="predictions-title">MLB Game Predictions</h1>
+      </div>
       {predictions.map((data) => (
         <div key={data.mlbGame.gameId} className="prediction-item">
-          <p>Home Team: {data.mlbGame.homeTeamName}</p>
-          <p>Away Team: {data.mlbGame.awayTeamName}</p>
-          <p>Score: {data.mlbGame.homeTeamScore} - {data.mlbGame.awayTeamScore}</p>
-          {data.mlbGame.isWinnerHome || data.mlbGame.isWinnerAway ? <p>Final</p> : null}
-          <p>Date: {data.mlbGame.gameDate}</p>
-          <p>Time: {data.mlbGame.gameTime}</p>
-          <p>Prediction: {data.prediction?.prediction}</p>
+          <div className="team-info">
+            <div className="away-team">
+              <p>{data.mlbGame.awayTeamName}</p>
+              <p>{data.mlbGame.awayTeamScore}</p>
+            </div>
+            <div className="home-team">
+              <p>{data.mlbGame.homeTeamName}</p>
+              <p>{data.mlbGame.homeTeamScore}</p>
+            </div>
+          </div>
+          {data.mlbGame.isWinnerHome || data.mlbGame.isWinnerAway ? <p className="game-status">Final</p> : null}
+          <p className="game-time">{convertToEST(data.mlbGame.gameTime)}</p>
+          <p className="prediction">Prediction: {data.prediction?.prediction}</p>
         </div>
       ))}
     </div>
