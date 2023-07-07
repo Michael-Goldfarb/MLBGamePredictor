@@ -1,7 +1,5 @@
 package com.pp.backend.service;
-
 import com.pp.backend.entity.MLBGame;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
