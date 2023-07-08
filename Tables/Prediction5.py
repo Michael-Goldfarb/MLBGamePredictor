@@ -17,8 +17,6 @@ for gameId, gameStatus in gameIds:
 
     # if gameStatus == "Final" or gameStatus == "In Progress":
     #     # Skip making predictions for games with "Final" or "In Progress" status
-    #     conn.execute("UPDATE games SET predictedwinner5 = '' WHERE gameId = CAST(%s AS text)", (str(gameId),))
-    #     print(f"GameId: {gameId} - No winner prediction for Final game.")
     if gameStatus == "Postponed":
         continue
     else:
@@ -218,7 +216,6 @@ for gameId, gameStatus in gameIds:
             if prediction4 not in ['NaN', 'Unknown', firstWinner]:
                 secondWinner = prediction4
                 numTwoWins += 1
-            # Perform additional calculations and comparisons if needed
             
             # Update the values of 'predictedwinner5' and 'theWinner' based on the comparison
             if numOneWins > numTwoWins:
