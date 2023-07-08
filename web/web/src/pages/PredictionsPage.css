@@ -1,0 +1,53 @@
+.predictions-page {
+    margin-top: 20px;
+  }
+  
+  .predictions-title-wrapper {
+    text-align: center;
+  }
+  
+  .predictions-title {
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  .prediction-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .team-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .away-team,
+  .home-team {
+    width: 50%;
+    text-align: center;
+  }
+  
+  .away-team p,
+  .home-team p {
+    margin: 0;
+  }
+  
+  .game-status {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  
+  .game-date,
+  .game-time {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  
+  .prediction {
+    font-style: italic;
+    text-align: center;
+  }  
