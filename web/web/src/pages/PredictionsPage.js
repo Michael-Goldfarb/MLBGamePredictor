@@ -121,7 +121,9 @@ const PredictionsPage = () => {
           </div>
           {data.mlbGame.isWinnerHome || data.mlbGame.isWinnerAway ? <p className="game-status">Final</p> : null}
           <p className="game-time">{convertToEST(data.mlbGame.gameTime)}</p>
-          <p className="prediction">Prediction: {data.prediction?.prediction}</p>
+          <p className={`prediction ${data.mlbGame.correct === null ? 'white' : (data.mlbGame.correct ? 'green' : 'red')}`}>
+            Prediction: {data.prediction?.prediction}
+          </p>
         </div>
       ))}
     </div>

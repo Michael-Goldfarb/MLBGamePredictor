@@ -57,8 +57,20 @@
   text-align: center;
 }
 
+.white {
+  color: #ffffff;
+}
+
+.green {
+  color: green;
+}
+
+.red {
+  color: rgb(215, 112, 112);
+}
+
 .prediction {
   font-style: italic;
   text-align: center;
-  color: rgb(215, 112, 112);
+  font-size: 20px;
 }
