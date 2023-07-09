@@ -39,8 +39,6 @@ public class MLBGameController {
             }
             combinedData.add(mlbGameResponse);
         }
-
         return ResponseEntity.ok(combinedData);
     }
-
 }

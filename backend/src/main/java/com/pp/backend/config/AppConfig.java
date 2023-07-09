@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pp.backend.service.MLBGameService;
 import com.pp.backend.service.UserService;
 import com.pp.backend.service.PredictionService;
+import com.pp.backend.service.PredictionHistoryService;
 
 @Configuration
 public class AppConfig {
@@ -43,6 +44,11 @@ public class AppConfig {
     @Bean
     public PredictionService predictionService(DataSource dataSource) {
         return new PredictionService(dataSource);
+    }
+
+    @Bean
+    public PredictionHistoryService predictionHistoryService(DataSource dataSource) {
+        return new PredictionHistoryService(dataSource);
     }
 
     @Bean

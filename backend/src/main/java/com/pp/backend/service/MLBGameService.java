@@ -45,7 +45,6 @@ public class MLBGameService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return mlbGames;
     }
 }
