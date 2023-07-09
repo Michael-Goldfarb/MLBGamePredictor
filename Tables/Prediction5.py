@@ -238,9 +238,17 @@ for gameId, gameStatus in gameIds:
                     "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                     (firstWinner, str(gameId))
                 )
+                conn.execute(
+                    "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
+                        (firstWinner, str(gameId))
+                    )
             elif(numTwoWins > 2):
                 conn.execute(
                     "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
+                    (secondWinner, str(gameId))
+                )
+                conn.execute(
+                    "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                     (secondWinner, str(gameId))
                 )
             
@@ -304,11 +312,19 @@ for gameId, gameStatus in gameIds:
                         "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (firstWinner, str(gameId))
                     )
+                    conn.execute(
+                        "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
+                        (firstWinner, str(gameId))
+                    )
                 elif(numTwoWins > 2):
                     conn.execute(
                         "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (secondWinner, str(gameId))
-                )
+                    )
+                    conn.execute(
+                        "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
+                        (secondWinner, str(gameId))
+                    )
         
 # Close the connection
 conn.close()

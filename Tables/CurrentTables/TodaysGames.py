@@ -54,7 +54,8 @@ cursor.execute("""
         predictedWinner5 VARCHAR(255),
         earlyWinner VARCHAR(255),
         theWinner VARCHAR(255),
-        featuredWinner VARCHAR(255)
+        featuredWinner VARCHAR(255),
+        correct BOOLEAN
     )
 """)
 
