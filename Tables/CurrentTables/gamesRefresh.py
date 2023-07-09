@@ -37,6 +37,12 @@ cursor.execute("""
     )
 """)
 
+# Get the total number of games played
+totalGames = len(games)
+
+# Initialize counters
+numerator = 0
+denominator = 0
 
 records = []
 for game in games:
@@ -61,14 +67,44 @@ for game in games:
     # Determine the correct value based on the conditions
     if isWinnerAway and awayTeamName == theWinner:
         correct = True
+        numerator += 1
+        denominator += 1
     elif isWinnerHome and homeTeamName == theWinner:
         correct = True
+        numerator += 1
+        denominator += 1
     elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
         correct = False
+        denominator += 1
+    print(correct)
     
     records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
+
+# Calculate the fraction of correct predictions
+if denominator > 0:
+    fraction_numerator = numerator
+    fraction_denominator = denominator
+else:
+    fraction_numerator = None
+    fraction_denominator = None
+
+# Get the current date
+currentDate = datetime.now().date()
+
+# Delete the existing record for the current date if it exists
+cursor.execute("DELETE FROM dailyPredictions WHERE prediction_date = %s", (currentDate,))
+
+# Insert the daily prediction into the dailyPredictions table
+cursor.execute("""
+    INSERT INTO dailyPredictions (prediction_date, numerator, denominator)
+    VALUES (%s, %s, %s)
+""", (currentDate, fraction_numerator, fraction_denominator))
+
+
+
+
 # Insert data into the table
 cursor.execute("TRUNCATE TABLE gamesRefresh;")
 
