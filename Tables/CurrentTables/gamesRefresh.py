@@ -63,7 +63,7 @@ for game in games:
         correct = True
     elif isWinnerHome and homeTeamName == theWinner:
         correct = True
-    elif isWinnerAway is None or theWinner is None:
+    elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
         correct = False
@@ -72,10 +72,16 @@ for game in games:
 # Insert data into the table
 cursor.execute("TRUNCATE TABLE gamesRefresh;")
 
-cursor.executemany("""
-    INSERT INTO gamesRefresh (gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-""", records)
+if correct != None:
+    cursor.executemany("""
+        INSERT INTO gamesRefresh (gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, records)
+else:
+    cursor.executemany("""
+        INSERT INTO gamesRefresh (gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, records)
 
 cursor.execute("ALTER TABLE games ADD COLUMN IF NOT EXISTS correct BOOLEAN;")
 

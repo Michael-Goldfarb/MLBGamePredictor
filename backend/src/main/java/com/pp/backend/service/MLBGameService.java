@@ -37,7 +37,7 @@ public class MLBGameService {
                 Boolean isWinnerHome = resultSet.getBoolean("isWinnerHome");
                 Boolean isWinnerAway = resultSet.getBoolean("isWinnerAway");
                 String featuredWinner = resultSet.getString("featuredWinner");
-                Boolean correct = resultSet.getBoolean("correct");
+                Boolean correct = resultSet.getObject("correct", Boolean.class);
 
                 MLBGame mlbGame = new MLBGame(gameId, homeTeam, awayTeam, status, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway, featuredWinner, correct);
                 mlbGames.add(mlbGame);
