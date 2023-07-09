@@ -175,7 +175,7 @@ for gameId, gameStatus in gameIds:
         else:
             predicted_winner = teamTwo  # Tie or no winner
 
-        if gameStatus == "Final" or gameStatus == "In Progress":
+        if gameStatus == "Warmup" or gameStatus == "In Progress":
         # if gameStatus == "Warmup":
 
             # Fetch the current values of the columns 'predictedwinner1', 'predictedwinner2', 'predictedwinner3', and 'predictedwinner4' for the current gameId
