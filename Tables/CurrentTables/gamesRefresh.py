@@ -108,7 +108,7 @@ cursor.execute("""
 # Insert data into the table
 cursor.execute("TRUNCATE TABLE gamesRefresh;")
 
-if correct != None:
+if correct == None:
     cursor.executemany("""
         INSERT INTO gamesRefresh (gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
