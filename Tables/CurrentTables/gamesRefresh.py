@@ -119,15 +119,6 @@ else:
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, records)
 
-cursor.execute("ALTER TABLE games ADD COLUMN IF NOT EXISTS correct BOOLEAN;")
-
-# Update the 'correct' column in the games table
-cursor.executemany("""
-    UPDATE games
-    SET correct = %s
-    WHERE gameId = CAST(%s AS text)
-""", [(correct, gameId) for gameId, *_ in records])
-
 # Commit the changes and close the cursor and connection
 conn.commit()
 cursor.close()

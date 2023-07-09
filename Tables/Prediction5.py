@@ -175,7 +175,7 @@ for gameId, gameStatus in gameIds:
         else:
             predicted_winner = teamTwo  # Tie or no winner
 
-        if gameStatus == "Warmup" or gameStatus == "In Progress":
+        if gameStatus == "Final" or gameStatus == "In Progress":
         # if gameStatus == "Warmup":
 
             # Fetch the current values of the columns 'predictedwinner1', 'predictedwinner2', 'predictedwinner3', and 'predictedwinner4' for the current gameId
@@ -218,12 +218,12 @@ for gameId, gameStatus in gameIds:
                 numTwoWins += 1
             
             # Update the values of 'predictedwinner5' and 'theWinner' based on the comparison
-            if numOneWins > numTwoWins:
+            if numOneWins > numTwoWins and firstWinner == teamOne or firstWinner == teamTwo:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
                     (predicted_winner, firstWinner, str(gameId))
                 )
-            elif numTwoWins > numOneWins:
+            elif numTwoWins > numOneWins and secondWinner == teamOne or secondWinner == teamTwo:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
                     (predicted_winner, secondWinner, str(gameId))
@@ -233,7 +233,7 @@ for gameId, gameStatus in gameIds:
                     "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
                     (predicted_winner, predicted_winner, str(gameId))
                 )
-            if(numOneWins > 2):
+            if(numOneWins > 2 and firstWinner == teamOne or firstWinner == teamTwo):
                 conn.execute(
                     "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                     (firstWinner, str(gameId))
@@ -242,7 +242,7 @@ for gameId, gameStatus in gameIds:
                     "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (firstWinner, str(gameId))
                     )
-            elif(numTwoWins > 2):
+            elif(numTwoWins > 2 and secondWinner == teamOne or secondWinner == teamTwo):
                 conn.execute(
                     "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                     (secondWinner, str(gameId))
