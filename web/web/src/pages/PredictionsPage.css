@@ -28,9 +28,9 @@
 .home-team {
   width: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   text-align: center;
+  justify-content: center;
 }
 
 .away-team p,
@@ -41,6 +41,7 @@
 .team-info img {
   width: 40px; /* Adjust the width to your desired size */
   height: 40px; /* Maintain aspect ratio */
+  margin-right: 10px; /* Add spacing between logo and team name */
 }
 
 .game-status {
