@@ -32,10 +32,16 @@ public class MLBGame {
     @JsonProperty("isWinnerAway")
     private Boolean isWinnerAway;
 
+    @JsonProperty("featuredWinner")
+    private String featuredWinner;
+
+    @JsonProperty("correct")
+    private Boolean correct;
+
     public MLBGame() {
     }
 
-    public MLBGame(String gameId, String homeTeam, String awayTeam, String status, String gameDate, String gameTime, String awayTeamScore, String homeTeamScore, Boolean isWinnerHome, Boolean isWinnerAway) {
+    public MLBGame(String gameId, String homeTeam, String awayTeam, String status, String gameDate, String gameTime, String awayTeamScore, String homeTeamScore, Boolean isWinnerHome, Boolean isWinnerAway, String featuredWinner, Boolean correct) {
         this.gameId = gameId;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
@@ -46,6 +52,8 @@ public class MLBGame {
         this.homeTeamScore = homeTeamScore;
         this.isWinnerHome = isWinnerHome;
         this.isWinnerAway = isWinnerAway;
+        this.featuredWinner = featuredWinner;
+        this.correct = correct;
     }
 
     public String getGameId() {
@@ -126,5 +134,21 @@ public class MLBGame {
 
     public void setIsWinnerAway(Boolean isWinnerAway) {
         this.isWinnerAway = isWinnerAway;
+    }
+
+    public String getFeaturedWinner() {
+        return featuredWinner;
+    }
+
+    public void setFeaturedWinner(String featuredWinner) {
+        this.featuredWinner = featuredWinner;
+    }
+
+    public Boolean getCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(Boolean correct) {
+        this.correct = correct;
     }
 }

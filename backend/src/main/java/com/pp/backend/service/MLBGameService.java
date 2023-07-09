@@ -19,7 +19,7 @@ public class MLBGameService {
         List<MLBGame> mlbGames = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection()) {
-            String query = "SELECT gameId, homeTeamName, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway " +
+            String query = "SELECT gameId, homeTeamName, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway, featuredWinner, correct " +
                     "FROM gamesRefresh";
 
             PreparedStatement statement = connection.prepareStatement(query);
@@ -36,13 +36,16 @@ public class MLBGameService {
                 String homeTeamScore = resultSet.getString("homeTeamScore");
                 Boolean isWinnerHome = resultSet.getBoolean("isWinnerHome");
                 Boolean isWinnerAway = resultSet.getBoolean("isWinnerAway");
+                String featuredWinner = resultSet.getString("featuredWinner");
+                Boolean correct = resultSet.getBoolean("correct");
 
-                MLBGame mlbGame = new MLBGame(gameId, homeTeam, awayTeam, status, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway);
+                MLBGame mlbGame = new MLBGame(gameId, homeTeam, awayTeam, status, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway, featuredWinner, correct);
                 mlbGames.add(mlbGame);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return mlbGames;
     }
 }
