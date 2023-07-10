@@ -122,13 +122,12 @@ const PredictionsPage = () => {
       <div className="predictions-title-wrapper">
         <h1 className="predictions-title">MLB Game Predictions</h1>
       </div>
-      <div className="prediction-history">
-        {predictionHistory && (
-          <p>
-            Prediction History: Date - {predictionHistory.predictionDate}, Numerator - {predictionHistory.numerator}, Denominator - {predictionHistory.denominator}
-          </p>
-        )}
-      </div>
+      {/* Prediction History */}
+      {predictionHistory && (
+        <div className="prediction-history">
+          {formatPredictionHistory(predictionHistory)}
+        </div>
+      )}
       {predictions.map((data) => (
         <div key={data.mlbGame.gameId} className="prediction-item">
           <div className="team-info">

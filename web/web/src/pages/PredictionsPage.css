@@ -1,11 +1,10 @@
 .predictions-page {
   margin-top: 20px;
+  position: relative;
 }
 
-.predictions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.predictions-title-wrapper {
+  text-align: center;
 }
 
 .predictions-title {
@@ -14,9 +13,12 @@
 }
 
 .prediction-history {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 20px;
   font-size: 18px;
-  white-space: pre-wrap;
-  text-align: right;
+  white-space: pre-wrap; 
 }
 
 .prediction-item {
