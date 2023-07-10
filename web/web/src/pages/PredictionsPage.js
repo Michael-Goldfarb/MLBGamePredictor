@@ -34,6 +34,7 @@ import giantsLogo from "../images/giants.png";
 
 const PredictionsPage = () => {
   const [predictions, setPredictions] = useState([]);
+  const [predictionHistory, setPredictionHistory] = useState(null);
   const teamLogos = {
     "Arizona Diamondbacks": diamondbacksLogo,
     "Atlanta Braves": bravesLogo,
@@ -79,8 +80,32 @@ const PredictionsPage = () => {
       }
     };
 
+    const fetchPredictionHistory = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/prediction-history');
+        console.log(response.data);
+        setPredictionHistory(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     fetchPredictions();
+    fetchPredictionHistory();
   }, []);
+
+  const formatPredictionHistory = (predictionHistory) => {
+    if (!predictionHistory) {
+      return null;
+    }
+
+    const { predictionDate, numerator, denominator } = predictionHistory;
+
+    const formattedDate = predictionDate.substring(5).replace('-', '/');
+    const formattedPrediction = `${numerator}/${denominator}`;
+
+    return `Prediction History\n${formattedDate}: ${formattedPrediction}`;
+  };
 
   const convertToEST = (gameTime) => {
     const [hours, minutes] = gameTime.split(':');
@@ -96,6 +121,13 @@ const PredictionsPage = () => {
     <div className="predictions-page">
       <div className="predictions-title-wrapper">
         <h1 className="predictions-title">MLB Game Predictions</h1>
+      </div>
+      <div className="prediction-history">
+        {predictionHistory && (
+          <p>
+            Prediction History: Date - {predictionHistory.predictionDate}, Numerator - {predictionHistory.numerator}, Denominator - {predictionHistory.denominator}
+          </p>
+        )}
       </div>
       {predictions.map((data) => (
         <div key={data.mlbGame.gameId} className="prediction-item">
