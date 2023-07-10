@@ -1,16 +1,21 @@
 .logo-container {
-    margin-left: 0px; 
-  }
-  
-  .history-logo {
-    height: 50px; 
-    width: 50px; 
-    transform: translate(-24px)
-  }
-  
-  .main-logo {
-    height: 120px; 
-    width: 120px; 
-    transform: translate(-24px)
-  }
-  
+  margin-left: 0px;
+}
+
+.history-logo {
+  height: 50px;
+  width: 50px;
+  transform: translate(-24px);
+}
+
+.main-logo {
+  height: 120px;
+  width: 120px;
+  transform: translate(0px);
+}
+
+.profile-logo {
+  height: 50px;
+  width: 50px;
+  transform: translate(24px);
+}

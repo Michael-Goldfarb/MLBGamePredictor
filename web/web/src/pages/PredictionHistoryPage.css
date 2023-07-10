@@ -1,7 +1,14 @@
 .prediction-history-page {
-  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.prediction-history p {
-  white-space: pre-line;
+.prediction-history-container {
+  text-align: center;
+}
+
+.prediction-history-text {
+  margin: 0 auto;
 }

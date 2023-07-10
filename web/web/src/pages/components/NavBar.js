@@ -2,17 +2,22 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../images/logo.png";
 import historyLogo from "../../images/history.png";
-import "./NavBar.css"; // Import custom CSS file for styling
+import profileLogo from "../../images/profile.png";
+import "./NavBar.css";
 
 function NavBar() {
   const navigate = useNavigate();
 
   const handleClickLogo = () => {
-    navigate("/");
+    navigate("/predictions");
   };
 
   const handleClickHistory = () => {
     navigate("/history");
+  };
+
+  const handleClickProfile = () => {
+    navigate("/profile");
   };
 
   return (
@@ -24,14 +29,18 @@ function NavBar() {
           </Link>
         </div>
         <div className="logo-container flex-grow flex justify-center">
-          <Link to="/" onClick={handleClickLogo}>
+          <Link to="/predictions" onClick={handleClickLogo}>
             <img src={logo} alt="Logo" className="main-logo" />
           </Link>
         </div>
-        <div></div>
+        <div className="logo-container">
+          <Link to="/profile" onClick={handleClickProfile}>
+            <img src={profileLogo} alt="Profile" className="profile-logo" />
+          </Link>
+        </div>
       </div>
     </nav>
-  );
+  );  
 }
 
 export default NavBar;
