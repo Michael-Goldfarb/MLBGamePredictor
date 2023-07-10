@@ -1,14 +1,16 @@
 .logo-container {
-    margin-left: 20px; /* Adjust the margin-left value as needed */
+    margin-left: 0px; 
   }
   
   .history-logo {
-    height: 50px; /* Adjust the height as needed */
-    width: 50px; /* Adjust the width as needed */
+    height: 50px; 
+    width: 50px; 
+    transform: translate(-24px)
   }
   
   .main-logo {
-    height: 120px; /* Adjust the height as needed */
-    width: 120px; /* Adjust the width as needed */
+    height: 120px; 
+    width: 120px; 
+    transform: translate(-24px)
   }
   
