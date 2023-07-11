@@ -10,6 +10,7 @@ import com.pp.backend.service.MLBGameService;
 import com.pp.backend.service.UserService;
 import com.pp.backend.service.PredictionService;
 import com.pp.backend.service.PredictionHistoryService;
+import com.pp.backend.service.TeamRecordService;
 
 @Configuration
 public class AppConfig {
@@ -44,6 +45,11 @@ public class AppConfig {
     @Bean
     public PredictionService predictionService(DataSource dataSource) {
         return new PredictionService(dataSource);
+    }
+
+    @Bean
+    public TeamRecordService teamRecordService(DataSource dataSource) {
+        return new TeamRecordService(dataSource);
     }
 
     @Bean

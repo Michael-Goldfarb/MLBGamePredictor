@@ -1,5 +1,4 @@
 package com.pp.backend.service;
-
 import com.pp.backend.entity.PredictionHistory;
 import javax.sql.DataSource;
 import java.sql.Connection;

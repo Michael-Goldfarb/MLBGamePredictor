@@ -3,27 +3,26 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.Date;
 
 @Entity
-public class PredictionHistory {
+public class TeamRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String predictionDate;
+    private String teamName;
     private int numerator;
     private int denominator;
+    private float percentage;
 
-    public PredictionHistory() {
+    public TeamRecord() {
     }
 
-    public PredictionHistory(String predictionDate, int numerator, int denominator) {
-        this.predictionDate = predictionDate;
+    public TeamRecord(String teamName, int numerator, int denominator, float percentage) {
+        this.teamName = teamName;
         this.numerator = numerator;
         this.denominator = denominator;
+        this.percentage = percentage;
     }
 
     public Long getId() {
@@ -34,12 +33,12 @@ public class PredictionHistory {
         this.id = id;
     }
 
-    public String getPredictionDate() {
-        return predictionDate;
+    public String getTeamName() {
+        return teamName;
     }
 
-    public void setPredictionDate(String predictionDate) {
-        this.predictionDate = predictionDate;
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
     public int getNumerator() {
@@ -56,5 +55,13 @@ public class PredictionHistory {
 
     public void setDenominator(int denominator) {
         this.denominator = denominator;
+    }
+
+    public float getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(float percentage) {
+        this.percentage = percentage;
     }
 }
