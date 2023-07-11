@@ -43,7 +43,9 @@ cursor.execute("""
     CREATE TABLE IF NOT EXISTS teamRecords (
         teamName VARCHAR(255),
         numerator INTEGER,
-        denominator INTEGER
+        denominator INTEGER,
+        percentage FLOAT,
+        gameStatus VARCHAR(255)
     )
 """)
 
@@ -74,12 +76,13 @@ for game in games:
     theWinner = cursor.fetchone()[0]
 
     # Retrieve the value of teamName, numerator, denominator, and gameStatus from the teamRecords table for the specific gameId
-    cursor.execute("SELECT numerator, denominator FROM teamRecords WHERE teamName = CAST(%s AS text);", (awayTeamName,))
+    cursor.execute("SELECT numerator, denominator, gameStatus FROM teamRecords WHERE teamName = CAST(%s AS text);", (awayTeamName,))
     row = cursor.fetchone()
     updateAway = 0
     if row is not None:
         numeratorAway = row[0]
-        denominatorAway = row[2]
+        denominatorAway = row[1]
+        gameStatus2 = row[2]
         if denominatorAway == 0:
             updateAway+=1
     else:
@@ -93,7 +96,7 @@ for game in games:
     updateHome = 0
     if row is not None:
         numeratorHome = row[0]
-        denominatorHome = row[2]
+        denominatorHome = row[1]
         if denominatorHome == 0:
             updateHome+=1
     else:
@@ -102,9 +105,11 @@ for game in games:
         updateHome+=1
     
     # Determine the correct value based on the conditions
+    starter = 0
     if isWinnerAway and awayTeamName == theWinner:
         print(awayTeamName)
         correct = True
+        starter+=1
         numerator += 1
         denominator += 1
         numeratorAway += 1
@@ -114,6 +119,7 @@ for game in games:
     elif isWinnerHome and homeTeamName == theWinner:
         print(homeTeamName)
         correct = True
+        starter+=1
         numerator += 1
         denominator += 1
         numeratorHome += 1
@@ -124,33 +130,40 @@ for game in games:
         correct = None
     else:
         correct = False
+        starter+=1
         denominator += 1
         denominatorAway += 1
         denominatorHome += 1
     
     # Check the conditions before inserting into teamRecords
     if updateAway == 1:
+        percentages = float(numeratorAway)/denominatorAway
         cursor.execute("""
-            INSERT INTO teamRecords (teamName, numerator, denominator)
-            VALUES (%s, %s, %s)
-        """, (awayTeamName, numeratorAway, denominatorAway))
+            INSERT INTO teamRecords (teamName, numerator, denominator, percentage, gameStatus)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (awayTeamName, numeratorAway, denominatorAway, percentages, gameStatus))
     else:
-        cursor.execute("""
-            UPDATE teamRecords
-            SET numerator = %s, denominator = %s
-            WHERE teamName = %s
-        """, (numeratorAway, denominatorAway, awayTeamName))
+        if gameStatus == "Final" and gameStatus2 != "Final" and starter != 0:
+            percentages = float(numeratorAway)/denominatorAway
+            cursor.execute("""
+                UPDATE teamRecords
+                SET numerator = %s, denominator = %s, percentage = %s, gameStatus = %s
+                WHERE teamName = %s
+            """, (numeratorAway, denominatorAway, percentages, awayTeamName, gameStatus))
     if updateHome == 1:
+        percentages = float(numeratorAway)/denominatorAway
         cursor.execute("""
-            INSERT INTO teamRecords (teamName, numerator, denominator)
-            VALUES (%s, %s, %s)
-        """, (homeTeamName, numeratorHome, denominatorHome))
+            INSERT INTO teamRecords (teamName, numerator, denominator, percentage, gameStatus)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (homeTeamName, numeratorHome, denominatorHome, percentages, gameStatus))
     else:
-        cursor.execute("""
-            UPDATE teamRecords
-            SET numerator = %s, denominator = %s
-            WHERE teamName = %s
-        """, (numeratorHome, denominatorHome, homeTeamName))
+        if gameStatus == "Final" and gameStatus2 != "Final":
+            percentages = float(numeratorAway)/denominatorAway
+            cursor.execute("""
+                UPDATE teamRecords
+                SET numerator = %s, denominator = %s, percentage = %s, gameStatus = %s
+                WHERE teamName = %s
+            """, (numeratorHome, denominatorHome, percentages, homeTeamName, gameStatus))
     records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
 
 # Calculate the fraction of correct predictions
