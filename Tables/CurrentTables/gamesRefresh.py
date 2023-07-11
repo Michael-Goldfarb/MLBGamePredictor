@@ -3,6 +3,7 @@ import json
 import psycopg2
 from datetime import datetime
 
+# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-09&endDate=2023-07-09")
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
@@ -36,9 +37,15 @@ cursor.execute("""
         correct BOOLEAN
     )
 """)
-
-# Get the total number of games played
-totalGames = len(games)
+               
+# Create the teamRecords table if it doesn't exist
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS teamRecords (
+        teamName VARCHAR(255),
+        numerator INTEGER,
+        denominator INTEGER
+    )
+""")
 
 # Initialize counters
 numerator = 0
@@ -48,7 +55,9 @@ records = []
 for game in games:
     gameId = game['gamePk']
     awayTeamName = game['teams']['away']['team']['name']
+    print(awayTeamName)
     homeTeamName = game['teams']['home']['team']['name']
+    print(homeTeamName)
     gameStatus = game["status"]["detailedState"]
     gameDate = game['gameDate']
     gameTime = game['gameDate'][11:16]
@@ -63,23 +72,85 @@ for game in games:
     # Retrieve the value of theWinner from the games table for the specific gameId
     cursor.execute("SELECT theWinner FROM games WHERE gameId = CAST(%s AS text);", (gameId,))
     theWinner = cursor.fetchone()[0]
+
+    # Retrieve the value of teamName, numerator, denominator, and gameStatus from the teamRecords table for the specific gameId
+    cursor.execute("SELECT numerator, denominator FROM teamRecords WHERE teamName = CAST(%s AS text);", (awayTeamName,))
+    row = cursor.fetchone()
+    updateAway = 0
+    if row is not None:
+        numeratorAway = row[0]
+        denominatorAway = row[2]
+        if denominatorAway == 0:
+            updateAway+=1
+    else:
+        numeratorAway = 0
+        denominatorAway = 0
+        updateAway+=1
+
+    # Retrieve the value of teamName, numerator, denominator, and gameStatus from the teamRecords table for the specific gameId
+    cursor.execute("SELECT numerator, denominator FROM teamRecords WHERE teamName = CAST(%s AS text);", (homeTeamName,))
+    row = cursor.fetchone()
+    updateHome = 0
+    if row is not None:
+        numeratorHome = row[0]
+        denominatorHome = row[2]
+        if denominatorHome == 0:
+            updateHome+=1
+    else:
+        numeratorHome = 0
+        denominatorHome = 0
+        updateHome+=1
     
     # Determine the correct value based on the conditions
     if isWinnerAway and awayTeamName == theWinner:
+        print(awayTeamName)
         correct = True
         numerator += 1
         denominator += 1
+        numeratorAway += 1
+        numeratorHome += 1
+        denominatorAway += 1
+        denominatorHome += 1
     elif isWinnerHome and homeTeamName == theWinner:
+        print(homeTeamName)
         correct = True
         numerator += 1
         denominator += 1
+        numeratorHome += 1
+        numeratorAway += 1
+        denominatorAway += 1
+        denominatorHome += 1
     elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
         correct = False
         denominator += 1
-    print(correct)
+        denominatorAway += 1
+        denominatorHome += 1
     
+    # Check the conditions before inserting into teamRecords
+    if updateAway == 1:
+        cursor.execute("""
+            INSERT INTO teamRecords (teamName, numerator, denominator)
+            VALUES (%s, %s, %s)
+        """, (awayTeamName, numeratorAway, denominatorAway))
+    else:
+        cursor.execute("""
+            UPDATE teamRecords
+            SET numerator = %s, denominator = %s
+            WHERE teamName = %s
+        """, (numeratorAway, denominatorAway, awayTeamName))
+    if updateHome == 1:
+        cursor.execute("""
+            INSERT INTO teamRecords (teamName, numerator, denominator)
+            VALUES (%s, %s, %s)
+        """, (homeTeamName, numeratorHome, denominatorHome))
+    else:
+        cursor.execute("""
+            UPDATE teamRecords
+            SET numerator = %s, denominator = %s
+            WHERE teamName = %s
+        """, (numeratorHome, denominatorHome, homeTeamName))
     records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
 
 # Calculate the fraction of correct predictions
