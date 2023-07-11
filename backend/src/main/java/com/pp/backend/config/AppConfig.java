@@ -7,7 +7,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pp.backend.service.MLBGameService;
-import com.pp.backend.service.UserService;
+// import com.pp.backend.service.UserService;
 import com.pp.backend.service.PredictionService;
 import com.pp.backend.service.PredictionHistoryService;
 import com.pp.backend.service.TeamRecordService;
@@ -37,10 +37,10 @@ public class AppConfig {
         return dataSource;
     }
 
-    @Bean
-    public UserService userService(DataSource dataSource) {
-        return new UserService(dataSource);
-    }
+    // @Bean
+    // public UserService userService(DataSource dataSource) {
+    //     return new UserService(dataSource);
+    // }
 
     @Bean
     public PredictionService predictionService(DataSource dataSource) {
