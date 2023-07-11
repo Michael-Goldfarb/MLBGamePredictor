@@ -85,7 +85,7 @@ const PredictionHistoryPage = () => {
       )}
     </div>
     <div className="right-section w-1/2 text-center">
-      <h1 className="text-4xl font-bold mb-4">Team Records</h1>
+      <h1 className="text-4xl font-bold mb-4">Prediction Rate By Team</h1>
       <div className="sort-button-container">
         <button className="sort-button" onClick={handleSortByHighest}>
           Sort by Highest Percentage

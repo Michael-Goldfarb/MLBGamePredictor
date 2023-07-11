@@ -43,7 +43,6 @@
 
 .sort-button-container {
   display: inline-block;
-  border: none;
   border-radius: 4px;
   overflow: hidden;
 }
