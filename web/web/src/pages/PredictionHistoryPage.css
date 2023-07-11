@@ -5,10 +5,28 @@
   height: 100vh;
 }
 
-.prediction-history-container {
-  text-align: center;
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.prediction-history-text {
-  margin: 0 auto;
+.column-heading {
+  font-size: 1.5rem;
+}
+
+.prediction-history-column {
+  margin-left: 20px; /* Adjust the margin as per your layout preferences */
+}
+
+.prediction-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prediction-list li {
+  margin-bottom: 8px;
 }
