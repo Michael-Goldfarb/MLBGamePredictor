@@ -24,7 +24,6 @@ const PredictionHistoryPage = () => {
       }
     };
 
-
     fetchPredictionHistory();
     fetchTeamRecords();
   }, []);
@@ -43,15 +42,13 @@ const PredictionHistoryPage = () => {
     if (!teamRecords || teamRecords.length === 0) {
       return null;
     }
-    return teamRecords.map((teamRecord) => {
+    const sortedTeamRecords = teamRecords.sort((a, b) => a.teamName.localeCompare(b.teamName)); // Sort the teamRecords array alphabetically by teamName
+    return sortedTeamRecords.map((teamRecord) => {
       const { teamName, numerator, denominator, percentage } = teamRecord;
       const formattedPercentage = (percentage * 100).toFixed(2); // Multiply by 100 and format to 2 decimal places
       return `${teamName}: ${numerator}/${denominator} (${formattedPercentage}%)`;
     }).join('\n');
   };
-  
-  
-  
 
   return (
     <div className="prediction-history-container text-white text-center">
