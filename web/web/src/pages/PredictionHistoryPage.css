@@ -6,7 +6,7 @@
 }
 
 .container {
-  margin-top: 5rem; /* Adjust the margin-top value as needed */
+  margin-top: 5rem;
 }
 
 .column {
@@ -17,7 +17,8 @@
 }
 
 .column-heading {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: bold;
   margin-bottom: 1rem;
 }
 
@@ -36,22 +37,26 @@
   margin-bottom: 0px;
 }
 
+.sort-buttons {
+  margin-bottom: 1rem;
+}
+
 .sort-button-container {
   display: inline-block;
-  border: 1px solid #4a4a4a;
+  border: none;
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 1rem;
 }
 
 .sort-button {
   background-color: #4a4a4a;
   color: #ffffff;
   padding: 0.5rem 1rem;
-  border: none;
+  border: 1px solid #000000;
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .sort-button:hover {
@@ -64,4 +69,8 @@
 
 .sort-button:focus {
   outline: none;
+}
+
+.sort-button:first-child {
+  border-right: 1px solid #4a4a4a;
 }
