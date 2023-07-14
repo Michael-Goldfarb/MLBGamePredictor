@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.pp.backend.entity.PredictionHistory;
 import com.pp.backend.service.PredictionHistoryService;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/prediction-history")
@@ -16,8 +17,8 @@ public class PredictionHistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<PredictionHistory> getPredictionHistory() {
-        PredictionHistory predictionHistory = predictionHistoryService.getPredictionHistory();
-        return ResponseEntity.ok(predictionHistory);
+    public ResponseEntity<List<PredictionHistory>> getPredictionHistory() {
+        List<PredictionHistory> predictionHistoryList = predictionHistoryService.getPredictionHistory();
+        return ResponseEntity.ok(predictionHistoryList);
     }
 }

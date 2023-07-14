@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PredictionHistoryService {
     private final DataSource dataSource;
@@ -14,26 +16,27 @@ public class PredictionHistoryService {
         this.dataSource = dataSource;
     }
 
-    public PredictionHistory getPredictionHistory() {
-        PredictionHistory predictionHistory = null;
+    public List<PredictionHistory> getPredictionHistory() {
+        List<PredictionHistory> predictionHistoryList = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection()) {
-            String query = "SELECT prediction_date, numerator, denominator FROM dailyPredictions ORDER BY prediction_date DESC LIMIT 1";
+            String query = "SELECT prediction_date, numerator, denominator FROM dailyPredictions ORDER BY prediction_date DESC";
 
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 String predictionDate = resultSet.getString("prediction_date");
                 int numerator = resultSet.getInt("numerator");
                 int denominator = resultSet.getInt("denominator");
 
-                predictionHistory = new PredictionHistory(predictionDate, numerator, denominator);
+                PredictionHistory predictionHistory = new PredictionHistory(predictionDate, numerator, denominator);
+                predictionHistoryList.add(predictionHistory);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return predictionHistory;
+        return predictionHistoryList;
     }
 }
