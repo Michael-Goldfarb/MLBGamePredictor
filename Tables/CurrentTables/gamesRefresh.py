@@ -37,6 +37,7 @@ cursor.execute("""
         correct BOOLEAN
     )
 """)
+# cursor.execute("TRUNCATE TABLE gamesRefresh;")
                
 # Create the teamRecords table if it doesn't exist
 cursor.execute("""
@@ -137,7 +138,10 @@ for game in games:
     
     # Check the conditions before inserting into teamRecords
     if updateAway == 1:
-        percentages = float(numeratorAway)/denominatorAway
+        if denominatorAway != 0:
+            percentages = float(numeratorAway)/denominatorAway
+        else:
+            percentages = None
         cursor.execute("""
             INSERT INTO teamRecords (teamName, numerator, denominator, percentage, gameStatus)
             VALUES (%s, %s, %s, %s, %s)
@@ -151,7 +155,10 @@ for game in games:
                 WHERE teamName = %s
             """, (numeratorAway, denominatorAway, percentages, awayTeamName, gameStatus))
     if updateHome == 1:
-        percentages = float(numeratorAway)/denominatorAway
+        if denominatorHome != 0:
+            percentages = float(numeratorAway)/denominatorAway
+        else:
+            percentages = None
         cursor.execute("""
             INSERT INTO teamRecords (teamName, numerator, denominator, percentage, gameStatus)
             VALUES (%s, %s, %s, %s, %s)
@@ -164,7 +171,10 @@ for game in games:
                 SET numerator = %s, denominator = %s, percentage = %s, gameStatus = %s
                 WHERE teamName = %s
             """, (numeratorHome, denominatorHome, percentages, homeTeamName, gameStatus))
-    records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
+    if correct == None:
+        records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome))
+    else:
+        records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
 
 # Calculate the fraction of correct predictions
 if denominator > 0:

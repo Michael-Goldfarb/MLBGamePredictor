@@ -24,6 +24,7 @@ games = data['dates'][0]['games']
 # Loop through each gameId and create rows in the "LineupAndProbables" table
 for game in games:
     gamesId = game['gamePk']
+    print(gamesId)
     url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
     response = requests.get(url)
     data = response.json()
@@ -137,6 +138,7 @@ team_stats = {}
 # Make the API request to fetch player stats and insert into the table
 for index, playerId in enumerate(lineup):
     teamId = teamsLineup[index]  # Get the team name corresponding to the current player
+    print(teamId)
     gameId = gameIdss[index]
 
     # Make the API request to fetch player stats
