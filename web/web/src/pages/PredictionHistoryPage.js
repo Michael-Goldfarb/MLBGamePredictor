@@ -3,7 +3,7 @@ import axios from 'axios';
 import './PredictionHistoryPage.css';
 
 const PredictionHistoryPage = () => {
-  const [predictionHistory, setPredictionHistory] = useState([]);
+  const [predictionHistory, setPredictionHistory] = useState(null);
   const [teamRecords, setTeamRecords] = useState(null);
   const [sortType, setSortType] = useState(''); // Track the current sort type
 
@@ -11,20 +11,26 @@ const PredictionHistoryPage = () => {
     const fetchPredictionHistory = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/prediction-history');
+        console.log(response.data); // Check the response data
         setPredictionHistory(response.data);
+        console.log(predictionHistory); // Log the value of predictionHistory after setting it in the state
       } catch (error) {
         console.error(error);
       }
     };
+    
 
     const fetchTeamRecords = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/team-records');
+        console.log(response.data); // Check the response data
         setTeamRecords(response.data);
+        console.log(teamRecords); // Log the value of teamRecords after setting it in the state
       } catch (error) {
         console.error(error);
       }
     };
+    
 
     fetchPredictionHistory();
     fetchTeamRecords();
@@ -34,9 +40,9 @@ const PredictionHistoryPage = () => {
     if (!predictionHistory || predictionHistory.length === 0) {
       return null;
     }
-
+  
     return predictionHistory.map((prediction) => {
-      const { predictionDate, numerator, denominator } = prediction;
+      const { id, predictionDate, numerator, denominator } = prediction;
       const formattedDate = predictionDate.substring(5).replace('-', '/');
       return `${formattedDate}: ${numerator}/${denominator}`;
     });
