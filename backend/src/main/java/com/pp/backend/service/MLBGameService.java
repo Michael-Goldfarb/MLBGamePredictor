@@ -20,7 +20,8 @@ public class MLBGameService {
 
         try (Connection connection = dataSource.getConnection()) {
             String query = "SELECT gameId, homeTeamName, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, isWinnerHome, isWinnerAway, featuredWinner, correct " +
-                    "FROM gamesRefresh";
+                    "FROM gamesRefresh " +
+                    "ORDER BY gameDate ASC, gameTime ASC";
 
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery();
