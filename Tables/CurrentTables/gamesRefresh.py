@@ -47,13 +47,21 @@ cursor.execute("""
         numerator INTEGER,
         denominator INTEGER,
         percentage FLOAT,
-        gameStatus VARCHAR(255)
+        insertedYet VARCHAR(255)
     )
 """)
 
 # Initialize counters
 numerator = 0
 denominator = 0
+
+# Get the current date
+currentDate = games[0]['gameDate']
+print(currentDate)
+est_timezone = pytz.timezone('America/New_York')
+gameDateEST = datetime.strptime(currentDate, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc).astimezone(est_timezone)
+print("Game Date (Eastern Standard Time):", gameDateEST)
+gameDateString = gameDateEST.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 records = []
 for game in games:
@@ -77,39 +85,71 @@ for game in games:
     cursor.execute("SELECT theWinner FROM games WHERE gameId = CAST(%s AS text);", (gameId,))
     theWinner = cursor.fetchone()[0]
 
-    # Retrieve the value of teamName, numerator, denominator, and gameStatus from the teamRecords table for the specific gameId
-    cursor.execute("SELECT numerator, denominator, gameStatus FROM teamRecords WHERE teamName = CAST(%s AS text);", (awayTeamName,))
+    # Retrieve the value of teamName, numerator, denominator, and insertedYet from the teamRecords table for the specific gameId
+    cursor.execute("SELECT numerator, denominator, insertedYet FROM teamRecords WHERE teamName ILIKE %s;", (awayTeamName,))
     row = cursor.fetchone()
     updateAway = 0
+    print(row)
     if row is not None:
         numeratorAway = row[0]
         denominatorAway = row[1]
-        gameStatus2 = row[2]
-        if denominatorAway == 0:
-            updateAway+=1
+        insertedYet = row[2]
     else:
         numeratorAway = 0
         denominatorAway = 0
+        insertedYet = ""
         updateAway+=1
-
-    # Retrieve the value of teamName, numerator, denominator, and gameStatus from the teamRecords table for the specific gameId
-    cursor.execute("SELECT numerator, denominator FROM teamRecords WHERE teamName = CAST(%s AS text);", (homeTeamName,))
+        print("New info")
+    # if dates == gameDateEST and gameStatus == "Final":
+    #     alreadyStoredAway = True
+    # else:
+    #     alreadyStoredAway = False
+    
+    if gameStatus != "Final" and gameStatus != "Postponed" and gameStatus != "Suspended":
+        insertedYetAway = "No" + gameDateString
+    else:
+        insertedYetAway = "Yes" + gameDateString
+    print(insertedYetAway)
+    if insertedYet == insertedYetAway and insertedYetAway[:3] == "Yes":
+        alreadyStoredAway = True
+    else:
+        alreadyStoredAway = False
+   
+    # Retrieve the value of teamName, numerator, denominator, and insertedYet from the teamRecords table for the specific gameId
+    cursor.execute("SELECT numerator, denominator, insertedYet FROM teamRecords WHERE teamName ILIKE %s;", (homeTeamName,))
     row = cursor.fetchone()
     updateHome = 0
+    print(row)
     if row is not None:
         numeratorHome = row[0]
         denominatorHome = row[1]
-        if denominatorHome == 0:
-            updateHome+=1
+        insertedYet = row[2]
     else:
         numeratorHome = 0
         denominatorHome = 0
+        insertedYet = ""
         updateHome+=1
+        print("New info")
     
+    # if dates == gameDateEST and gameStatus == "Final":
+    #     alreadyStoredHome = True
+    # else:
+    #     alreadyStoredHome = False
+    
+    if gameStatus != "Final" and gameStatus != "Postponed" and gameStatus != "Suspended":
+        insertedYetHome = "No" + gameDateString
+    else:
+        insertedYetHome = "Yes" + gameDateString
+    print(insertedYetHome)
+    if insertedYet == insertedYetHome and insertedYetAway[:3] == "Yes":
+        alreadyStoredHome = True
+    else:
+        alreadyStoredHome = False
+   
+
     # Determine the correct value based on the conditions
     starter = 0
     if isWinnerAway and awayTeamName == theWinner:
-        print(awayTeamName)
         correct = True
         starter+=1
         numerator += 1
@@ -119,7 +159,6 @@ for game in games:
         denominatorAway += 1
         denominatorHome += 1
     elif isWinnerHome and homeTeamName == theWinner:
-        print(homeTeamName)
         correct = True
         starter+=1
         numerator += 1
@@ -131,11 +170,12 @@ for game in games:
     elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
-        correct = False
-        starter+=1
-        denominator += 1
-        denominatorAway += 1
-        denominatorHome += 1
+        if gameStatus != "Postponed" and gameStatus != "Suspended":
+            correct = False
+            starter+=1
+            denominator += 1
+            denominatorAway += 1
+            denominatorHome += 1
     
     # Check the conditions before inserting into teamRecords
     if updateAway == 1:
@@ -144,35 +184,40 @@ for game in games:
         else:
             percentages = None
         cursor.execute("""
-            INSERT INTO teamRecords (teamName, numerator, denominator, percentage, gameStatus)
+            INSERT INTO teamRecords (teamName, numerator, denominator, percentage, insertedYet)
             VALUES (%s, %s, %s, %s, %s)
-        """, (awayTeamName, numeratorAway, denominatorAway, percentages, gameStatus))
+        """, (awayTeamName, numeratorAway, denominatorAway, percentages, insertedYetAway))
     else:
-        if gameStatus == "Final" and gameStatus2 != "Final" and starter != 0:
-            percentages = float(numeratorAway)/denominatorAway
+        if gameStatus == "Final" and alreadyStoredAway == False:
+            if denominatorAway > 0:
+                percentages = float(numeratorAway)/denominatorAway
+            else:
+                percentages = 0.0
             cursor.execute("""
                 UPDATE teamRecords
-                SET numerator = %s, denominator = %s, percentage = %s, gameStatus = %s
+                SET numerator = %s, denominator = %s, percentage = %s, insertedYet = %s
                 WHERE teamName = %s
-            """, (numeratorAway, denominatorAway, percentages, awayTeamName, gameStatus))
+            """, (numeratorAway, denominatorAway, percentages, insertedYetAway, awayTeamName))
     if updateHome == 1:
         if denominatorHome != 0:
             percentages = float(numeratorAway)/denominatorAway
         else:
             percentages = None
         cursor.execute("""
-            INSERT INTO teamRecords (teamName, numerator, denominator, percentage, gameStatus)
+            INSERT INTO teamRecords (teamName, numerator, denominator, percentage, insertedYet)
             VALUES (%s, %s, %s, %s, %s)
-        """, (homeTeamName, numeratorHome, denominatorHome, percentages, gameStatus))
+        """, (homeTeamName, numeratorHome, denominatorHome, percentages, insertedYetHome))
     else:
-        if gameStatus == "Final" and gameStatus2 != "Final":
-            percentages = float(numeratorAway)/denominatorAway
+        if gameStatus == "Final" and alreadyStoredHome == False:
+            if denominatorHome > 0:
+                percentages = float(numeratorAway)/denominatorAway
+            else:
+                percentages = 0.0
             cursor.execute("""
                 UPDATE teamRecords
-                SET numerator = %s, denominator = %s, percentage = %s, gameStatus = %s
+                SET numerator = %s, denominator = %s, percentage = %s, insertedYet = %s
                 WHERE teamName = %s
-            """, (numeratorHome, denominatorHome, percentages, homeTeamName, gameStatus))
-    print(correct)
+            """, (numeratorHome, denominatorHome, percentages, insertedYetHome, homeTeamName))
     records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
 
 # Calculate the fraction of correct predictions
@@ -182,22 +227,6 @@ if denominator > 0:
 else:
     fraction_numerator = None
     fraction_denominator = None
-
-# Get the current date
-currentDate = games[0]['gameDate']
-print(currentDate)
-est_timezone = pytz.timezone('America/New_York')
-gameDateEST = datetime.strptime(currentDate, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc).astimezone(est_timezone)
-print("Game Date (Eastern Standard Time):", gameDateEST)
-
-# # Delete the existing record for the current date if it exists
-# cursor.execute("DELETE FROM dailyPredictions WHERE prediction_date = %s", (gameDateEST,))
-
-# # Insert the daily prediction into the dailyPredictions table
-# cursor.execute("""
-#     INSERT INTO dailyPredictions (prediction_date, numerator, denominator)
-#     VALUES (%s, %s, %s)
-# """, (gameDateEST, fraction_numerator, fraction_denominator))
 
 # Insert the daily prediction into the dailyPredictions table
 cursor.execute("""
