@@ -20,20 +20,20 @@ for gameId, gameStatus in gameIds:
     if gameStatus == "Postponed":
         predicted_winner = "None - Game Postponed"
         conn.execute(
-            "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
-            (predicted_winner, predicted_winner, str(gameId))
+            "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
+            (predicted_winner, predicted_winner, predicted_winner, str(gameId))
         )
     elif gameStatus == "Suspended":
         predicted_winner = "None - Game Suspended"
         conn.execute(
-            "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
-            (predicted_winner, predicted_winner, str(gameId))
+            "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
+            (predicted_winner, predicted_winner, predicted_winner, str(gameId))
         )
     elif gameStatus == "Canceled":
         predicted_winner = "None - Game Canceled"
         conn.execute(
-            "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
-            (predicted_winner, predicted_winner, str(gameId))
+            "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
+            (predicted_winner, predicted_winner, predicted_winner, str(gameId))
         )
     else:
         # Fetch the current data from the relevant tables for the current gameId
