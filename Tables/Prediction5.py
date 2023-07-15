@@ -17,8 +17,12 @@ for gameId, gameStatus in gameIds:
 
     # if gameStatus == "Final" or gameStatus == "In Progress":
     #     # Skip making predictions for games with "Final" or "In Progress" status
-    if gameStatus == "Postponed":
-        continue
+    if gameStatus == "Postponed" or gameStatus == "Suspended":
+        predicted_winner = "None"
+        conn.execute(
+            "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
+            (predicted_winner, predicted_winner, str(gameId))
+        )
     else:
         # Fetch the current data from the relevant tables for the current gameId
         hitting_stats = conn.execute("SELECT teamId, ops FROM HittingStats WHERE gameId = CAST(%s AS text)", (gameId,)).fetchall()
