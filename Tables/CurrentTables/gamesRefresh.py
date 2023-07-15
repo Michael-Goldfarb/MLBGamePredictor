@@ -2,6 +2,7 @@ import requests
 import json
 import psycopg2
 from datetime import datetime
+import pytz
 
 # response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-09&endDate=2023-07-09")
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
@@ -183,17 +184,28 @@ else:
     fraction_denominator = None
 
 # Get the current date
-currentDate = datetime.now().date()
+currentDate = games[0]['gameDate']
+print(currentDate)
+est_timezone = pytz.timezone('America/New_York')
+gameDateEST = datetime.strptime(currentDate, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc).astimezone(est_timezone)
+print("Game Date (Eastern Standard Time):", gameDateEST)
 
-# Delete the existing record for the current date if it exists
-cursor.execute("DELETE FROM dailyPredictions WHERE prediction_date = %s", (currentDate,))
+# # Delete the existing record for the current date if it exists
+# cursor.execute("DELETE FROM dailyPredictions WHERE prediction_date = %s", (gameDateEST,))
+
+# # Insert the daily prediction into the dailyPredictions table
+# cursor.execute("""
+#     INSERT INTO dailyPredictions (prediction_date, numerator, denominator)
+#     VALUES (%s, %s, %s)
+# """, (gameDateEST, fraction_numerator, fraction_denominator))
 
 # Insert the daily prediction into the dailyPredictions table
 cursor.execute("""
     INSERT INTO dailyPredictions (prediction_date, numerator, denominator)
     VALUES (%s, %s, %s)
-""", (currentDate, fraction_numerator, fraction_denominator))
-
+    ON CONFLICT (prediction_date) DO UPDATE
+    SET numerator = EXCLUDED.numerator, denominator = EXCLUDED.denominator
+""", (gameDateEST, fraction_numerator, fraction_denominator))
 
 
 
