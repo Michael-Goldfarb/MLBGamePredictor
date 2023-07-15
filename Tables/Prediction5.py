@@ -307,12 +307,12 @@ for gameId, gameStatus in gameIds:
             if prediction4 not in ['NaN', 'Unknown', firstWinner]:
                 secondWinner = prediction4
                 numTwoWins += 1
-            if numOneWins > numTwoWins:
+            if numOneWins > numTwoWins and firstWinner == teamOne or firstWinner == teamTwo:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s WHERE gameId = CAST(%s AS text)",
                     (predicted_winner, firstWinner, str(gameId))
                 )
-            elif numTwoWins > numOneWins:
+            elif numTwoWins > numOneWins and secondWinner == teamOne or secondWinner == teamTwo:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s WHERE gameId = CAST(%s AS text)",
                     (predicted_winner, secondWinner, str(gameId))
@@ -323,16 +323,16 @@ for gameId, gameStatus in gameIds:
                     (predicted_winner, predicted_winner, str(gameId))
                 )
             if(gameStatus == "Pre-Game"):
-                if(numOneWins > 2):
+                if(numOneWins > 2 and firstWinner == teamOne or firstWinner == teamTwo):
                     conn.execute(
                         "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (firstWinner, str(gameId))
                     )
                     conn.execute(
                         "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
-                        (firstWinner, str(gameId))
-                    )
-                elif(numTwoWins > 2):
+                            (firstWinner, str(gameId))
+                        )
+                elif(numTwoWins > 2 and secondWinner == teamOne or secondWinner == teamTwo):
                     conn.execute(
                         "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (secondWinner, str(gameId))
@@ -341,7 +341,7 @@ for gameId, gameStatus in gameIds:
                         "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (secondWinner, str(gameId))
                     )
-        
+            
 # Close the connection
 conn.close()
 print("Database connection closed.")
