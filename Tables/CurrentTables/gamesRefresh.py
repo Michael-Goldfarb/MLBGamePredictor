@@ -191,6 +191,9 @@ for game in games:
         if gameStatus == "Final" and alreadyStoredAway == False:
             if denominatorAway > 0:
                 percentages = float(numeratorAway)/denominatorAway
+                print(numeratorAway)
+                print(denominatorAway)
+                print(percentages)
             else:
                 percentages = 0.0
             cursor.execute("""
@@ -200,7 +203,7 @@ for game in games:
             """, (numeratorAway, denominatorAway, percentages, insertedYetAway, awayTeamName))
     if updateHome == 1:
         if denominatorHome != 0:
-            percentages = float(numeratorAway)/denominatorAway
+            percentages = float(numeratorHome)/denominatorHome
         else:
             percentages = None
         cursor.execute("""
@@ -210,7 +213,10 @@ for game in games:
     else:
         if gameStatus == "Final" and alreadyStoredHome == False:
             if denominatorHome > 0:
-                percentages = float(numeratorAway)/denominatorAway
+                percentages = float(numeratorHome)/denominatorHome
+                print(numeratorHome)
+                print(denominatorHome)
+                print(percentages)
             else:
                 percentages = 0.0
             cursor.execute("""
