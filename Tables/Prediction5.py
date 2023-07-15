@@ -17,8 +17,20 @@ for gameId, gameStatus in gameIds:
 
     # if gameStatus == "Final" or gameStatus == "In Progress":
     #     # Skip making predictions for games with "Final" or "In Progress" status
-    if gameStatus == "Postponed" or gameStatus == "Suspended":
-        predicted_winner = "None"
+    if gameStatus == "Postponed":
+        predicted_winner = "None - Game Postponed"
+        conn.execute(
+            "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
+            (predicted_winner, predicted_winner, str(gameId))
+        )
+    elif gameStatus == "Suspended":
+        predicted_winner = "None - Game Suspended"
+        conn.execute(
+            "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
+            (predicted_winner, predicted_winner, str(gameId))
+        )
+    elif gameStatus == "Canceled":
+        predicted_winner = "None - Game Canceled"
         conn.execute(
             "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
             (predicted_winner, predicted_winner, str(gameId))
