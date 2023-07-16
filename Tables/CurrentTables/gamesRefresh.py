@@ -100,15 +100,11 @@ for game in games:
         insertedYet = ""
         updateAway+=1
         print("New info")
-    # if dates == gameDateEST and gameStatus == "Final":
-    #     alreadyStoredAway = True
-    # else:
-    #     alreadyStoredAway = False
     
     if gameStatus != "Final" and gameStatus != "Postponed" and gameStatus != "Suspended":
-        insertedYetAway = "No" + gameDateString
+        insertedYetAway = "No" + gameDateString + str(gameId)
     else:
-        insertedYetAway = "Yes" + gameDateString
+        insertedYetAway = "Yes" + gameDateString + str(gameId)
     print(insertedYetAway)
     if insertedYet == insertedYetAway and insertedYetAway[:3] == "Yes":
         alreadyStoredAway = True
@@ -131,15 +127,10 @@ for game in games:
         updateHome+=1
         print("New info")
     
-    # if dates == gameDateEST and gameStatus == "Final":
-    #     alreadyStoredHome = True
-    # else:
-    #     alreadyStoredHome = False
-    
     if gameStatus != "Final" and gameStatus != "Postponed" and gameStatus != "Suspended":
-        insertedYetHome = "No" + gameDateString
+        insertedYetHome = "No" + gameDateString + str(gameId)
     else:
-        insertedYetHome = "Yes" + gameDateString
+        insertedYetHome = "Yes" + gameDateString + str(gameId)
     print(insertedYetHome)
     if insertedYet == insertedYetHome and insertedYetAway[:3] == "Yes":
         alreadyStoredHome = True
