@@ -24,7 +24,7 @@ response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=
 data = response.json()
 games = data['dates'][0]['games']
 
-# Loop through each gameId and create rows in the "LineupAndProbables" table
+# Loop through each gameId
 for game in games:
     gameId = game['gamePk']
     gameIdss.append(gameId)
