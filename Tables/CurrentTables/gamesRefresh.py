@@ -57,10 +57,8 @@ denominator = 0
 
 # Get the current date
 currentDate = games[0]['gameDate']
-print(currentDate)
 est_timezone = pytz.timezone('America/New_York')
 gameDateEST = datetime.strptime(currentDate, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc).astimezone(est_timezone)
-print("Game Date (Eastern Standard Time):", gameDateEST)
 gameDateString = gameDateEST.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 records = []
@@ -89,7 +87,6 @@ for game in games:
     cursor.execute("SELECT numerator, denominator, insertedYet FROM teamRecords WHERE teamName ILIKE %s;", (awayTeamName,))
     row = cursor.fetchone()
     updateAway = 0
-    print(row)
     if row is not None:
         numeratorAway = row[0]
         denominatorAway = row[1]
@@ -105,7 +102,6 @@ for game in games:
         insertedYetAway = "No" + gameDateString + str(gameId)
     else:
         insertedYetAway = "Yes" + gameDateString + str(gameId)
-    print(insertedYetAway)
     if insertedYet == insertedYetAway and insertedYetAway[:3] == "Yes":
         alreadyStoredAway = True
     else:
@@ -115,7 +111,6 @@ for game in games:
     cursor.execute("SELECT numerator, denominator, insertedYet FROM teamRecords WHERE teamName ILIKE %s;", (homeTeamName,))
     row = cursor.fetchone()
     updateHome = 0
-    print(row)
     if row is not None:
         numeratorHome = row[0]
         denominatorHome = row[1]
@@ -131,7 +126,6 @@ for game in games:
         insertedYetHome = "No" + gameDateString + str(gameId)
     else:
         insertedYetHome = "Yes" + gameDateString + str(gameId)
-    print(insertedYetHome)
     if insertedYet == insertedYetHome and insertedYetAway[:3] == "Yes":
         alreadyStoredHome = True
     else:
@@ -182,9 +176,6 @@ for game in games:
         if gameStatus == "Final" and alreadyStoredAway == False:
             if denominatorAway > 0:
                 percentages = float(numeratorAway)/denominatorAway
-                print(numeratorAway)
-                print(denominatorAway)
-                print(percentages)
             else:
                 percentages = 0.0
             cursor.execute("""
@@ -205,9 +196,6 @@ for game in games:
         if gameStatus == "Final" and alreadyStoredHome == False:
             if denominatorHome > 0:
                 percentages = float(numeratorHome)/denominatorHome
-                print(numeratorHome)
-                print(denominatorHome)
-                print(percentages)
             else:
                 percentages = 0.0
             cursor.execute("""
