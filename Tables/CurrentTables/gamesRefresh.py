@@ -65,9 +65,7 @@ records = []
 for game in games:
     gameId = game['gamePk']
     awayTeamName = game['teams']['away']['team']['name']
-    print(awayTeamName)
     homeTeamName = game['teams']['home']['team']['name']
-    print(homeTeamName)
     gameStatus = game["status"]["detailedState"]
     gameDate = game['gameDate']
     gameTime = game['gameDate'][11:16]
@@ -177,6 +175,7 @@ for game in games:
         """, (awayTeamName, numeratorAway, denominatorAway, percentages, insertedYetAway))
     else:
         if gameStatus == "Final" and alreadyStoredAway == False and correct != None:
+            print(awayTeamName)
             if denominatorAway > 0:
                 percentages = float(numeratorAway)/denominatorAway
             else:
@@ -197,6 +196,7 @@ for game in games:
         """, (homeTeamName, numeratorHome, denominatorHome, percentages, insertedYetHome))
     else:
         if gameStatus == "Final" and alreadyStoredHome == False and correct != None:
+            print(homeTeamName)
             if denominatorHome > 0:
                 percentages = float(numeratorHome)/denominatorHome
             else:
