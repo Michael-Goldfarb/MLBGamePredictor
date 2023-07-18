@@ -134,6 +134,7 @@ for game in games:
 
     # Determine the correct value based on the conditions
     starter = 0
+    updatedOrNo = False
     if isWinnerAway and awayTeamName == theWinner:
         correct = True
         starter+=1
@@ -143,6 +144,7 @@ for game in games:
         numeratorHome += 1
         denominatorAway += 1
         denominatorHome += 1
+        updatedOrNo = True
     elif isWinnerHome and homeTeamName == theWinner:
         correct = True
         starter+=1
@@ -152,6 +154,7 @@ for game in games:
         numeratorAway += 1
         denominatorAway += 1
         denominatorHome += 1
+        updatedOrNo = True
     elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
@@ -173,7 +176,7 @@ for game in games:
             VALUES (%s, %s, %s, %s, %s)
         """, (awayTeamName, numeratorAway, denominatorAway, percentages, insertedYetAway))
     else:
-        if gameStatus == "Final" and alreadyStoredAway == False:
+        if gameStatus == "Final" and alreadyStoredAway == False and correct != None:
             if denominatorAway > 0:
                 percentages = float(numeratorAway)/denominatorAway
             else:
@@ -193,7 +196,7 @@ for game in games:
             VALUES (%s, %s, %s, %s, %s)
         """, (homeTeamName, numeratorHome, denominatorHome, percentages, insertedYetHome))
     else:
-        if gameStatus == "Final" and alreadyStoredHome == False:
+        if gameStatus == "Final" and alreadyStoredHome == False and correct != None:
             if denominatorHome > 0:
                 percentages = float(numeratorHome)/denominatorHome
             else:
