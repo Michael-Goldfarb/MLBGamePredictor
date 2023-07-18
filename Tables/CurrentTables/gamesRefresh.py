@@ -155,7 +155,7 @@ for game in games:
     elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
-        if gameStatus != "Postponed" and gameStatus != "Suspended":
+        if gameStatus != "Postponed" and gameStatus != "Suspended" and theWinner != None:
             correct = False
             starter+=1
             denominator += 1
