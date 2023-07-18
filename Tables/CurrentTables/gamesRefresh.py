@@ -132,6 +132,7 @@ for game in games:
 
     # Determine the correct value based on the conditions
     starter = 0
+    updatedAway = 0
     updatedOrNo = False
     if isWinnerAway and awayTeamName == theWinner:
         correct = True
@@ -140,6 +141,7 @@ for game in games:
         denominator += 1
         numeratorAway += 1
         numeratorHome += 1
+        updatedAway += 1
         denominatorAway += 1
         denominatorHome += 1
         updatedOrNo = True
@@ -156,7 +158,7 @@ for game in games:
     elif isWinnerAway is None or isWinnerHome is None:
         correct = None
     else:
-        if gameStatus != "Postponed" and gameStatus != "Suspended" and theWinner != None:
+        if gameStatus != "Postponed" and gameStatus != "Suspended" and theWinner != None and gameStatus == "Final":
             correct = False
             starter+=1
             denominator += 1
