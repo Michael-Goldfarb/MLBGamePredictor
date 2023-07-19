@@ -20,7 +20,8 @@ gameIdss = []
 teamsStarters = []
 startersName = []
 teamIds = []
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
+# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-18&endDate=2023-07-18")
 data = response.json()
 games = data['dates'][0]['games']
 

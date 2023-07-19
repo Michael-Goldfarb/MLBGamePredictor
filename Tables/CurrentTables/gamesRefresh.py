@@ -4,8 +4,8 @@ import psycopg2
 from datetime import datetime
 import pytz
 
-# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-09&endDate=2023-07-09")
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-18&endDate=2023-07-18")
+# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
 
@@ -134,6 +134,7 @@ for game in games:
     starter = 0
     updatedAway = 0
     updatedOrNo = False
+    correct = None
     if isWinnerAway and awayTeamName == theWinner:
         correct = True
         starter+=1
