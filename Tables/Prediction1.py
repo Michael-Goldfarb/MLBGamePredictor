@@ -11,9 +11,16 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
+import os
 
-# Create a SQLAlchemy engine
-engine = create_engine('postgresql://syabkhtb:J7LXI5pNQ_UoUP316yEd-yoXnCOZK8HE@rajje.db.elephantsql.com:5432/syabkhtb')
+db_host = os.environ.get('DB_HOST')
+db_name = os.environ.get('DB_NAME')
+db_user = os.environ.get('DB_USER')
+db_port = os.environ.get('DB_PORT')
+db_password = os.environ.get('DB_PASSWORD')
+
+# Use the variables in your create_engine() call:
+engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
 
 scaler = StandardScaler()
 # Fetch the historical data from the database tables
