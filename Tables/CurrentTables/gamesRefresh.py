@@ -226,7 +226,7 @@ cursor.execute("""
     ON CONFLICT (prediction_date) DO UPDATE
     SET numerator = EXCLUDED.numerator, denominator = EXCLUDED.denominator
 """, (gameDateEST, fraction_numerator, fraction_denominator))
-
+print(str(fraction_numerator) + "/" + str(fraction_denominator))
 
 
 # Insert data into the table
