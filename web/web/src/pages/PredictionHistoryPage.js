@@ -5,32 +5,29 @@ import './PredictionHistoryPage.css';
 const PredictionHistoryPage = () => {
   const [predictionHistory, setPredictionHistory] = useState(null);
   const [teamRecords, setTeamRecords] = useState(null);
-  const [sortType, setSortType] = useState(''); // Track the current sort type
+  const [totalNumerator, setTotalNumerator] = useState(0); 
+  const [totalDenominator, setTotalDenominator] = useState(0); 
+  const [sortType, setSortType] = useState('');
 
   useEffect(() => {
     const fetchPredictionHistory = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/prediction-history');
-        console.log(response.data); // Check the response data
         setPredictionHistory(response.data);
-        console.log(predictionHistory); // Log the value of predictionHistory after setting it in the state
       } catch (error) {
         console.error(error);
       }
     };
-    
 
     const fetchTeamRecords = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/team-records');
-        console.log(response.data); // Check the response data
         setTeamRecords(response.data);
-        console.log(teamRecords); // Log the value of teamRecords after setting it in the state
+        calculateOverallPercentage(response.data); 
       } catch (error) {
         console.error(error);
       }
     };
-    
 
     fetchPredictionHistory();
     fetchTeamRecords();
@@ -53,7 +50,7 @@ const PredictionHistoryPage = () => {
       return null;
     }
 
-    let sortedTeamRecords = [...teamRecords]; // Create a copy of the teamRecords array
+    let sortedTeamRecords = [...teamRecords];
 
     // Sort the teamRecords based on the current sort type
     if (sortType === 'highest') {
@@ -77,12 +74,31 @@ const PredictionHistoryPage = () => {
     setSortType('lowest');
   };
 
+  const calculateOverallPercentage = (predictionHistory) => {
+    let totalNumerator = 0;
+    let totalDenominator = 0;
+
+    for (const prediction of predictionHistory) {
+      totalNumerator += prediction.numerator;
+      totalDenominator += prediction.denominator;
+    }
+    totalNumerator/=2;
+    totalDenominator/=2;
+
+    setTotalNumerator(totalNumerator);
+    setTotalDenominator(totalDenominator);
+  };
+
+  const overallPercentage = ((totalNumerator / totalDenominator) * 100).toFixed(2);
+
+
   return (
     <div className="prediction-history-page bg-gray-800 min-h-screen flex flex-col items-center justify-start py-10">
       <div className="container flex mr-12">
         <div className="left-section w-3/4 text-center">
           <h1 className="text-4xl font-bold mb-4">Prediction History</h1>
           {predictionHistory && (
+            <div>
             <ul className="prediction-list">
               {formatPredictionHistory(predictionHistory).map((prediction, index) => (
                 <li key={index} className="mb-3">
@@ -90,6 +106,12 @@ const PredictionHistoryPage = () => {
                 </li>
               ))}
             </ul>
+            {totalDenominator !== 0 && (
+              <p className="overall-percentage">
+                Overall: {totalNumerator}/{totalDenominator} ({((totalNumerator / totalDenominator) * 100).toFixed(2)}%)
+              </p>
+            )}
+          </div>
           )}
         </div>
         <div className="right-section w-1/2 text-center">

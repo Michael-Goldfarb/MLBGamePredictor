@@ -73,3 +73,9 @@
 .sort-button:first-child {
   border-right: 1px solid #4a4a4a;
 }
+
+.overall-percentage {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 20px; 
+}
