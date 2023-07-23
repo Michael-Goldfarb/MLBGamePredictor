@@ -68,7 +68,17 @@ est_timezone = pytz.timezone('America/New_York')
 gameDateEST = datetime.strptime(currentDate, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc).astimezone(est_timezone)
 gameDateString = gameDateEST.strftime("%Y-%m-%d %H:%M:%S %Z")
 
+team_game_counts = {}
 records = []
+for game in games:
+    awayTeamName = game['teams']['away']['team']['name']
+    homeTeamName = game['teams']['home']['team']['name']
+    team_game_counts[awayTeamName] = team_game_counts.get(awayTeamName, {'count': 0, 'game_ids': []})
+    team_game_counts[homeTeamName] = team_game_counts.get(homeTeamName, {'count': 0, 'game_ids': []})
+    team_game_counts[awayTeamName]['count'] += 1
+    team_game_counts[homeTeamName]['count'] += 1
+    team_game_counts[awayTeamName]['game_ids'].append(game['gamePk'])
+    team_game_counts[homeTeamName]['game_ids'].append(game['gamePk'])
 for game in games:
     gameId = game['gamePk']
     awayTeamName = game['teams']['away']['team']['name']
@@ -83,6 +93,7 @@ for game in games:
     venue = game['venue']['name']
     isWinnerAway = game['teams']['away'].get('isWinner')
     isWinnerHome = game['teams']['home'].get('isWinner')
+
     
     # Retrieve the value of theWinner from the games table for the specific gameId
     cursor.execute("SELECT theWinner FROM games WHERE gameId = CAST(%s AS text);", (gameId,))
@@ -174,6 +185,7 @@ for game in games:
             denominatorHome += 1
     
     # Check the conditions before inserting into teamRecords
+    twoGamesNoDoubleheader = True
     if updateAway == 1:
         if denominatorAway != 0:
             percentages = float(numeratorAway)/denominatorAway
@@ -184,7 +196,10 @@ for game in games:
             VALUES (%s, %s, %s, %s, %s)
         """, (awayTeamName, numeratorAway, denominatorAway, percentages, insertedYetAway))
     else:
-        if gameStatus == "Final" and alreadyStoredAway == False and correct != None:
+        if team_game_counts[awayTeamName]['count'] == 2 and gameId == team_game_counts[awayTeamName]['game_ids'][0] and insertedYet[:13] == insertedYetAway[:13] and insertedYet[:3] == "Yes":
+        # Skip updating teamRecords for the first game
+            twoGamesNoDoubleheader = False
+        if gameStatus == "Final" and alreadyStoredAway == False and correct != None and twoGamesNoDoubleheader:
             print(awayTeamName)
             if denominatorAway > 0:
                 percentages = float(numeratorAway)/denominatorAway
@@ -205,7 +220,10 @@ for game in games:
             VALUES (%s, %s, %s, %s, %s)
         """, (homeTeamName, numeratorHome, denominatorHome, percentages, insertedYetHome))
     else:
-        if gameStatus == "Final" and alreadyStoredHome == False and correct != None:
+        if team_game_counts[homeTeamName]['count'] == 2 and gameId == team_game_counts[awayTeamName]['game_ids'][0] and insertedYet[:13] == insertedYetHome[:13] and insertedYet[:3] == "Yes":
+        # Skip updating teamRecords for the first game
+            twoGamesNoDoubleheader = False
+        if gameStatus == "Final" and alreadyStoredHome == False and correct != None and twoGamesNoDoubleheader:
             print(homeTeamName)
             if denominatorHome > 0:
                 percentages = float(numeratorHome)/denominatorHome
