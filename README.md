@@ -9,13 +9,13 @@
 <p align="center">
   <img width="1440" alt="Screenshot 2023-07-25 at 8 18 30 AM" src="https://github.com/Michael-Goldfarb/MLBGamePredictor/assets/66848094/77f9030b-d096-4920-bf75-7fd01e78f317">
   <br>
-  <em>Caption for the second image</em>
+  <em>History page with daily prediction records and overall prediction record. There is also a spot to see the overall prediction record by team, to be able to tell which teams the model is best and worst at predicting. I added buttons to sort by the teams the model is best at predicting, and the teams the model is worst at predicting.</em>
 </p>
 
 <p align="center">
   <img width="1440" alt="Screenshot 2023-07-25 at 8 19 41 AM" src="https://github.com/Michael-Goldfarb/MLBGamePredictor/assets/66848094/72afeb2e-2fcc-492e-b70d-9c43bf63da53">
   <br>
-  <em>Caption for the third image</em>
+  <em>This is the page the user is sent to after logging in with Google. They have the option to either be sent to the predictions page, or log out. I implemented Google OAuth for Google Sign In.</em>
 </p>
 
 ## How to Use:
