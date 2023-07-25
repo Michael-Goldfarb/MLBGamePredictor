@@ -35,3 +35,4 @@ build/
 ### Application Properties ###
 /application.properties
 /application.yml
+/firebase_config.json
