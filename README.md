@@ -19,8 +19,9 @@
 </p>
 
 ## How to Use:
-1. Run 'git clone https://github.com/Michael-Goldfarb/MLBGamePredictor.git'
-2. Open up three terminals and cd into MLBGamePredictor in each terminal
+1. Open a terminal and paste the below text:
+2.     git clone https://github.com/Michael-Goldfarb/MLBGamePredictor.git
+3. Open up three terminals and cd into MLBGamePredictor by typing 'cd MLBGamePredictor' in each terminal
 4. In one terminal, run 'git checkout backend'
 5. In the same terminal, run 'cd tables', then 'cd currentTables'
 6. In that table, run the following files:
