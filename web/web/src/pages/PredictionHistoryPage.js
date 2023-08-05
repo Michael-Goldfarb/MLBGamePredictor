@@ -82,8 +82,8 @@ const PredictionHistoryPage = () => {
       totalNumerator += prediction.numerator;
       totalDenominator += prediction.denominator;
     }
-    totalNumerator/=2;
-    totalDenominator/=2;
+   // totalNumerator/=2;
+    //totalDenominator/=2;
 
     setTotalNumerator(totalNumerator);
     setTotalDenominator(totalDenominator);
