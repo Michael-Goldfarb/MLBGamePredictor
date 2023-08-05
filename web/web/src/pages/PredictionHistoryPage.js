@@ -14,6 +14,7 @@ const PredictionHistoryPage = () => {
       try {
         const response = await axios.get('http://localhost:8000/api/prediction-history');
         setPredictionHistory(response.data);
+        calculateOverallPercentage(response.data); 
       } catch (error) {
         console.error(error);
       }
@@ -23,7 +24,6 @@ const PredictionHistoryPage = () => {
       try {
         const response = await axios.get('http://localhost:8000/api/team-records');
         setTeamRecords(response.data);
-        calculateOverallPercentage(response.data); 
       } catch (error) {
         console.error(error);
       }
