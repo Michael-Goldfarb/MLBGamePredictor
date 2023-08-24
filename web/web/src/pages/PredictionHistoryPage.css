@@ -3,6 +3,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
+  overflow-y: auto;
 }
 
 .container {
@@ -20,6 +21,10 @@
   font-size: 1.75rem;
   font-weight: bold;
   margin-bottom: 1rem;
+}
+
+.left-section {
+  margin-top: 10rem;
 }
 
 .prediction-history-column {
@@ -72,6 +77,10 @@
 
 .sort-button:first-child {
   border-right: 1px solid #4a4a4a;
+}
+
+.right-section {
+  margin-top: 10rem;
 }
 
 .overall-percentage {
