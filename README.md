@@ -18,7 +18,7 @@
   <em>This is the page the user is sent to after logging in with Google. They have the option to either be sent to the predictions page, or log out. I implemented Google OAuth for Google Sign In.</em>
 </p>
 
-## How to Use:
+## How to Use: (Email me @ michaelgoldfarb6@gmail.com if you want to be able to access my database credentials)
 1. Open a terminal and paste the below text:
 2.     git clone https://github.com/Michael-Goldfarb/MLBGamePredictor.git
 3. Open up three terminals and cd into MLBGamePredictor by typing 'cd MLBGamePredictor' in each terminal
