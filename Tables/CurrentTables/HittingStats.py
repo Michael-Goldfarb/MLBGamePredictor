@@ -4,8 +4,8 @@ import psycopg2
 from datetime import datetime
 import os
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
-# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-18&endDate=2023-07-18")
+# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-18&endDate=2023-07-18")
 data = response.json()
 games = data['dates'][0]['games']
 
@@ -51,7 +51,8 @@ for game in games:
     awayTeamName = game['teams']['away']['team']['name']
     homeTeamId = game['teams']['home']['team']['id']
     homeTeamName = game['teams']['home']['team']['name']
-    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=hitting&stats=season"
+    # awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=hitting&stats=season"
+    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&group=hitting&startDate=2023-02-18&endDate=2023-07-18"
     awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
     awayTeamStatsData = awayTeamStatsResponse.json()
     awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
@@ -69,7 +70,8 @@ for game in games:
     ))
 
     # Get the hitting stats for the home team
-    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=hitting&stats=season"
+    # homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=hitting&stats=season"
+    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&group=hitting&startDate=2023-02-18&endDate=2023-07-18"
     homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
     homeTeamStatsData = homeTeamStatsResponse.json()
     homeTeamStats = homeTeamStatsData['stats'][0]['splits'][0]['stat']
