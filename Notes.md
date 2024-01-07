@@ -1,5 +1,5 @@
 # How to set up the database!
-Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these 18 create table statements in ElephantSQL before running the program files!
+Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these 18 create table statements individually in ElephantSQL before running the program files!
 Make sure to follow the instructions on the bottom of the page after creating the 18 tables!
 
 
