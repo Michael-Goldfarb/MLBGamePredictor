@@ -18,29 +18,30 @@
   <em>This is the page the user is sent to after logging in with Google. They have the option to either be sent to the predictions page, or log out. I implemented Google OAuth for Google Sign In.</em>
 </p>
 
-## How to Use: (Email me @ michaelgoldfarb6@gmail.com if you want to know how to set up the database to be able to run the below files)
+## How to Use:
 1. Open a terminal and paste the below text:
 2.     git clone https://github.com/Michael-Goldfarb/MLBGamePredictor.git
 3. Open up three terminals and cd into MLBGamePredictor by typing 'cd MLBGamePredictor' in each terminal
 4. In one terminal, run 'git checkout backend'
 5. In the same terminal, run 'cd tables', then 'cd currentTables'
-6. In that table, run the following files:
-7.     python todaysgames.py
-8.     python gamesv3.py
-9.     python gamesrefresh.py
-10.     python hittingstats.py
-11.     python pitchingstats.py
-12.     python probablesstats.py
-13.     python lineupstats.py
-14.     python previousyearhittingstats.py
-15.     python previousyearpitchingstats.py
-16. Then, in another terminal, run 'cd tables'
-17. In that terminal, run the following files:
-18.     python prediction1.py
-19.     python prediction2.py
-20.     python prediction3.py
-21.     python prediction4.py
-22.     python prediction5.py
-23. Then, to start the website, in the same terminal, run 'cd ..', then 'cd backend', then 'mvn spring-boot:run'
-24. Open up your third terminal, run 'git checkout web', then 'cd web', then 'cd web', then 'npm start'
-25. Now the website is started! For more up-to-date predictions and game scores, run the gamesRefresh file, the prediction5.py file, and run the lineupStats.py and previousyearhittingstats tables, because lineups are only put out a few hours before the start of the game and could change.
+6. Follow the instructions on the Notes.md file
+7. In /currentTables, run the following files:
+8.     python todaysgames.py
+9.     python gamesv3.py
+10.     python gamesrefresh.py
+11.     python hittingstats.py
+12.     python pitchingstats.py
+13.     python probablesstats.py
+14.     python lineupstats.py
+15.     python previousyearhittingstats.py
+16.     python previousyearpitchingstats.py
+17. Then, in another terminal, run 'cd tables'
+18. In that terminal, run the following files:
+19.     python prediction1.py
+20.     python prediction2.py
+21.     python prediction3.py
+22.     python prediction4.py
+23.     python prediction5.py
+24. Then, to start the website, in the same terminal, run 'cd ..', then 'cd backend', then 'mvn spring-boot:run'
+25. Open up your third terminal, run 'git checkout web', then 'cd web', then 'cd web', then 'npm start'
+26. Now the website is started! For more up-to-date predictions and game scores, run the gamesRefresh file, the prediction5.py file, and run the lineupStats.py and previousyearhittingstats tables, because lineups are only put out a few hours before the start of the game and could change.
