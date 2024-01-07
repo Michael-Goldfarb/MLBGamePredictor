@@ -83,41 +83,40 @@ intercept = model.intercept_
 # Print the above attributes
 print("Coefficients:", coefficients)
 
-# Manually adjust the coefficient for 'era'
-era_index = features.index("era")  
-model.coef_[0][era_index] = 9.59137001e-02
-whip_index = features.index("whip")
-model.coef_[0][whip_index] = 5.95366708e-02
-hitsper9inn_index = features.index("hitsper9inn")
-model.coef_[0][hitsper9inn_index] = -1.99281612e-01
-runsscoredper9_index = features.index("runsscoredper9")
-model.coef_[0][runsscoredper9_index] = 1.27788597e-01
-homerunsper9_index = features.index("homerunsper9")
-model.coef_[0][homerunsper9_index] = -3.54604613e-02
-strikeoutwalkratio_pitching_index = features.index("strikeoutwalkratio_pitching")
-model.coef_[0][strikeoutwalkratio_pitching_index] = 2.81140744e-01
-games_started_index = features.index("games_started")
-model.coef_[0][games_started_index] = 1.98856168e-04
-gamespitched_index = features.index("gamespitched")
-model.coef_[0][gamespitched_index] = 4.95434015e-03
-strikeouts_index = features.index("strikeouts")
-model.coef_[0][strikeouts_index] = -1.39930944e-03
-saves_index = features.index("saves")
-model.coef_[0][saves_index] = 5.91876260e-03
-blownsaves_index = features.index("blownsaves")
-model.coef_[0][blownsaves_index] = 1.70929299e-02
-obp_index = features.index("obp")
-model.coef_[0][obp_index] = 2.07089606e-02
-slg_hitting_index = features.index("slg_hitting")
-model.coef_[0][slg_hitting_index] = 3.04611994e-02
-ops_index = features.index("ops")
-model.coef_[0][ops_index] = 3.86047238e-02
-strikeoutwalkratio_probables_index = features.index("strikeoutwalkratio_probables")
-model.coef_[0][strikeoutwalkratio_probables_index] = -3.61638317e-02
+# # Manually adjust the coefficient for 'era'
+# era_index = features.index("era")  
+# model.coef_[0][era_index] = 9.59137001e-02
+# whip_index = features.index("whip")
+# model.coef_[0][whip_index] = 5.95366708e-02
+# hitsper9inn_index = features.index("hitsper9inn")
+# model.coef_[0][hitsper9inn_index] = -1.99281612e-01
+# runsscoredper9_index = features.index("runsscoredper9")
+# model.coef_[0][runsscoredper9_index] = 1.27788597e-01
+# homerunsper9_index = features.index("homerunsper9")
+# model.coef_[0][homerunsper9_index] = -3.54604613e-02
+# strikeoutwalkratio_pitching_index = features.index("strikeoutwalkratio_pitching")
+# model.coef_[0][strikeoutwalkratio_pitching_index] = 2.81140744e-01
+# games_started_index = features.index("games_started")
+# model.coef_[0][games_started_index] = 1.98856168e-04
+# gamespitched_index = features.index("gamespitched")
+# model.coef_[0][gamespitched_index] = 4.95434015e-03
+# strikeouts_index = features.index("strikeouts")
+# model.coef_[0][strikeouts_index] = -1.39930944e-03
+# saves_index = features.index("saves")
+# model.coef_[0][saves_index] = 5.91876260e-03
+# blownsaves_index = features.index("blownsaves")
+# model.coef_[0][blownsaves_index] = 1.70929299e-02
+# obp_index = features.index("obp")
+# model.coef_[0][obp_index] = 2.07089606e-02
+# slg_hitting_index = features.index("slg_hitting")
+# model.coef_[0][slg_hitting_index] = 3.04611994e-02
+# ops_index = features.index("ops")
+# model.coef_[0][ops_index] = 3.86047238e-02
+# strikeoutwalkratio_probables_index = features.index("strikeoutwalkratio_probables")
+# model.coef_[0][strikeoutwalkratio_probables_index] = -3.61638317e-02
 
-
-# Optionally, print the updated coefficients
-print("Updated Coefficients:", model.coef_)
+# # Updated coefficients
+# print("Updated Coefficients:", model.coef_)
 
 # Fetch the gameIds from the 'games' table
 query = "SELECT gameId FROM games"
@@ -159,6 +158,10 @@ for gameId in gameIds:
         X_current = current_data_imputed
         current_data["predicted_winner"] = model.predict(X_current)
 
+        # Fetch the home team name for the current game
+        home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
+        home_team_name = pd.read_sql_query(home_team_query, engine).iloc[0, 0]
+        
         predicted_probabilities = model.predict_proba(X_current)
 
         # Create a DataFrame to display the current data and the model's decision
@@ -175,6 +178,9 @@ for gameId in gameIds:
 
         # Get the predicted winners as a list of team names
         predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
+
+        # Check for NaN in predicted winners and replace with home team name
+        # predicted_winners = predicted_winners.fillna(home_team_name)
         
         # Add the gameId and predicted winners to the updated_data list
         updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])

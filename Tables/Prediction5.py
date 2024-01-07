@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+import pandas as pd
 import os
 
 db_host = os.environ.get('DB_HOST')
@@ -241,6 +242,10 @@ for gameId, gameStatus in gameIds:
                 secondWinner = prediction4
                 numTwoWins += 1
             
+            # Fetch the home team name for the current game
+            home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
+            home_team_name = pd.read_sql_query(home_team_query, engine).iloc[0, 0]
+        
             # Update the values of 'predictedwinner5' and 'theWinner' based on the comparison
             if numOneWins > numTwoWins and firstWinner == teamOne or firstWinner == teamTwo:
                 conn.execute(
@@ -255,9 +260,9 @@ for gameId, gameStatus in gameIds:
             else:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, thewinner = %s WHERE gameId = CAST(%s AS text)",
-                    (predicted_winner, predicted_winner, str(gameId))
+                    (predicted_winner, home_team_name, str(gameId))
                 )
-            if(numOneWins > 2 and firstWinner == teamOne or firstWinner == teamTwo):
+            if(numOneWins > 2 and (firstWinner == teamOne or firstWinner == teamTwo)):
                 conn.execute(
                     "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                     (firstWinner, str(gameId))
@@ -266,7 +271,7 @@ for gameId, gameStatus in gameIds:
                     "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (firstWinner, str(gameId))
                     )
-            elif(numTwoWins > 2 and secondWinner == teamOne or secondWinner == teamTwo):
+            elif(numTwoWins > 2 and (secondWinner == teamOne or secondWinner == teamTwo)):
                 conn.execute(
                     "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                     (secondWinner, str(gameId))
@@ -315,6 +320,11 @@ for gameId, gameStatus in gameIds:
             if prediction4 not in ['NaN', 'Unknown', firstWinner]:
                 secondWinner = prediction4
                 numTwoWins += 1
+
+            # Fetch the home team name for the current game
+            home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
+            home_team_name = pd.read_sql_query(home_team_query, engine).iloc[0, 0]
+            
             if numOneWins > numTwoWins and firstWinner == teamOne or firstWinner == teamTwo:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s WHERE gameId = CAST(%s AS text)",
@@ -328,10 +338,10 @@ for gameId, gameStatus in gameIds:
             else:
                 conn.execute(
                     "UPDATE games SET predictedwinner5 = %s, earlyWinner = %s WHERE gameId = CAST(%s AS text)",
-                    (predicted_winner, predicted_winner, str(gameId))
+                    (predicted_winner, home_team_name, str(gameId))
                 )
             if(gameStatus == "Pre-Game"):
-                if(numOneWins > 2 and firstWinner == teamOne or firstWinner == teamTwo):
+                if(numOneWins > 2 and (firstWinner == teamOne or firstWinner == teamTwo)):
                     conn.execute(
                         "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (firstWinner, str(gameId))
@@ -340,7 +350,7 @@ for gameId, gameStatus in gameIds:
                         "UPDATE gamesRefresh SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                             (firstWinner, str(gameId))
                         )
-                elif(numTwoWins > 2 and secondWinner == teamOne or secondWinner == teamTwo):
+                elif(numTwoWins > 2 and (secondWinner == teamOne or secondWinner == teamTwo)):
                     conn.execute(
                         "UPDATE games SET featuredWinner = %s WHERE gameId = CAST(%s AS text)",
                         (secondWinner, str(gameId))
