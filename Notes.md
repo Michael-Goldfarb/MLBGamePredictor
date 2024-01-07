@@ -1,14 +1,4 @@
 # Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these create table statements in ElephantSQL before running the program files!
-## Once you have copied and pasted each statement, run this statement in your terminal: (replace [REPLACE] with your database credentials)!
-
-export DB_HOST=[REPLACE] (should end in .db.elephantsql.com)
-export DB_NAME=[REPLACE]
-export DB_USER=[REPLACE] (should be same as DB_NAME)
-export DB_PORT=5432
-export DB_PASSWORD=[REPLACE]
-
-Note that all of this information can be found in the 'details' section of your instance. DB_HOST is 'Server', DB_NAME and DB_USER is 'User & Default database', and DB_PASSWORD is 'Password'
-
 
     CREATE TABLE IF NOT EXISTS gamesRefresh (
         gameId TEXT,
@@ -322,4 +312,12 @@ Note that all of this information can be found in the 'details' section of your 
             isWinner BOOLEAN
     )
 
+## Once you have copied and pasted each statement, run this statement in your terminal: (replace [REPLACE] with your database credentials)!
 
+export DB_HOST=[REPLACE] (should end in .db.elephantsql.com)
+export DB_NAME=[REPLACE]
+export DB_USER=[REPLACE] (should be same as DB_NAME)
+export DB_PORT=5432
+export DB_PASSWORD=[REPLACE]
+
+Note that all of this information can be found in the 'details' section of your instance. DB_HOST is 'Server', DB_NAME and DB_USER is 'User & Default database', and DB_PASSWORD is 'Password'
