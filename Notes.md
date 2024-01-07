@@ -1,6 +1,6 @@
 # How to set up the database!
-Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these 18 create table statements individually in ElephantSQL before running the program files!
-Make sure to follow the instructions on the bottom of the page after creating the 18 tables!
+Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these 17 create table statements individually in ElephantSQL before running the program files!
+Make sure to follow the instructions on the bottom of the page after creating the 17 tables!
 
 
  1.     CREATE TABLE IF NOT EXISTS gamesRefresh (
@@ -187,28 +187,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 
-12.     CREATE TABLE IF NOT EXISTS games2022 (
-        gameId SERIAL PRIMARY KEY,
-        link VARCHAR(255),
-        awayTeamId INTEGER,
-        homeTeamId INTEGER,
-        awayTeamName VARCHAR(255),
-        homeTeamName VARCHAR(255),
-        gameStatus VARCHAR(255),
-        gameDate DATE,
-        gameTime TIME,
-        awayTeamScore INTEGER,
-        homeTeamScore INTEGER,
-        awayTeamWinPct FLOAT,
-        homeTeamWinPct FLOAT,
-        venue VARCHAR(255),
-        isWinnerAway BOOLEAN,
-        isWinnerHome BOOLEAN
-        )
-
-
-    
-13.     CREATE TABLE IF NOT EXISTS HittingStats2022v3 (
+12.     CREATE TABLE IF NOT EXISTS HittingStats2022v3 (
         teamId INTEGER,
         gameId VARCHAR(255),
         gameDate DATE,
@@ -225,7 +204,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 
-14.     CREATE TABLE IF NOT EXISTS lineupStats2022v3 (
+13.     CREATE TABLE IF NOT EXISTS lineupStats2022v3 (
             date DATE,
             gameId TEXT,
             teamId TEXT,
@@ -241,7 +220,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 
-15.     CREATE TABLE IF NOT EXISTS PitchingStats2022v3 (
+14.     CREATE TABLE IF NOT EXISTS PitchingStats2022v3 (
         teamId INTEGER,
         gameId TEXT,
         gameDate DATE,
@@ -264,7 +243,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 
-16.     CREATE TABLE IF NOT EXISTS previousYearHittingStats2022v3 (
+15.     CREATE TABLE IF NOT EXISTS previousYearHittingStats2022v3 (
         date DATE,
         teamId TEXT,
         gameId TEXT,
@@ -279,7 +258,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 
-17.     CREATE TABLE IF NOT EXISTS previousYearPitchingStats2022V3 (
+16.     CREATE TABLE IF NOT EXISTS previousYearPitchingStats2022V3 (
             player_id TEXT,
             gameDate DATE,
             gameId TEXT,
@@ -298,7 +277,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 
-18.     CREATE TABLE IF NOT EXISTS probablesStats2022V3 (
+17.     CREATE TABLE IF NOT EXISTS probablesStats2022V3 (
             player_id TEXT,
             gameDate DATE,
             gameId TEXT,
