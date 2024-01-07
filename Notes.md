@@ -317,9 +317,9 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 ## Once you have copied and pasted each statement, run this statement in your terminal: (replace [REPLACE] with your database credentials)!
 
-    export DB_HOST=[REPLACE] (should end in .db.elephantsql.com)
+    export DB_HOST=[REPLACE] 
     export DB_NAME=[REPLACE]
-    export DB_USER=[REPLACE] (should be same as DB_NAME)
+    export DB_USER=[REPLACE] 
     export DB_PORT=5432
     export DB_PASSWORD=[REPLACE]
 
