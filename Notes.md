@@ -303,18 +303,25 @@ Make sure to follow the instructions on the bottom of the page after creating th
     export DB_PASSWORD=[REPLACE]
 
 Note that all of this information can be found in the 'details' section of your instance. DB_HOST is 'Server', DB_NAME and DB_USER is 'User & Default database', and DB_PASSWORD is 'Password'
+Keep this information stored somewhere because you will need it for future use.
 
 
 
-
-Afterwards, to get information properly in the database, start at the root of the directory, then run these statments:
-1.     cd Tables
-2.     cd PastTables
-3.     python HittingStats2022.py
-4.     python PitchingStats2022.py
-5.     python LineupStats2022.py
-6.     python PreviousYearPitchingStats2022.py
-7.     python PreviousYearHittingStats2022.py
-8.     python ProbablesStats2022.py
+Afterwards, to get information properly in the database, open up a new terminal, cd into MLBGamePredictor, then run these statments:
+1.     git checkout backend
+2. The same statement you just created (make sure to replace the [REPLACE] parts
+        export DB_HOST=[REPLACE] 
+        export DB_NAME=[REPLACE]
+        export DB_USER=[REPLACE] 
+        export DB_PORT=5432
+        export DB_PASSWORD=[REPLACE]
+4.     cd Tables
+5.     cd PastTables
+6.     python HittingStats2022.py
+7.     python PitchingStats2022.py
+8.     python LineupStats2022.py
+9.     python PreviousYearPitchingStats2022.py
+10.     python PreviousYearHittingStats2022.py
+11.     python ProbablesStats2022.py
    
 Email me @ michaelgoldfarb6@gmail.com if you run into any difficulties or have any questions! Note that it may take a while to load the data into the database.
