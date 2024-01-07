@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.impute import SimpleImputer
 import os
 
@@ -81,6 +82,42 @@ intercept = model.intercept_
 
 # Print the above attributes
 print("Coefficients:", coefficients)
+
+# Manually adjust the coefficient for 'era'
+era_index = features.index("era")  
+model.coef_[0][era_index] = 9.59137001e-02
+whip_index = features.index("whip")
+model.coef_[0][whip_index] = 5.95366708e-02
+hitsper9inn_index = features.index("hitsper9inn")
+model.coef_[0][hitsper9inn_index] = -1.99281612e-01
+runsscoredper9_index = features.index("runsscoredper9")
+model.coef_[0][runsscoredper9_index] = 1.27788597e-01
+homerunsper9_index = features.index("homerunsper9")
+model.coef_[0][homerunsper9_index] = -3.54604613e-02
+strikeoutwalkratio_pitching_index = features.index("strikeoutwalkratio_pitching")
+model.coef_[0][strikeoutwalkratio_pitching_index] = 2.81140744e-01
+games_started_index = features.index("games_started")
+model.coef_[0][games_started_index] = 1.98856168e-04
+gamespitched_index = features.index("gamespitched")
+model.coef_[0][gamespitched_index] = 4.95434015e-03
+strikeouts_index = features.index("strikeouts")
+model.coef_[0][strikeouts_index] = -1.39930944e-03
+saves_index = features.index("saves")
+model.coef_[0][saves_index] = 5.91876260e-03
+blownsaves_index = features.index("blownsaves")
+model.coef_[0][blownsaves_index] = 1.70929299e-02
+obp_index = features.index("obp")
+model.coef_[0][obp_index] = 2.07089606e-02
+slg_hitting_index = features.index("slg_hitting")
+model.coef_[0][slg_hitting_index] = 3.04611994e-02
+ops_index = features.index("ops")
+model.coef_[0][ops_index] = 3.86047238e-02
+strikeoutwalkratio_probables_index = features.index("strikeoutwalkratio_probables")
+model.coef_[0][strikeoutwalkratio_probables_index] = -3.61638317e-02
+
+
+# Optionally, print the updated coefficients
+print("Updated Coefficients:", model.coef_)
 
 # Fetch the gameIds from the 'games' table
 query = "SELECT gameId FROM games"
