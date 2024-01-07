@@ -324,3 +324,18 @@ Make sure to follow the instructions on the bottom of the page after creating th
     export DB_PASSWORD=[REPLACE]
 
 Note that all of this information can be found in the 'details' section of your instance. DB_HOST is 'Server', DB_NAME and DB_USER is 'User & Default database', and DB_PASSWORD is 'Password'
+
+
+
+
+Afterwards, to get information properly in the database, start at the root of the directory, then run these statments:
+1.     cd Tables
+2.     cd PastTables
+3.     python HittingStats2022.py
+4.     python PitchingStats2022.py
+5.     python LineupStats2022.py
+6.     python PreviousYearPitchingStats2022.py
+7.     python PreviousYearHittingStats2022.py
+8.     python ProbablesStats2022.py
+   
+Email me @ michaelgoldfarb6@gmail.com if you run into any difficulties or have any questions! Note that it may take a while to load the data into the database.
