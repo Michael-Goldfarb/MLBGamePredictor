@@ -317,10 +317,10 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 ## Once you have copied and pasted each statement, run this statement in your terminal: (replace [REPLACE] with your database credentials)!
 
-export DB_HOST=[REPLACE] (should end in .db.elephantsql.com)
-export DB_NAME=[REPLACE]
-export DB_USER=[REPLACE] (should be same as DB_NAME)
-export DB_PORT=5432
-export DB_PASSWORD=[REPLACE]
+    export DB_HOST=[REPLACE] (should end in .db.elephantsql.com)
+    export DB_NAME=[REPLACE]
+    export DB_USER=[REPLACE] (should be same as DB_NAME)
+    export DB_PORT=5432
+    export DB_PASSWORD=[REPLACE]
 
 Note that all of this information can be found in the 'details' section of your instance. DB_HOST is 'Server', DB_NAME and DB_USER is 'User & Default database', and DB_PASSWORD is 'Password'
