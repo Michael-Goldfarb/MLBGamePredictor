@@ -1,4 +1,4 @@
-# Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these create table statements in ElephantSQL before running the program files!
+## Make an account on ElephantSQL, create an instance, click on browser, then copy and paste these create table statements in ElephantSQL before running the program files!
 # Once you have copied and pasted each statement, run this statement in your terminal: (replace [REPLACE] with your database credentials)!
 
 export DB_HOST=[REPLACE] (should end in .db.elephantsql.com)
