@@ -309,19 +309,20 @@ Keep this information stored somewhere because you will need it for future use.
 
 Afterwards, to get information properly in the database, open up a new terminal, cd into MLBGamePredictor, then run these statments:
 1.     git checkout backend
-2. The same statement you just created (make sure to replace the [REPLACE] parts
-        export DB_HOST=[REPLACE] 
-        export DB_NAME=[REPLACE]
-        export DB_USER=[REPLACE] 
-        export DB_PORT=5432
-        export DB_PASSWORD=[REPLACE]
-4.     cd Tables
-5.     cd PastTables
-6.     python HittingStats2022.py
-7.     python PitchingStats2022.py
-8.     python LineupStats2022.py
-9.     python PreviousYearPitchingStats2022.py
-10.     python PreviousYearHittingStats2022.py
-11.     python ProbablesStats2022.py
+2.     export DB_HOST=[REPLACE] 
+       export DB_NAME=[REPLACE]
+       export DB_USER=[REPLACE] 
+       export DB_PORT=5432
+       export DB_PASSWORD=[REPLACE]
+3.     cd Tables
+4.     cd PastTables
+5.     python HittingStats2022.py
+6.     python PitchingStats2022.py
+7.     python LineupStats2022.py
+8.     python PreviousYearPitchingStats2022.py
+9.     python PreviousYearHittingStats2022.py
+10.     python ProbablesStats2022.py
    
+(#2 is the same statement you just created (make sure to replace the [REPLACE] parts))
+
 Email me @ michaelgoldfarb6@gmail.com if you run into any difficulties or have any questions! Note that it may take a while to load the data into the database.
