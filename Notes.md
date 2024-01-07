@@ -19,7 +19,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         isWinnerHome BOOLEAN,
         featuredWinner VARCHAR(255),
         correct BOOLEAN
-    )
+        )
 
 
 2.     CREATE TABLE IF NOT EXISTS gamesv3 (
@@ -39,7 +39,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         predictedWinner3 VARCHAR(255),
         predictedWinner4 VARCHAR(255),
         predictedWinner5 VARCHAR(255)
-    )
+       )
 
 
 3.     CREATE TABLE IF NOT EXISTS HittingStats (
@@ -53,7 +53,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         gamesPlayed INTEGER,
         leftOnBase INTEGER,
         stolenBases INTEGER
-    )
+       )
 
 
 
@@ -66,7 +66,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         at_bats_per_home_run TEXT,
         games_played INTEGER,
         babip TEXT
-    )
+       )
 
 
 
@@ -87,7 +87,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         saves INTEGER,
         blownSaves INTEGER,
         strikeoutWalkRatio VARCHAR(255)
-    )
+       )
 
 
 
@@ -101,7 +101,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         at_bats_per_home_run TEXT,
         games_played INTEGER,
         babip TEXT
-    )
+       )
 
 
 
@@ -118,7 +118,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         era TEXT,
         whip TEXT,
         walksPer9Inn TEXT
-    )
+       )
 
 
 
@@ -135,7 +135,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         era TEXT,
         whip TEXT,
         walksPer9Inn TEXT
-    )
+       )
 
 
 
@@ -161,7 +161,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         theWinner VARCHAR(255),
         featuredWinner VARCHAR(255),
         correct BOOLEAN
-    )
+       )
 
 
 
@@ -173,7 +173,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         denominator INTEGER,
         percentage FLOAT,
         insertedYet VARCHAR(255)
-    )
+        )
 
 
 
@@ -204,7 +204,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         venue VARCHAR(255),
         isWinnerAway BOOLEAN,
         isWinnerHome BOOLEAN
-    )
+        )
 
 
     
@@ -221,7 +221,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         leftOnBase INTEGER,
         stolenBases INTEGER,
         isWinner BOOLEAN
-    )
+        )
 
 
 
@@ -260,7 +260,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         blownSaves INTEGER,
         strikeoutWalkRatio VARCHAR(255),
         isWinner BOOLEAN
-    )
+        )
 
 
 
@@ -275,7 +275,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
         games_played INTEGER,
         babip TEXT,
         isWinner BOOLEAN
-    )
+        )
 
 
 
@@ -313,7 +313,7 @@ Make sure to follow the instructions on the bottom of the page after creating th
             whip TEXT,
             walksPer9Inn TEXT,
             isWinner BOOLEAN
-    )
+        )
 
 ## Once you have copied and pasted each statement, run this statement in your terminal: (replace [REPLACE] with your database credentials)!
 
