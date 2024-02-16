@@ -33,7 +33,7 @@ gameIdss = []
 outcomes = []
 gamess = []
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-03-30&endDate=2023-10-01")
 data = response.json()
 
 i = 0
@@ -70,7 +70,7 @@ for date_info in data["dates"]:
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
-        if gameId == 663466: # all star game
+        if gameId == 717421: # all star game
             continue
         url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
         response = requests.get(url)
@@ -147,6 +147,7 @@ for date_info in data["dates"]:
         batterNineHome = battingOrderHome[8]
         lineup.append(battingOrderHome[8])
         teamsLineup.append(homeTeamName)
+        conn.commit()
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS previousYearHittingStats2022v3 (
@@ -179,7 +180,7 @@ for index, playerId in enumerate(lineup):
     gameId = gameIdss[index]
     isWinner = outcomes[index]
     try:
-        api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=hitting&startDate=07/24/2020&endDate=10/03/2021&leagueListId=mlb_milb".format(
+        api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=hitting&startDate=04/01/2021&endDate=10/01/2022&leagueListId=mlb_milb".format(
             playerId=playerId,
         )
         theDate = dates[index]
@@ -255,6 +256,7 @@ for index, playerId in enumerate(lineup):
             }
             team_stats[team_game_key]["isWinner"] = isWinner
             team_stats[team_game_key]["date"] = theDate
+        conn.commit()
     except (ConnectionResetError, ConnectionError) as e:
             # Handle the connection-related exception
             print(f"Connection error occurred: {e}")

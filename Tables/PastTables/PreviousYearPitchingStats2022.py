@@ -28,7 +28,7 @@ gameIdss = []
 outcomes = []
 teamIdss = []
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-03-30&endDate=2023-10-01")
 data = response.json()
 
 i = 0
@@ -62,7 +62,7 @@ for date_info in data["dates"]:
         if i == 0: # uses the first game twice for some reason
             i += 1
             continue
-        if gameId == 663466: # all star game
+        if gameId == 717421: # all star game
             continue
         url = f"https://statsapi.mlb.com/api/v1.1/game/{game['gamePk']}/feed/live"
         response = requests.get(url)
@@ -121,7 +121,7 @@ for index, playerId in enumerate(starters):
     teamId = teamIdss[index]
     isWinner = outcomes[index]
      #   game_date = dates[index]
-    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=07/24/2020&endDate=10/03/2021&leagueListId=mlb_milb"
+    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=04/01/2021&endDate=10/01/2022&leagueListId=mlb_milb"
     response = requests.get(url)
     data = json.loads(response.text)
     player_id = playerId

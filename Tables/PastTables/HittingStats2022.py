@@ -4,7 +4,7 @@ import psycopg2
 from datetime import datetime
 import os
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2022-04-20&endDate=2022-10-01")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-03-30&endDate=2023-10-01")
 data = response.json()
 
 db_host = os.environ.get('DB_HOST')
@@ -51,13 +51,13 @@ for date_info in data["dates"]:
         homeTeamName = game['teams']['home']['team']['name']
         isWinnerAway = game['teams']['away'].get('isWinner')
         isWinnerHome = game['teams']['home'].get('isWinner')
-        if gameId == 663466: # all star game
+        if gameId == 717421: # all star game
             continue
         # if i == 0: # uses the first game twice for some reason
         #     i += 1
         #     continue
 
-        awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
+        awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={gameDate}&leagueListId=mlb"
         awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
         awayTeamStatsData = awayTeamStatsResponse.json()
         awayTeamStats = awayTeamStatsData['stats'][0]['splits'][0]['stat']
@@ -75,7 +75,7 @@ for date_info in data["dates"]:
             awayTeamStats['stolenBases'], isWinnerAway
         ))
 
-        homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&season=2022&group=hitting&startDate=04/07/2022&endDate={gameDate}&leagueListId=mlb"
+        homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/30/2023&endDate={gameDate}&leagueListId=mlb"
         homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
         homeTeamStatsData = homeTeamStatsResponse.json()
         homeTeamStats = homeTeamStatsData['stats'][0]['splits'][0]['stat']
