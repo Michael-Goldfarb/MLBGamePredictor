@@ -5,8 +5,8 @@ from datetime import datetime
 import pytz
 import os
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-18&endDate=2023-07-18")
-# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
+# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-22&endDate=2023-07-22")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
 
@@ -97,7 +97,12 @@ for game in games:
     
     # Retrieve the value of theWinner from the games table for the specific gameId
     cursor.execute("SELECT theWinner FROM games WHERE gameId = CAST(%s AS text);", (gameId,))
-    theWinner = cursor.fetchone()[0]
+    result = cursor.fetchone()
+
+    if result is not None:
+        theWinner = result[0]
+    else:
+        theWinner = None
 
     # Retrieve the value of teamName, numerator, denominator, and insertedYet from the teamRecords table for the specific gameId
     cursor.execute("SELECT numerator, denominator, insertedYet FROM teamRecords WHERE teamName ILIKE %s;", (awayTeamName,))

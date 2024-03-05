@@ -29,8 +29,8 @@ game_ids = set()
 unique_games = []
 teamsId = []
 
-# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-18&endDate=2023-07-18")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
+# response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-22&endDate=2023-07-22")
 data = response.json()
 games = data['dates'][0]['games']
 
@@ -104,7 +104,7 @@ for index, playerId in enumerate(starters):
     print(player_name)
     gamesId = gameIdss[index]
     print(gamesId)
-    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=05/01/2021&endDate=10/05/2022&leagueListId=mlb_milb"
+    url = f"https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&group=pitching&startDate=05/01/2022&endDate=10/01/2023&leagueListId=mlb_milb"
     response = requests.get(url)
     data = json.loads(response.text)
     player_id = playerId
