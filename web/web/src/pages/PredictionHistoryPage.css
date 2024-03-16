@@ -2,11 +2,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  /* height: 100vh; */
 }
 
 .container {
   margin-top: 5rem;
+  margin-bottom: 1rem;
 }
 
 .column {
@@ -17,7 +18,7 @@
 }
 
 .column-heading {
-  font-size: 1.75rem;
+  font-size: 2vh;
   font-weight: bold;
   margin-bottom: 1rem;
 }
@@ -79,3 +80,4 @@
   font-weight: bold;
   margin-top: 20px; 
 }
+
