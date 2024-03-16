@@ -35,6 +35,12 @@ public class MLBGame {
     @JsonProperty("featuredWinner")
     private String featuredWinner;
 
+    @JsonProperty("currentInning")
+    private String currentInning;
+
+    @JsonProperty("inningHalf")
+    private String inningHalf;
+
     @JsonProperty("correct")
     private Boolean correct;
 
