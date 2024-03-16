@@ -180,10 +180,11 @@ Make sure to follow the instructions on the bottom of the page after creating th
 
 
 11.     CREATE TABLE IF NOT EXISTS dailyPredictions (
-            prediction_date DATE,
-            numerator INTEGER,
-            denominator INTEGER
-          )
+         prediction_date DATE PRIMARY KEY,
+         numerator INTEGER,
+         denominator INTEGER
+        );
+
 
 
 
