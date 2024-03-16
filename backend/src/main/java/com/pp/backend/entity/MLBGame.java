@@ -41,7 +41,7 @@ public class MLBGame {
     public MLBGame() {
     }
 
-    public MLBGame(String gameId, String homeTeam, String awayTeam, String status, String gameDate, String gameTime, String awayTeamScore, String homeTeamScore, Boolean isWinnerHome, Boolean isWinnerAway, String featuredWinner, Boolean correct) {
+    public MLBGame(String gameId, String homeTeam, String awayTeam, String status, String gameDate, String gameTime, String awayTeamScore, String homeTeamScore, Boolean isWinnerHome, Boolean isWinnerAway, String featuredWinner, Boolean correct, String currentInning, String inningHalf) {
         this.gameId = gameId;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
@@ -54,6 +54,8 @@ public class MLBGame {
         this.isWinnerAway = isWinnerAway;
         this.featuredWinner = featuredWinner;
         this.correct = correct;
+        this.currentInning = currentInning;
+        this.inningHalf = inningHalf;
     }
 
     public String getGameId() {
@@ -142,6 +144,22 @@ public class MLBGame {
 
     public void setFeaturedWinner(String featuredWinner) {
         this.featuredWinner = featuredWinner;
+    }
+
+    public String getCurrentInning() {
+        return currentInning;
+    }
+
+    public void setCurrentInning(String currentInning) {
+        this.currentInning = currentInning;
+    }
+
+    public String getInningHalf() {
+        return inningHalf;
+    }
+
+    public void setInningHalf(String inningHalf) {
+        this.inningHalf = inningHalf;
     }
 
     public Boolean getCorrect() {
