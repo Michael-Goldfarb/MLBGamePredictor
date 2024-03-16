@@ -36,7 +36,7 @@ public class MLBGameService {
                 String awayTeamScore = resultSet.getString("awayTeamScore");
                 String homeTeamScore = resultSet.getString("homeTeamScore");
                 String currentInning = resultSet.getString("currentInning");
-                String inningHalf = resultSet.getString("homeTeamScoinningHalfre");
+                String inningHalf = resultSet.getString("inningHalf");
                 Boolean isWinnerHome = resultSet.getBoolean("isWinnerHome");
                 Boolean isWinnerAway = resultSet.getBoolean("isWinnerAway");
                 String featuredWinner = resultSet.getString("featuredWinner");
