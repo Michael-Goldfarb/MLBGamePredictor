@@ -110,6 +110,11 @@ const PredictionsPage = () => {
                 <p>{data.mlbGame.awayTeamScore}</p>
               </div>
             </div>
+            <div className="inning-info">
+              <p className="current-inning">
+                {data.mlbGame.inningHalf ? `${data.mlbGame.inningHalf} of the ` : ''}{data.mlbGame.currentInning ? `${data.mlbGame.currentInning}` : 'Game not started'}
+              </p>
+            </div>
             <div className="home-team">
               <div className="team-name-score">
                 <p>{data.mlbGame.homeTeamName}</p>
@@ -120,7 +125,6 @@ const PredictionsPage = () => {
               </div>
             </div>
           </div>
-          {data.mlbGame.isWinnerHome || data.mlbGame.isWinnerAway ? <p className="game-status">Final</p> : null}
           <p className="game-time">{convertToEST(data.mlbGame.gameTime)}</p>
           <p className={`prediction ${data.mlbGame.correct === null ? 'white' : (data.mlbGame.correct ? 'green' : 'red')}`}>
             Prediction: {data.prediction?.prediction}
