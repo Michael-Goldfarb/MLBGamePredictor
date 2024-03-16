@@ -42,7 +42,9 @@ cursor.execute("""
         isWinnerAway BOOLEAN,
         isWinnerHome BOOLEAN,
         featuredWinner VARCHAR(255),
-        correct BOOLEAN
+        correct BOOLEAN,
+        currentInning VARCHAR(255),
+        inningHalf VARCHAR(255)
     )
 """)
 # cursor.execute("TRUNCATE TABLE gamesRefresh;")
@@ -84,6 +86,8 @@ for game in games:
     awayTeamName = game['teams']['away']['team']['name']
     homeTeamName = game['teams']['home']['team']['name']
     gameStatus = game["status"]["detailedState"]
+    currentInning = gameStatus
+    inningHalf = None 
     gameDate = game['gameDate']
     gameTime = game['gameDate'][11:16]
     awayTeamScore = game['teams']['away'].get('score')
@@ -93,6 +97,20 @@ for game in games:
     venue = game['venue']['name']
     isWinnerAway = game['teams']['away'].get('isWinner')
     isWinnerHome = game['teams']['home'].get('isWinner')
+    if gameStatus == "In Progress":
+        game_details_url = f"http://statsapi.mlb.com{game['link']}"
+        print(game_details_url)
+        detailed_response = requests.get(game_details_url)
+        detailed_data = detailed_response.json()
+
+        try:
+            linescore = detailed_data.get('liveData', {}).get('linescore', {})
+            currentInning = linescore.get('currentInningOrdinal', 'Not Available')
+            inningHalf = linescore.get('inningHalf', 'Not Available')
+            print(currentInning)
+            print(inningHalf)
+        except KeyError:
+            print(f"Details not available for game {game['gamePk']}")
 
     
     # Retrieve the value of theWinner from the games table for the specific gameId
@@ -239,7 +257,7 @@ for game in games:
                 SET numerator = %s, denominator = %s, percentage = %s, insertedYet = %s
                 WHERE teamName = %s
             """, (numeratorHome, denominatorHome, percentages, insertedYetHome, homeTeamName))
-    records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct))
+    records.append((gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct, currentInning, inningHalf))
 
 # Calculate the fraction of correct predictions
 if denominator > 0:
@@ -262,8 +280,8 @@ print(str(fraction_numerator) + "/" + str(fraction_denominator))
 # Insert data into the table
 cursor.execute("TRUNCATE TABLE gamesRefresh;")
 cursor.executemany("""
-    INSERT INTO gamesRefresh (gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO gamesRefresh (gameId, awayTeamName, homeTeamName, gameStatus, gameDate, gameTime, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, venue, isWinnerAway, isWinnerHome, correct, currentInning, inningHalf)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """, records)
 
 
