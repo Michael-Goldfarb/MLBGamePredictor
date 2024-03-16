@@ -70,8 +70,8 @@ for game in games:
     ))
 
     # Get the hitting stats for the home team
-    # homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=hitting&stats=season"
-    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&group=hitting&startDate=2023-02-18&endDate=2023-07-22"
+    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=hitting&stats=season"
+    # homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&group=hitting&startDate=2023-02-18&endDate=2023-07-22"
     homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
     homeTeamStatsData = homeTeamStatsResponse.json()
     homeTeamStats = homeTeamStatsData['stats'][0]['splits'][0]['stat']

@@ -149,27 +149,59 @@ for index, player_id in enumerate(lineup):
     gamess.append(teamId)
     print(teamId)
     gameId = gameIdss[index]
+    print(player_id)
     print(gameId)
     
     # Make the API request to fetch player stats
-    api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2024&group=hitting&startDate=03/01/2024&endDate={currentDate}&leagueListId=mlb_milb".format(
+    api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=hitting&startDate=03/01/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
         playerId=player_id,
-        currentDate=datetime.now().strftime("%m/%d/%Y")
+        # currentDate=datetime.now().strftime("%m/%d/%Y")
+        currentDate = "09/25/2023"
     )
     response = requests.get(api_url)
     data = response.json()
 
     # Extract the required fields
-    stats = data["stats"][0]["splits"][0]["stat"]
-    games_played = int(stats["gamesPlayed"])
-    obp = float(stats["obp"])
-    slg = float(stats["slg"])
-    ops = float(stats["ops"])
-    babip = float(stats.get("babip")) if stats.get("babip") != ".---" else 0.0
-    if stats["atBatsPerHomeRun"] != "-.--":
-        at_bats_per_home_run = float(stats["atBatsPerHomeRun"])
+    if 'stats' in data and data['stats']:
+        stats_list = data['stats']
+        if stats_list:
+            last_stats = stats_list[-1]  # Get the last instance of 'stats'
+            if 'splits' in last_stats and last_stats['splits']:
+                splits = last_stats['splits']
+                last_split = splits[-1]  # Get the last instance of 'splits'
+                if 'stat' in last_split:
+                    stat = last_split['stat']
+                    # Retrieve the required fields
+                    games_played = int(stat.get("gamesPlayed")) if stat.get("gamesPlayed") is not None else 0
+                    obp = float(stat.get("obp")) if stat.get("obp") is not None else 0.0
+                    slg = float(stat.get("slg")) if stat.get("slg") is not None else 0.0
+                    ops = float(stat.get("ops")) if stat.get("ops") is not None else 0.0
+                    babip = float(stat.get("babip")) if (stat.get("babip") is not None and stat.get("babip") != ".---") else 0.0
+                    at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if (stat.get("atBatsPerHomeRun") is not None and stat.get("atBatsPerHomeRun") != "-.--") else 0.0
+            else:
+                # Handle the case where 'splits' field is empty
+                games_played = 50
+                obp = 0.320
+                slg = 0.420
+                ops = 0.740
+                at_bats_per_home_run = 50
+                babip = 0.300
+        else:
+            # Handle the case where 'stats' field is empty
+            games_played = 50
+            obp = 0.320
+            slg = 0.420
+            ops = 0.740
+            at_bats_per_home_run = 50
+            babip = 0.300
     else:
-        at_bats_per_home_run = 0.0
+        # Handle the case where 'stats' field is missing
+        games_played = 50
+        obp = 0.320
+        slg = 0.420
+        ops = 0.740
+        at_bats_per_home_run = 50
+        babip = 0.300
 
     # Update the cumulative values for the current team
     team_game_key = (teamId, gameId)
@@ -179,7 +211,7 @@ for index, player_id in enumerate(lineup):
         team_stats[team_game_key]["obp"] += obp
         team_stats[team_game_key]["slg"] += slg
         team_stats[team_game_key]["ops"] += ops
-        at_bats_per_home_run = float(stats["atBatsPerHomeRun"]) if stats["atBatsPerHomeRun"] != "-.--" else 0.0
+        at_bats_per_home_run = float(stat.get("atBatsPerHomeRun")) if stat.get("atBatsPerHomeRun") != "-.--" else 0.0
         team_stats[team_game_key]["babip"] += babip
         team_stats[team_game_key]["gameId"] = gameId
     else:

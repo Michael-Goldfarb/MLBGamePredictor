@@ -157,6 +157,13 @@ for index, playerId in enumerate(lineup):
     response = requests.get(api_url)
     data = response.json()
 
+    games_played = 50
+    obp = 0.320
+    slg = 0.420
+    ops = 0.740
+    at_bats_per_home_run = 50
+    babip = 0.300
+
     if 'stats' in data and data['stats']:
         stats_list = data['stats']
         if stats_list:
