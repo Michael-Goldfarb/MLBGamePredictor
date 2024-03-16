@@ -20,16 +20,16 @@ db_password = os.environ.get('DB_PASSWORD')
 engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
 
 # Fetch the historical data from the database tables
-query = "SELECT * FROM PitchingStats2022"
+query = "SELECT * FROM PitchingStats2022v3"
 pitching_stats_df = pd.read_sql_query(query, engine)
 
-query = "SELECT * FROM probablesStats2022"
+query = "SELECT * FROM probablesStats2022v3"
 probables_stats_df = pd.read_sql_query(query, engine)
 
-query = "SELECT * FROM previousYearPitchingStats2022"
+query = "SELECT * FROM previousYearPitchingStats2022v3"
 previous_pitching_stats_df = pd.read_sql_query(query, engine)
 
-query = "SELECT * FROM HittingStats2022"
+query = "SELECT * FROM HittingStats2022v3"
 hitting_stats_df = pd.read_sql_query(query, engine)
 
 # Merge the relevant historical tables based on common keys
