@@ -57,9 +57,9 @@ for game in games:
     homeTeamId = game['teams']['home']['team']['id']
     awayTeamName = game['teams']['away']['team']['name']
     homeTeamName = game['teams']['home']['team']['name']
-    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=pitching&stats=season"
+    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2024&group=pitching&stats=season"
     # awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&group=pitching&startDate=2023-02-18&endDate=2023-07-22"
-    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=pitching&stats=season"
+    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2024&group=pitching&stats=season"
     # homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&group=pitching&startDate=2023-02-18&endDate=2023-07-22"
 
     # Get the pitching statistics for the away team

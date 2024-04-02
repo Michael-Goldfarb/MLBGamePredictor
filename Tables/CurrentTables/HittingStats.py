@@ -51,7 +51,8 @@ for game in games:
     awayTeamName = game['teams']['away']['team']['name']
     homeTeamId = game['teams']['home']['team']['id']
     homeTeamName = game['teams']['home']['team']['name']
-    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2023&group=hitting&stats=season"
+    awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?season=2024&group=hitting&stats=season"
+    print(awayTeamStatsUrl)
     # awayTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{awayTeamId}/stats?stats=byDateRange&group=hitting&startDate=2023-02-18&endDate=2023-07-22"
     awayTeamStatsResponse = requests.get(awayTeamStatsUrl)
     awayTeamStatsData = awayTeamStatsResponse.json()
@@ -70,7 +71,8 @@ for game in games:
     ))
 
     # Get the hitting stats for the home team
-    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2023&group=hitting&stats=season"
+    homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?season=2024&group=hitting&stats=season"
+    print(homeTeamStatsUrl)
     # homeTeamStatsUrl = f"https://statsapi.mlb.com/api/v1/teams/{homeTeamId}/stats?stats=byDateRange&group=hitting&startDate=2023-02-18&endDate=2023-07-22"
     homeTeamStatsResponse = requests.get(homeTeamStatsUrl)
     homeTeamStatsData = homeTeamStatsResponse.json()

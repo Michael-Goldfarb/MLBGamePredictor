@@ -92,7 +92,7 @@ for index, player_id in enumerate(starters):
     print(gamesId)
 
     # Make the API request to fetch player stats
-    api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2023&group=pitching&startDate=03/01/2023&endDate={currentDate}&leagueListId=mlb_milb".format(
+    api_url = "https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=byDateRange&season=2024&group=pitching&startDate=03/28/2024&endDate={currentDate}&leagueListId=mlb_milb".format(
         playerId=player_id,
         # currentDate=datetime.now().strftime("%m/%d/%Y")  
         currentDate = "09-25-2023"

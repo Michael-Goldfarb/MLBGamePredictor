@@ -11,28 +11,29 @@ games = data['dates'][0]['games']
 
 records = []
 for game in games:
-    gameId = game['gamePk']
-    link = game['link']
-    awayTeamId = game['teams']['away']['team']['id']
-    homeTeamId = game['teams']['home']['team']['id']
-    awayTeamName = game['teams']['away']['team']['name']
-    homeTeamName = game['teams']['home']['team']['name']
-    gameStatus = game["status"]["detailedState"]
-    gameDate = game['gameDate']
-    gameTime = game['gameDate'][11:16]
-    awayTeamScore = game['teams']['away'].get('score')
-    homeTeamScore = game['teams']['home'].get('score')
-    awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
-    homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
-    venue = game['venue']['name']
-    isWinnerAway = game['teams']['away'].get('isWinner')
-    isWinnerHome = game['teams']['home'].get('isWinner')
+    if game['seriesDescription'] == "Regular Season":
+        gameId = game['gamePk']
+        link = game['link']
+        awayTeamId = game['teams']['away']['team']['id']
+        homeTeamId = game['teams']['home']['team']['id']
+        awayTeamName = game['teams']['away']['team']['name']
+        homeTeamName = game['teams']['home']['team']['name']
+        gameStatus = game["status"]["detailedState"]
+        gameDate = game['gameDate']
+        gameTime = game['gameDate'][11:16]
+        awayTeamScore = game['teams']['away'].get('score')
+        homeTeamScore = game['teams']['home'].get('score')
+        awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
+        homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
+        venue = game['venue']['name']
+        isWinnerAway = game['teams']['away'].get('isWinner')
+        isWinnerHome = game['teams']['home'].get('isWinner')
 
-    # Append record for the away team
-    records.append((gameId, link, awayTeamId, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, awayTeamWinPct, venue, isWinnerAway, None, None, None, None, None))
+        # Append record for the away team
+        records.append((gameId, link, awayTeamId, awayTeamName, gameStatus, gameDate, gameTime, awayTeamScore, awayTeamWinPct, venue, isWinnerAway, None, None, None, None, None))
 
-    # Append record for the home team
-    records.append((gameId, link, homeTeamId, homeTeamName, gameStatus, gameDate, gameTime, homeTeamScore, homeTeamWinPct, venue, isWinnerHome, None, None, None, None, None))
+        # Append record for the home team
+        records.append((gameId, link, homeTeamId, homeTeamName, gameStatus, gameDate, gameTime, homeTeamScore, homeTeamWinPct, venue, isWinnerHome, None, None, None, None, None))
 
 db_host = os.environ.get('DB_HOST')
 db_name = os.environ.get('DB_NAME')

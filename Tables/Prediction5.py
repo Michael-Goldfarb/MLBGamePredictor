@@ -159,7 +159,8 @@ for gameId, gameStatus in gameIds:
 
         era_previous_pitching_team = []
         for _, era_previous_pitching in previous_pitching_stats:
-            era_previous_pitching_team.append(float(era_previous_pitching))
+            value = float(era_previous_pitching) if era_previous_pitching is not None else 0.0
+            era_previous_pitching_team.append(value)
         if len(era_previous_pitching_team) >= 2:
             if era_previous_pitching_team[0] > era_previous_pitching_team[1]:
                 countTeamOne += 1
@@ -170,7 +171,8 @@ for gameId, gameStatus in gameIds:
                 
         whip_previous_pitching_team = []
         for _, whip_previous_pitching in previous_pitching_stats2:
-            whip_previous_pitching_team.append(float(whip_previous_pitching))
+            value = float(whip_previous_pitching) if whip_previous_pitching is not None else 0.0
+            whip_previous_pitching_team.append(value)
         if len(whip_previous_pitching_team) >= 2:
             if whip_previous_pitching_team[0] > whip_previous_pitching_team[1]:
                 countTeamOne += 1

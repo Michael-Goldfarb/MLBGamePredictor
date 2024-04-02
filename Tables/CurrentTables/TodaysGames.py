@@ -12,19 +12,20 @@ games = data['dates'][0]['games']
 
 records = []
 for game in games:
-    gameId = game['gamePk']
-    awayTeamId = game['teams']['away']['team']['id']
-    homeTeamId = game['teams']['home']['team']['id']
-    awayTeamName = game['teams']['away']['team']['name']
-    homeTeamName = game['teams']['home']['team']['name']
-    awayTeamScore = game['teams']['away'].get('score')
-    homeTeamScore = game['teams']['home'].get('score')
-    awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
-    homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
-    # if it has ended, get a "isWinner" field to see who wins
-    isWinnerAway = game['teams']['away'].get('isWinner')
-    isWinnerHome = game['teams']['home'].get('isWinner')
-    records.append((gameId, awayTeamId, homeTeamId, awayTeamName, homeTeamName, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, isWinnerAway, isWinnerHome))
+    if game['seriesDescription'] == "Regular Season":
+        gameId = game['gamePk']
+        awayTeamId = game['teams']['away']['team']['id']
+        homeTeamId = game['teams']['home']['team']['id']
+        awayTeamName = game['teams']['away']['team']['name']
+        homeTeamName = game['teams']['home']['team']['name']
+        awayTeamScore = game['teams']['away'].get('score')
+        homeTeamScore = game['teams']['home'].get('score')
+        awayTeamWinPct = game["teams"]["away"]["leagueRecord"]["pct"]
+        homeTeamWinPct = game["teams"]["home"]["leagueRecord"]["pct"]
+        # if it has ended, get a "isWinner" field to see who wins
+        isWinnerAway = game['teams']['away'].get('isWinner')
+        isWinnerHome = game['teams']['home'].get('isWinner')
+        records.append((gameId, awayTeamId, homeTeamId, awayTeamName, homeTeamName, awayTeamScore, homeTeamScore, awayTeamWinPct, homeTeamWinPct, isWinnerAway, isWinnerHome))
 
 db_host = os.environ.get('DB_HOST')
 db_name = os.environ.get('DB_NAME')
