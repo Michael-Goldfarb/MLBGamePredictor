@@ -123,8 +123,6 @@ for gameId in gameIds:
     current_data_imputed = pd.DataFrame(current_data_imputed, columns=features)
     current_data_imputed.dropna(inplace=True)
 
-    print(gameId)
-
     # Check if current_data_imputed is not empty
     if current_data_imputed.empty:
         print(f"GameId: {gameId} - No valid data available for prediction.")
