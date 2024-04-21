@@ -5,7 +5,7 @@ from datetime import datetime
 import pytz
 import os
 
-response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2024-04-16&endDate=2024-04-16")
+response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2024-04-20&endDate=2024-04-20")
 # response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
