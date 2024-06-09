@@ -36,3 +36,4 @@ build/
 /application.properties
 /application.yml
 /firebase_config.json
+.env
