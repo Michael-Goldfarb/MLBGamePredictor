@@ -82,15 +82,14 @@ const PredictionsPage = () => {
     fetchPredictions();
   }, []);
 
-
-  const convertToEST = (gameTime) => {
+  const convertToLocalTime = (gameTime) => {
     const [hours, minutes] = gameTime.split(':');
-    const estTime = new Date();
-    estTime.setUTCHours(hours);
-    estTime.setUTCMinutes(minutes);
+    const localTime = new Date();
+    localTime.setUTCHours(hours);
+    localTime.setUTCMinutes(minutes);
 
-    const options = { timeZone: 'America/New_York', hour12: true, hour: 'numeric', minute: 'numeric' };
-    return estTime.toLocaleString('en-US', options);
+    const options = { hour12: true, hour: 'numeric', minute: 'numeric' };
+    return localTime.toLocaleString('en-US', options);
   };
 
   return (
@@ -125,7 +124,7 @@ const PredictionsPage = () => {
               </div>
             </div>
           </div>
-          <p className="game-time">{convertToEST(data.mlbGame.gameTime)}</p>
+          <p className="game-time">{convertToLocalTime(data.mlbGame.gameTime)}</p>
           <p className={`prediction ${data.mlbGame.correct === null ? 'white' : (data.mlbGame.correct ? 'green' : 'red')}`}>
             Prediction: {data.prediction?.prediction}
           </p>
