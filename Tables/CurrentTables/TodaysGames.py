@@ -9,6 +9,8 @@ response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=
 # response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&startDate=2023-07-22&endDate=2023-07-22")
 data = response.json()
 games = data['dates'][0]['games']
+currentDate=datetime.now().strftime("%m/%d/%Y")  
+print(currentDate)
 
 records = []
 for game in games:

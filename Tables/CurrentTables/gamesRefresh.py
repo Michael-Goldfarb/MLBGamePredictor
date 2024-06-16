@@ -9,6 +9,8 @@ import os
 response = requests.get("http://statsapi.mlb.com/api/v1/schedule/games/?sportId=1")
 data = response.json()
 games = data['dates'][0]['games']
+currentDate=datetime.now().strftime("%m/%d/%Y")  
+print(currentDate)
 
 db_host = os.environ.get('DB_HOST')
 db_name = os.environ.get('DB_NAME')
