@@ -23,8 +23,9 @@ updated_data = []
 for gameId, gameStatus in gameIds:
     # Convert gameId to an integer
     gameId = int(gameId)
+    print(gameStatus)
 
-    if gameStatus == "Final" or "In Progress":
+    if gameStatus == "Final" or gameStatus == "In Progress":
         print("Skip making predictions for games with 'Final' or 'In Progress' status")
     elif gameStatus == "Postponed":
         predicted_winner = "None - Game Postponed"
