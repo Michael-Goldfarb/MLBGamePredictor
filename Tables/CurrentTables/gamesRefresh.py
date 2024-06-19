@@ -271,6 +271,15 @@ else:
     fraction_numerator = None
     fraction_denominator = None
 
+if fraction_numerator is not None and fraction_denominator is not None:
+    cursor.execute("""
+        INSERT INTO dailyPredictions (prediction_date, numerator, denominator)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (prediction_date) DO UPDATE
+        SET numerator = EXCLUDED.numerator, denominator = EXCLUDED.denominator
+    """, (gameDateEST, fraction_numerator, fraction_denominator))
+    print(str(fraction_numerator) + "/" + str(fraction_denominator))
+    
 # Insert the daily prediction into the dailyPredictions table
 cursor.execute("""
     INSERT INTO dailyPredictions (prediction_date, numerator, denominator)
