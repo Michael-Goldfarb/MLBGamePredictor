@@ -1,6 +1,10 @@
 <h1 align="center">MLB GAME PREDICTOR</h1>
 
 <p align="center">
+  <a href="http://www.mlbgamepredictor.com">www.mlbgamepredictor.com</a>
+</p>
+
+<p align="center">
   <img width="1436" alt="Home Page" src="https://github.com/Michael-Goldfarb/MLBGamePredictor/assets/66848094/6fc0e768-42aa-4260-a544-fced9de8fbe0">
   <br>
   <em>Home Page with information from each matchup of the day, including updated scores, game time, game status, and the prediction of the winner of the game. If the prediction was right, the prediction will be in green text. If the prediction was wrong, the prediction will be in red text.</em>
