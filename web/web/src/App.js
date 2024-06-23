@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./Login.js";
 import Dashboard from "./dashboard.js";
@@ -8,6 +8,16 @@ import Navbar from "./pages/components/NavBar.js";
 import PredictionHistory from "./pages/PredictionHistoryPage.js";
 
 function App() {
+  useEffect(() => {
+    document.body.style.backgroundColor = "#1F2937";
+    document.body.style.color = "#FFF";
+
+    return () => {
+      document.body.style.backgroundColor = "";
+      document.body.style.color = "";
+    };
+  }, []);
+  
   return (
     <div className="app bg-gray-800 text-white">
       <Router>
