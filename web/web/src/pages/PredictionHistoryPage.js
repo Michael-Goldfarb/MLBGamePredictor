@@ -96,7 +96,7 @@ const PredictionHistoryPage = () => {
     <div className="prediction-history-page bg-gray-800 min-h-screen flex flex-col items-center justify-start py-10">
       <div className="container flex mr-12">
         <div className="left-section w-3/4 text-center">
-          <h1 className="text-4xl font-bold mb-4">Prediction History</h1>
+          <h1 className="column-heading text-4xl font-bold mb-4">Prediction History</h1>
           {predictionHistory && (
             <div>
             <ul className="prediction-list">
@@ -115,7 +115,7 @@ const PredictionHistoryPage = () => {
           )}
         </div>
         <div className="right-section w-1/2 text-center">
-          <h1 className="text-4xl font-bold mb-4">Prediction Rate By Team</h1>
+          <h1 className="column-heading text-4xl font-bold mb-4">Prediction Rate By Team</h1>
           <div className="sort-button-container">
             <button className="sort-button" onClick={handleSortByHighest}>
               Sort by Highest Percentage

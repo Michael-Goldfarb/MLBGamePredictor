@@ -19,3 +19,13 @@
   width: 50px;
   transform: translate(24px);
 }
+
+@media (max-width: 541px) {
+  .history-logo {
+    transform: translate(-12px); /* Adjust this value as needed */
+  }
+
+  .profile-logo {
+    transform: translate(12px); /* Adjust this value as needed */
+  }
+}
