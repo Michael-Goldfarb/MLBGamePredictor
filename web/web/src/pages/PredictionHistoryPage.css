@@ -99,8 +99,10 @@
     font-size: 4.5vh
   }
 
-  .overall-percentage {
-    font-size: 0.9rem;
-  }
+}
 
+@media (max-width: 450px) {
+  .overall-percentage {
+    font-size: 0.8rem;
+  }
 }
