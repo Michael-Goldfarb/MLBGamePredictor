@@ -133,7 +133,10 @@ for gameId in gameIds:
 
         # Predict winner
         X_current = current_data[features]
-        current_data["predicted_winner"] = model.predict(X_current)
+        current_data["predicted_proba"] = model.predict_proba(X_current)[:, 1]
+
+        # Apply the threshold of 0.30
+        current_data["predicted_winner"] = (current_data["predicted_proba"] >= 0.30).astype(int)
 
         # Fetch the home team name for the current game
         home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
@@ -149,9 +152,6 @@ for gameId in gameIds:
 
         # Get the predicted winners as a list of team names
         predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
-
-        # Check for NaN in predicted winners and replace with home team name
-        # predicted_winners = predicted_winners.fillna(home_team_name)
         
         # Add the gameId and predicted winners to the updated_data list
         updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])

@@ -4,9 +4,6 @@ import numpy as np
 import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.impute import SimpleImputer
 import os
 
@@ -40,13 +37,11 @@ historical_data = pd.merge(historical_data, hitting_stats_df, on=["gameid"], how
 # Adjust the features list to include the correct column names
 features = ["era", "whip", "hitsper9inn", "runsscoredper9", "homerunsper9",
             "strikeoutwalkratio_pitching", "games_started", "gamespitched", "strikeouts", "saves", "blownsaves",
-            "obp", "slg_hitting", "ops", "strikeoutwalkratio_probables",
-            ]
+            "obp", "slg_hitting", "ops", "strikeoutwalkratio_probables"]
 target = "iswinner"
 
 # Replace non-numeric values with NaN
 historical_data[features] = historical_data[features].apply(pd.to_numeric, errors='coerce')
-historical_data_mean = historical_data[features].mean()
 
 X = historical_data[features]
 y = historical_data[target]
@@ -74,53 +69,11 @@ except FileNotFoundError:
     with open(model_filename, 'wb') as file:
         pickle.dump(model, file)
     print("Trained model saved to file.")
-# Access the coefficients of the logistic regression model
-coefficients = model.coef_
-
-# Access the intercept of the logistic regression model
-intercept = model.intercept_
-
-# Print the above attributes
-print("Coefficients:", coefficients)
-
-# # Manually adjust the coefficient for 'era'
-# era_index = features.index("era")  
-# model.coef_[0][era_index] = 9.59137001e-02
-# whip_index = features.index("whip")
-# model.coef_[0][whip_index] = 5.95366708e-02
-# hitsper9inn_index = features.index("hitsper9inn")
-# model.coef_[0][hitsper9inn_index] = -1.99281612e-01
-# runsscoredper9_index = features.index("runsscoredper9")
-# model.coef_[0][runsscoredper9_index] = 1.27788597e-01
-# homerunsper9_index = features.index("homerunsper9")
-# model.coef_[0][homerunsper9_index] = -3.54604613e-02
-# strikeoutwalkratio_pitching_index = features.index("strikeoutwalkratio_pitching")
-# model.coef_[0][strikeoutwalkratio_pitching_index] = 2.81140744e-01
-# games_started_index = features.index("games_started")
-# model.coef_[0][games_started_index] = 1.98856168e-04
-# gamespitched_index = features.index("gamespitched")
-# model.coef_[0][gamespitched_index] = 4.95434015e-03
-# strikeouts_index = features.index("strikeouts")
-# model.coef_[0][strikeouts_index] = -1.39930944e-03
-# saves_index = features.index("saves")
-# model.coef_[0][saves_index] = 5.91876260e-03
-# blownsaves_index = features.index("blownsaves")
-# model.coef_[0][blownsaves_index] = 1.70929299e-02
-# obp_index = features.index("obp")
-# model.coef_[0][obp_index] = 2.07089606e-02
-# slg_hitting_index = features.index("slg_hitting")
-# model.coef_[0][slg_hitting_index] = 3.04611994e-02
-# ops_index = features.index("ops")
-# model.coef_[0][ops_index] = 3.86047238e-02
-# strikeoutwalkratio_probables_index = features.index("strikeoutwalkratio_probables")
-# model.coef_[0][strikeoutwalkratio_probables_index] = -3.61638317e-02
-
-# # Updated coefficients
-# print("Updated Coefficients:", model.coef_)
 
 # Fetch the gameIds from the 'games' table
 query = "SELECT gameId FROM games"
 gameIds = pd.read_sql_query(query, engine)["gameid"].tolist()
+print(gameIds)
 
 # Create a list to store the updated data
 updated_data = []
@@ -141,55 +94,48 @@ for gameId in gameIds:
     current_hitting_stats_df = pd.read_sql_query(query, engine)
 
     # Merge the relevant current date tables based on common keys
-    current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="inner", suffixes=('_pitching', '_probables'))
-    current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="inner", suffixes=('', '_previous_pitching'))
-    current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="inner", suffixes=('', '_hitting'))
+    current_data = pd.merge(current_pitching_stats_df, current_probables_stats_df, on=["gameid"], how="left", suffixes=('_pitching', '_probables'))
+    current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="left", suffixes=('', '_previous_pitching'))
+    current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="left", suffixes=('', '_hitting'))
 
     # Handle missing values in the current_data DataFrame
     current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
+    current_data_imputed = imputer.transform(current_data[features])
 
-    # Check if the current_data DataFrame has at least one sample
-    if not current_data.empty:
-        current_data.fillna(current_data["team_name"], inplace=True)
-        # Preprocess the current_data to handle missing values
-        current_data_imputed = imputer.transform(current_data[features])
+    # Convert imputed data back to DataFrame
+    current_data_imputed = pd.DataFrame(current_data_imputed, columns=features)
 
-        # Use the trained model to predict the winner of current date games
-        X_current = current_data_imputed
-        current_data["predicted_winner"] = model.predict(X_current)
+    # Ensure there are no empty predictions
+    if current_data_imputed.empty:
+        print(f"GameId: {gameId} - No valid data available for prediction.")
+        continue  # Skip to the next iteration of the loop
 
-        # Fetch the home team name for the current game
-        home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
-        home_team_name = pd.read_sql_query(home_team_query, engine).iloc[0, 0]
-        
-        predicted_probabilities = model.predict_proba(X_current)
+    # Use the trained model to predict the winner of current date games
+    X_current = current_data_imputed.values
 
-        # Create a DataFrame to display the current data and the model's decision
-        current_data_with_prediction = current_data.copy()
-        current_data_with_prediction['predicted_probability'] = predicted_probabilities[:, 1]  # Probability of winning (class 1)
-        
-        # Store the predicted winners in the database
-        current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
+    # Get probabilities and apply threshold
+    threshold = 0.3  # Adjust this threshold as needed
+    probabilities = model.predict_proba(X_current)[:, 1]
+    current_data["predicted_winner"] = (probabilities >= threshold).astype(int)
 
-        # Map team IDs to team names (or appropriate identifiers) using a dictionary
-        team_id_to_name = {
-            team_id: team_name for team_id, team_name in zip(current_data["teamid"], current_data["team_name"])
-        }
+    # Reset the index of the current_data DataFrame
+    current_data.reset_index(drop=True, inplace=True)
 
-        # Get the predicted winners as a list of team names
-        predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
+    # Store the predicted winners in the database
+    current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
 
-        # Check for NaN in predicted winners and replace with home team name
-        # predicted_winners = predicted_winners.fillna(home_team_name)
-        
-        # Add the gameId and predicted winners to the updated_data list
-        updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
+    # Map team IDs to team names (or appropriate identifiers) using a dictionary
+    team_id_to_name = {
+        team_id: team_name for team_id, team_name in zip(current_data["teamid"], current_data["team_name"])
+    }
 
-        print(f"GameId: {gameId} - Winner prediction stored in the database.")
-    else:
-        # Handle the case when current_data is empty (no samples available)
-        updated_data.append(("Unknown", gameId))
-        print(f"GameId: {gameId} - Missing data, prediction marked as unknown.")
+    # Get the predicted winners as a list of team names
+    predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
+
+    # Add the gameId and predicted winners to the updated_data list
+    updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
+
+    print(f"GameId: {gameId} - Winner prediction stored in the database.")
 
 # Prepare the query to update all rows at once
 update_query = "UPDATE games SET predictedWinner2 = %(winner)s WHERE gameId = %(gameId)s"

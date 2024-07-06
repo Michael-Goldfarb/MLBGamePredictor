@@ -119,23 +119,22 @@ for gameId in gameIds:
     current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
     current_data_imputed = imputer.transform(current_data[features])
 
-    # Drop rows with missing values
+    # Convert imputed data back to DataFrame
     current_data_imputed = pd.DataFrame(current_data_imputed, columns=features)
-    current_data_imputed.dropna(inplace=True)
 
-    # Check if current_data_imputed is not empty
+    # Ensure there are no empty predictions
     if current_data_imputed.empty:
         print(f"GameId: {gameId} - No valid data available for prediction.")
         continue  # Skip to the next iteration of the loop
 
     # Use the trained model to predict the winner of current date games
     X_current = current_data_imputed.values
-    current_data["predicted_winner"] = model.predict(X_current)
 
-    # Fetch the home team name for the current game
-    home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
-    home_team_name = pd.read_sql_query(home_team_query, engine).iloc[0, 0]
-    
+    # Get probabilities and apply threshold
+    threshold = 0.3  # Adjust this threshold as needed
+    probabilities = model.predict_proba(X_current)[:, 1]
+    current_data["predicted_winner"] = (probabilities >= threshold).astype(int)
+
     # Reset the index of the current_data DataFrame
     current_data.reset_index(drop=True, inplace=True)
 
@@ -147,12 +146,9 @@ for gameId in gameIds:
         team_id: team_name for team_id, team_name in zip(current_data["teamid"], current_data["team_name"])
     }
 
-     # Get the predicted winners as a list of team names
+    # Get the predicted winners as a list of team names
     predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
 
-    # Check for NaN in predicted winners and replace with home team name
-    # predicted_winners = predicted_winners.fillna(home_team_name)
-        
     # Add the gameId and predicted winners to the updated_data list
     updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
 
