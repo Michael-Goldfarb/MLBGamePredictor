@@ -11,7 +11,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
-import os
+from collections import Counter
 
 db_host = os.environ.get('DB_HOST')
 db_name = os.environ.get('DB_NAME')
@@ -23,6 +23,7 @@ db_password = os.environ.get('DB_PASSWORD')
 engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
 
 scaler = StandardScaler()
+
 # Fetch the historical data from the database tables
 query = "SELECT * FROM PitchingStats2022v3"
 pitching_stats_df = pd.read_sql_query(query, engine)
@@ -97,9 +98,6 @@ else:
 query = "SELECT gameId FROM games"
 gameIds = pd.read_sql_query(query, engine)["gameid"].tolist()
 
-# Create a list to store the updated data
-updated_data = []
-
 # Iterate over each gameId
 for gameId in gameIds:
     # Fetch the current date data from the database tables for the current gameId
@@ -130,7 +128,6 @@ for gameId in gameIds:
 
     # Check if the current_data DataFrame has at least one sample
     if not current_data.empty:
-
         # Predict winner
         X_current = current_data[features]
         current_data["predicted_proba"] = model.predict_proba(X_current)[:, 1]
@@ -138,44 +135,43 @@ for gameId in gameIds:
         # Apply the threshold of 0.30
         current_data["predicted_winner"] = (current_data["predicted_proba"] >= 0.30).astype(int)
 
-        # Fetch the home team name for the current game
-        home_team_query = f"SELECT hometeamname FROM games WHERE gameId = '{gameId}'"
-        home_team_name = pd.read_sql_query(home_team_query, engine).iloc[0, 0]
-        
         # Store the predicted winners in the database
-        current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
+        predicted_winner_team_ids = current_data.loc[current_data["predicted_winner"] == 1, "teamid"].values
 
-        # Map team IDs to team names (or appropriate identifiers) using a dictionary
-        team_id_to_name = {
-            team_id: team_name for team_id, team_name in zip(current_data["teamid"], current_data["team_name"])
-        }
+        if predicted_winner_team_ids.size > 0:
+            most_common_team_id = Counter(predicted_winner_team_ids).most_common(1)[0][0]
+        else:
+            most_common_team_id = None
 
-        # Get the predicted winners as a list of team names
-        predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
-        
-        # Add the gameId and predicted winners to the updated_data list
-        updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
+        if most_common_team_id is not None:
+            # Fetch the team names and IDs from the 'games' table for the current gameId
+            query = f"SELECT hometeamid, awayteamid, hometeamname, awayteamname FROM games WHERE gameId = '{gameId}'"
+            game_info = pd.read_sql_query(query, engine)
 
-        print(f"GameId: {gameId} - Winner prediction stored in the database.")
+            hometeamid = game_info["hometeamid"].values[0]
+            awayteamid = game_info["awayteamid"].values[0]
+            hometeamname = game_info["hometeamname"].values[0]
+            awayteamname = game_info["awayteamname"].values[0]
+
+            # Determine the team name based on the most common team ID
+            if most_common_team_id == str(hometeamid):
+                predicted_winner_team_name = hometeamname
+            elif most_common_team_id == str(awayteamid):
+                predicted_winner_team_name = awayteamname
+            else:
+                predicted_winner_team_name = None
+
+            if predicted_winner_team_name is not None:
+                update_query = "UPDATE games SET predictedWinner = %s WHERE gameId = %s"
+                try:
+                    engine.execute(update_query, (predicted_winner_team_name, gameId))
+                    print(f"GameId: {gameId} - Winner prediction stored in the database.")
+                except Exception as e:
+                    # Handle any exceptions that occur during the execution
+                    print("An error occurred during update:", str(e))
     else:
-        # Handle the case when current_data is empty (no samples available)
-        updated_data.append(("Unknown", gameId))
-        print(f"GameId: {gameId} - Missing data, prediction marked as unknown.")
+        print(f"GameId: {gameId} - No valid data available for prediction.")
 
-# Prepare the query to update all rows at once
-update_query = "UPDATE games SET predictedWinner = %(winner)s WHERE gameId = %(gameId)s"
-
-# Convert the updated_data list into a dictionary
-parameters = [{'winner': winner, 'gameId': gameId} for winner, gameId in updated_data]
-
-try:
-    # Execute the bulk update query
-    engine.execute(update_query, parameters)
-    print("Bulk update query executed.")
-except Exception as e:
-    # Handle any exceptions that occur during the execution
-    print("An error occurred during bulk update:", str(e))
-finally:
-    # Close the database connection
-    engine.dispose()
-    print("Database connection closed.")
+# Close the database connection
+engine.dispose()
+print("Database connection closed.")

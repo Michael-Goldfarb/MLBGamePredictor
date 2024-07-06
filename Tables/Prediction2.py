@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 import os
+from collections import Counter
 
 db_host = os.environ.get('DB_HOST')
 db_name = os.environ.get('DB_NAME')
@@ -75,9 +76,6 @@ query = "SELECT gameId FROM games"
 gameIds = pd.read_sql_query(query, engine)["gameid"].tolist()
 print(gameIds)
 
-# Create a list to store the updated data
-updated_data = []
-
 # Iterate over each gameId
 for gameId in gameIds:
     # Fetch the current date data from the database tables for the current gameId
@@ -98,7 +96,7 @@ for gameId in gameIds:
     current_data = pd.merge(current_data, current_previous_pitching_stats_df, on=["gameid"], how="left", suffixes=('', '_previous_pitching'))
     current_data = pd.merge(current_data, current_hitting_stats_df, on=["gameid"], how="left", suffixes=('', '_hitting'))
 
-    # Handle missing values in the current_data DataFrame
+    # c
     current_data[features] = current_data[features].apply(pd.to_numeric, errors='coerce')
     current_data_imputed = imputer.transform(current_data[features])
 
@@ -122,35 +120,41 @@ for gameId in gameIds:
     current_data.reset_index(drop=True, inplace=True)
 
     # Store the predicted winners in the database
-    current_data.loc[current_data["predicted_winner"] == 1, "predicted_winner"] = current_data["teamid"]
+    predicted_winner_team_ids = current_data.loc[current_data["predicted_winner"] == 1, "teamid"].values
 
-    # Map team IDs to team names (or appropriate identifiers) using a dictionary
-    team_id_to_name = {
-        team_id: team_name for team_id, team_name in zip(current_data["teamid"], current_data["team_name"])
-    }
+    if predicted_winner_team_ids.size > 0:
+        most_common_team_id = Counter(predicted_winner_team_ids).most_common(1)[0][0]
+        print(most_common_team_id)
+    else:
+        most_common_team_id = None
 
-    # Get the predicted winners as a list of team names
-    predicted_winners = current_data["predicted_winner"].map(team_id_to_name)
+    if most_common_team_id is not None:
+        # Fetch the team names and IDs from the 'games' table for the current gameId
+        query = f"SELECT hometeamid, awayteamid, hometeamname, awayteamname FROM games WHERE gameId = '{gameId}'"
+        game_info = pd.read_sql_query(query, engine)
 
-    # Add the gameId and predicted winners to the updated_data list
-    updated_data.extend([(winner, gameId) for winner, gameId in zip(predicted_winners, current_data["gameid"])])
+        hometeamid = game_info["hometeamid"].values[0]
+        awayteamid = game_info["awayteamid"].values[0]
+        hometeamname = game_info["hometeamname"].values[0]
+        awayteamname = game_info["awayteamname"].values[0]
 
-    print(f"GameId: {gameId} - Winner prediction stored in the database.")
+        # Determine the team name based on the most common team ID
+        if most_common_team_id == str(hometeamid):
+            predicted_winner_team_name = hometeamname
+        elif most_common_team_id == str(awayteamid):
+            predicted_winner_team_name = awayteamname
+        else:
+            predicted_winner_team_name = None
 
-# Prepare the query to update all rows at once
-update_query = "UPDATE games SET predictedWinner2 = %(winner)s WHERE gameId = %(gameId)s"
+        if predicted_winner_team_name is not None:
+            update_query = "UPDATE games SET predictedWinner2 = %s WHERE gameId = %s"
+            try:
+                engine.execute(update_query, (predicted_winner_team_name, gameId))
+                print(f"GameId: {gameId} - Winner prediction stored in the database.")
+            except Exception as e:
+                # Handle any exceptions that occur during the execution
+                print("An error occurred during update:", str(e))
 
-# Convert the updated_data list into a dictionary
-parameters = [{'winner': winner, 'gameId': gameId} for winner, gameId in updated_data]
-
-try:
-    # Execute the bulk update query
-    engine.execute(update_query, parameters)
-    print("Bulk update query executed.")
-except Exception as e:
-    # Handle any exceptions that occur during the execution
-    print("An error occurred during bulk update:", str(e))
-finally:
-    # Close the database connection
-    engine.dispose()
-    print("Database connection closed.")
+# Close the database connection
+engine.dispose()
+print("Database connection closed.")
